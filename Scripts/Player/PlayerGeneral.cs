@@ -8,10 +8,19 @@ public class PlayerGeneral : MonoBehaviour
     private float maxHealth;
     private float curHealth;
     private bool meleeInvulnerability = false;
+    private Timer meleeInvulnerabilityTimer;
 
     private void Start() {
         if (!IsInitialized()) {
             Initialize();
+        }
+    }
+
+    private void Update() {
+        if (TestRoomManager.GetIsGameActive()) {
+            if (meleeInvulnerability && meleeInvulnerabilityTimer.UpdateAndCheck()) {
+                this.meleeInvulnerability = false;
+            }
         }
     }
 
@@ -23,6 +32,9 @@ public class PlayerGeneral : MonoBehaviour
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.maxHealth = 100f;
         this.curHealth = maxHealth;
+        
+        float invulnerabilitySeconds = 0.5f;
+        this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
     }
 
     public void CheckCollisionWithEnemies() {
@@ -32,19 +44,12 @@ public class PlayerGeneral : MonoBehaviour
         }
         RaycastHit2D hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, Vector2.zero, 0, LayerMask.GetMask("Enemy"));
         if (hit.collider != null) {
-            float meleeDamage = 10.0f;      // currently constant damage for all enemy types; might change later
-            float invulnerabilitySeconds = 0.5f;
             if (!meleeInvulnerability) {
-                StartCoroutine(SetMeleeInvulnerability(invulnerabilitySeconds));
+                float meleeDamage = 10.0f;      // currently constant damage for all enemy types; might change later
                 TakeDamage(meleeDamage);
+                this.meleeInvulnerability = true;
             }
         }
-    }
-
-    private IEnumerator SetMeleeInvulnerability(float seconds) {
-        this.meleeInvulnerability = true;
-        yield return new WaitForSeconds(seconds);
-        this.meleeInvulnerability = false;
     }
 
     public void TakeDamage(float damage) {

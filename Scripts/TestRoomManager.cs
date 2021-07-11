@@ -10,23 +10,46 @@ public class TestRoomManager : MonoBehaviour
     public GameObject floor;
     public GameObject enemy1;
     public GameObject enemy2;
-    private Coroutine spawnEnemiesCoroutine;
-    private static bool isRunActive = true;
 
-    private const bool miniGame = false;
     private const int ROOM_WIDTH = 30;
     private const int ROOM_HEIGHT = 16;
 
+    private static bool isGameActive = true;        // false if game is paused or UI is open, true otherwise
+
+    private const bool miniGame = true;
+    private Timer spawnEnemiesTimer;
+    private const float INITIAL_SPAWN_PERIOD = 1.5f;
+    private float miniGameSpawnPeriod = INITIAL_SPAWN_PERIOD;       
+    private GameObject newPlayer;           // used for spawning enemies in the mini game
+    private Timer restartTimer;
+    private bool shouldRestart = false;
+    
+
     // Start is called before the first frame update
-    void Start()
-    {
+    private void Start() {
         GenerateRoom();     
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        
+    private void Update() {
+        if (isGameActive) {
+            if (miniGame && spawnEnemiesTimer.UpdateAndCheck()) {
+                UpdateMiniGameSpawnPeriod();
+                this.spawnEnemiesTimer = new Timer(miniGameSpawnPeriod);
+                SpawnEnemyRandomly();
+            }
+        } 
+        else if (shouldRestart && restartTimer.UpdateAndCheck()) {
+            this.shouldRestart = false;
+            TestRoomManager.isGameActive = true;
+            GenerateRoom();
+        }
+    }
+
+    private void UpdateMiniGameSpawnPeriod() {
+        float spawnRateAcceleration = 0.97f;
+        float minSpawnPeriod = 0.35f;
+        this.miniGameSpawnPeriod = Mathf.Max(minSpawnPeriod, miniGameSpawnPeriod * spawnRateAcceleration);
     }
 
     private void GenerateRoom() {
@@ -52,19 +75,11 @@ public class TestRoomManager : MonoBehaviour
                 Destroy(o);
             }
         }
-        isRunActive = false;
-        if (miniGame) {
-            StopCoroutine(spawnEnemiesCoroutine);
-        }
-        StartCoroutine(WaitAndGenerateRoom(2f));
+        TestRoomManager.isGameActive = false;
+        this.shouldRestart = true;
+        this.restartTimer = new Timer(2f);
+        this.miniGameSpawnPeriod = INITIAL_SPAWN_PERIOD;
     }
-
-    private IEnumerator WaitAndGenerateRoom(float seconds) {
-        yield return new WaitForSeconds(seconds);
-        GenerateRoom();
-        isRunActive = true;
-    }
-
 
     private void GenerateNormalRoom() {
         // Walls and floor
@@ -81,18 +96,21 @@ public class TestRoomManager : MonoBehaviour
         }
 
         // Player
-        GameObject newPlayer = Instantiate(player, new Vector3(-1.0f, 0.0f, 0.0f), Quaternion.identity) as GameObject;
+        this.newPlayer = Instantiate(player, new Vector3(-1.0f, 0.0f, 0.0f), Quaternion.identity) as GameObject;
 
         // Enemies
         if (miniGame) {
-            this.spawnEnemiesCoroutine = StartCoroutine(startSpawningEnemies(newPlayer));
+            this.spawnEnemiesTimer = new Timer(miniGameSpawnPeriod);
+            SpawnEnemyRandomly();
         }
         else {
             
             for (int i = 0; i < 3; i++) {
+                // Melee
                 GameObject newEnemy1 = Instantiate(enemy1, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
                 for (int j = 0; j < 3; j++) {
-                    GameObject newEnemy2 = Instantiate(enemy2, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
+                    // Ranged
+                    //GameObject newEnemy2 = Instantiate(enemy2, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
                 }
             }
             
@@ -100,33 +118,23 @@ public class TestRoomManager : MonoBehaviour
 
     }
 
-    private IEnumerator startSpawningEnemies(GameObject player) {
-        float spawnRate = 1.5f;
-        float spawnRateAcceleration = 0.97f;
-        float maxSpawnRate = 0.35f;
+    private void SpawnEnemyRandomly() {
         float minimumDistanceFromPlayer = 4f;
         float distanceFromPlayer;
         Vector2 spawnPos;
-        while (true) {
-            do {
-                float xPos = (float) (Random.Range(1f, ROOM_WIDTH - 2f) + 0.5 - ROOM_WIDTH / 2.0);
-                float yPos = (float) (Random.Range(1f, ROOM_HEIGHT - 2f) + 0.5 - ROOM_HEIGHT / 2.0);
-                spawnPos = new Vector2(xPos, yPos);
-                distanceFromPlayer = (spawnPos - (Vector2) player.transform.position).magnitude;
-            } while (distanceFromPlayer < minimumDistanceFromPlayer);
+        do {
+            float xPos = (float) (Random.Range(1f, ROOM_WIDTH - 2f) + 0.5 - ROOM_WIDTH / 2.0);
+            float yPos = (float) (Random.Range(1f, ROOM_HEIGHT - 2f) + 0.5 - ROOM_HEIGHT / 2.0);
+            spawnPos = new Vector2(xPos, yPos);
+            distanceFromPlayer = (spawnPos - (Vector2) newPlayer.transform.position).magnitude;
+        } while (distanceFromPlayer < minimumDistanceFromPlayer);
 
-            float enemyDeterminator = Random.Range(0f, 1f);
-            if (enemyDeterminator < 0.5) {
-                Instantiate(enemy1, spawnPos, Quaternion.identity);
-            }
-            else {
-                Instantiate(enemy2, spawnPos, Quaternion.identity);
-            }
-            
-            yield return new WaitForSeconds(spawnRate);
-            if (spawnRate > maxSpawnRate) {
-                spawnRate *= spawnRateAcceleration;
-            }
+        float enemyDeterminator = Random.Range(0f, 1f);
+        if (enemyDeterminator < 0.5) {
+            Instantiate(enemy1, spawnPos, Quaternion.identity);
+        }
+        else {
+            Instantiate(enemy2, spawnPos, Quaternion.identity);
         }
     }
 
@@ -147,7 +155,7 @@ public class TestRoomManager : MonoBehaviour
         }
     }
 
-    public static bool GetIsRunActive() {
-        return isRunActive;
+    public static bool GetIsGameActive() {
+        return isGameActive;
     }
 }

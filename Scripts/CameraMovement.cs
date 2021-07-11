@@ -9,7 +9,7 @@ public class CameraMovement : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (TestRoomManager.GetIsRunActive()) {
+        if (TestRoomManager.GetIsGameActive()) {
             if (player == null) {
                 SetPlayerReference();
             }

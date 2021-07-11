@@ -5,25 +5,24 @@ using UnityEngine;
 public class Enemy2 : AbstractEnemy
 {
     public GameObject projectile;
-    private float projectileSpawnPeriod = 3.0f;
-    private float projectileSpawnPeriodVariance = 0.5f;
-    
+    private Timer projectileSpawnTimer;
+
     private void Start()
     {
         // initialize
         base.Start(100f);
-
-        // start spawning projectiles
-        float initialDelay = Random.Range(projectileSpawnPeriod, 2 * projectileSpawnPeriod);
-        StartCoroutine(SpawnProjectilesPeriodically(initialDelay));
+        
+        float projectileSpawnPeriod = 3.0f;
+        float projectileSpawnPeriodVariance = 0.5f;
+        float initialDelay = Random.Range(-0.5f * projectileSpawnPeriod, 0.5f * projectileSpawnPeriod);
+        this.projectileSpawnTimer = new Timer(projectileSpawnPeriod, projectileSpawnPeriodVariance, initialDelay);
     }
 
-    private IEnumerator SpawnProjectilesPeriodically(float initialDelay) {
-        yield return new WaitForSeconds(initialDelay);
-        while (true) {
-            SpawnProjectile();
-            float varianceDelay = Random.Range(0f, projectileSpawnPeriodVariance);
-            yield return new WaitForSeconds(projectileSpawnPeriod + varianceDelay);
+    private void Update() {
+        if (TestRoomManager.GetIsGameActive()) {
+            if (projectileSpawnTimer.UpdateAndCheck()) {
+                SpawnProjectile();
+            }
         }
     }
 

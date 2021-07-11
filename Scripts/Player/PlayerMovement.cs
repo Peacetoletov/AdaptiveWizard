@@ -13,26 +13,35 @@ public class PlayerMovement : MonoBehaviour
 
     // dashing
     private Vector2 lastNonzeroMovementDir;
-    private float dashSpeed = 20f;
-    private float dashDuration = 0.15f;      // 20 speed and 0.15 duration works well
+    private float dashSpeed = 20f;   
     private bool isDashing = false;
+    private Timer dashDurationTimer;
+
 
     private void Start() {
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.playerGeneral = GetComponent<PlayerGeneral>();
         this.lastNonzeroMovementDir = new Vector2(1, 0);        // arbitrarily chosen default dashing direction
+
+        float dashDuration = 0.15f;                             // 20 dashSpeed and 0.15 dashDuration works well
+        this.dashDurationTimer = new Timer(dashDuration);
     }
 
     void Update() {
-        this.movementDir = GetInputWASD();
-        if (movementDir != Vector2.zero) {
-            this.lastNonzeroMovementDir = movementDir;
-        }
+        if (TestRoomManager.GetIsGameActive()) {
+            // update timer(s)
+            if (isDashing && dashDurationTimer.UpdateAndCheck()) {
+                this.isDashing = false;
+            }
 
-        if (Input.GetKeyDown("space")) {
-            if (!isDashing) {
+            // get input
+            this.movementDir = GetInputWASD();
+            if (movementDir != Vector2.zero) {
+                this.lastNonzeroMovementDir = movementDir;
+            }
+
+            if (Input.GetKeyDown("space")) {
                 this.isDashing = true;
-                StartCoroutine(Dashing());
             }
         }
     }
@@ -52,11 +61,6 @@ public class PlayerMovement : MonoBehaviour
             dir.x += 1;
         }
         return dir;
-    }
-
-    private IEnumerator Dashing() {
-        yield return new WaitForSeconds(dashDuration);
-        this.isDashing = false;
     }
 
     private void FixedUpdate() {
@@ -81,20 +85,8 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void SmoothMoveOneAxis(int precision, float delta, Vector2 axisVector) {
-        // returns false if player cannot move (anymore) in this axis; true otherwise
         float HighestNonCollidingDelta = GetHighestNonCollidingDelta(precision, delta, axisVector); 
 
-        if (Mathf.Abs(HighestNonCollidingDelta) < 0.00001) {      // == 0, floating point arithmetic
-            return;
-        }
-
-        // check if player should stop here
-        /*
-        float remainingDelta = axisVector.x == 0 ? target.y - transform.position.y : target.x - transform.position.x;
-        if (Mathf.Abs(remainingDelta) < Mathf.Abs(HighestNonCollidingDelta)) {
-            HighestNonCollidingDelta = remainingDelta;
-        }
-        */
         if (axisVector.x == 0) {
             transform.Translate(0, HighestNonCollidingDelta, 0);
         }
