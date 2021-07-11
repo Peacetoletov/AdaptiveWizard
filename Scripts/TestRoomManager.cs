@@ -13,9 +13,9 @@ public class TestRoomManager : MonoBehaviour
     private Coroutine spawnEnemiesCoroutine;
     private static bool isRunActive = true;
 
-    private const bool limitTesting = false;
-    private const int ROOM_WIDTH = limitTesting ? 300 : 30;
-    private readonly int ROOM_HEIGHT = limitTesting ? 100 : 16;
+    private const bool miniGame = false;
+    private const int ROOM_WIDTH = 30;
+    private const int ROOM_HEIGHT = 16;
 
     // Start is called before the first frame update
     void Start()
@@ -30,6 +30,7 @@ public class TestRoomManager : MonoBehaviour
     }
 
     private void GenerateRoom() {
+        /*
         if (limitTesting) {
             //this.ROOM_WIDTH = 300;
             //this.ROOM_HEIGHT = 100;
@@ -40,6 +41,8 @@ public class TestRoomManager : MonoBehaviour
             //this.ROOM_HEIGHT = 16;
             GenerateNormalRoom();
         }   
+        */
+        GenerateNormalRoom();
     }
 
     public void RestartLevel() {
@@ -50,7 +53,9 @@ public class TestRoomManager : MonoBehaviour
             }
         }
         isRunActive = false;
-        StopCoroutine(spawnEnemiesCoroutine);
+        if (miniGame) {
+            StopCoroutine(spawnEnemiesCoroutine);
+        }
         StartCoroutine(WaitAndGenerateRoom(2f));
     }
 
@@ -78,16 +83,21 @@ public class TestRoomManager : MonoBehaviour
         // Player
         GameObject newPlayer = Instantiate(player, new Vector3(-1.0f, 0.0f, 0.0f), Quaternion.identity) as GameObject;
 
-        /*
         // Enemies
-        for (int i = 0; i < 3; i++) {
-            GameObject newEnemy1 = Instantiate(enemy1, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
-            for (int j = 0; j < 3; j++) {
-                GameObject newEnemy2 = Instantiate(enemy2, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
-            }
+        if (miniGame) {
+            this.spawnEnemiesCoroutine = StartCoroutine(startSpawningEnemies(newPlayer));
         }
-        */
-        this.spawnEnemiesCoroutine = StartCoroutine(startSpawningEnemies(newPlayer));
+        else {
+            
+            for (int i = 0; i < 3; i++) {
+                GameObject newEnemy1 = Instantiate(enemy1, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
+                for (int j = 0; j < 3; j++) {
+                    GameObject newEnemy2 = Instantiate(enemy2, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
+                }
+            }
+            
+        }
+
     }
 
     private IEnumerator startSpawningEnemies(GameObject player) {

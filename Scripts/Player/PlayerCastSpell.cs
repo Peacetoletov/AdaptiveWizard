@@ -17,7 +17,7 @@ public class PlayerCastSpell : MonoBehaviour
     {
         // For now, I will have spell casting on right click and movement on left click. However, final version of the game
         // will have it the other way. 
-        if (Input.GetMouseButtonDown(1)) {      // 1 = right click
+        if (Input.GetMouseButtonDown(0)) {      // 0 = left click
             // I have only 1 basic spell so far. In future, I will first need to check what spell the player is holding, then casting it.
             Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
             float offset = 0.8f;       // how far away from the player will the fireball spawn 

@@ -49,7 +49,7 @@ public class PlayerGeneral : MonoBehaviour
 
     public void TakeDamage(float damage) {
         this.curHealth -= damage;
-        print("Took " + damage + " damage. Current health: " + curHealth);
+        // print("Took " + damage + " damage. Current health: " + curHealth);
         CheckDeath();
     }
 
