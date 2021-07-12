@@ -9,10 +9,10 @@ public class CameraMovement : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (TestRoomManager.GetIsGameActive()) {
-            if (player == null) {
-                SetPlayerReference();
-            }
+        if (TestRoomManager.IsGameActive() && player == null) {
+            SetPlayerReference();
+        }
+        if (player != null) {
             transform.position = player.transform.position + offset;
         }
     }

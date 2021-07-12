@@ -24,6 +24,7 @@ public class Timer
     }
 
     public bool UpdateAndCheck() {
+        // (do not check for active game, it should be checked in functions calling this)
         this.time += Time.deltaTime;
         if ((initialDelayActive && time >= period + initialDelay) || 
                 (!initialDelayActive && time >= period)) {

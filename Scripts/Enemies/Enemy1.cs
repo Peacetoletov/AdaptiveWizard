@@ -13,7 +13,9 @@ public class Enemy1 : AbstractEnemy
     }
 
     private void FixedUpdate() {
-        MoveTowardsPlayer();
+        if (TestRoomManager.IsGameActive()) {
+            MoveTowardsPlayer();
+        }
     }
 
     private void MoveTowardsPlayer() {

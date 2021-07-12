@@ -24,14 +24,6 @@ public abstract class AbstractEnemy : MonoBehaviour
         this.player = objectsWithTag[0];
     }
 
-    /*
-    // Update is called once per frame
-    void Update()
-    {
-        print(maxHealth);
-    }
-    */
-
     public void TakeDamage(float damage) {
         this.curHealth -= damage;
         //print("Took " + damage + " damage");

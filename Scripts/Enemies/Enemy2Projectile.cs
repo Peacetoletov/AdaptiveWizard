@@ -19,19 +19,21 @@ public class Enemy2Projectile : StraightProjectile
     }
 
     private void FixedUpdate() {
-        RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, GetDirection(), 0f, LayerMask.GetMask("Player", "Wall"));
-        if (hit.collider == null) {
-            transform.position += (Vector3) GetDirection().normalized * GetSpeed() * Time.deltaTime; 
-        }
-        else {
-            GameObject collidingObj = hit.collider.gameObject;
-            if (collidingObj.layer == LayerMask.NameToLayer("Player")) {
-                // damage player
-                PlayerGeneral playerScript = collidingObj.GetComponent<PlayerGeneral>();
-                playerScript.TakeDamage(GetDamage());
+        if (TestRoomManager.IsGameActive()) {
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, GetDirection(), 0f, LayerMask.GetMask("Player", "Wall"));
+            if (hit.collider == null) {
+                transform.position += (Vector3) GetDirection().normalized * GetSpeed() * Time.deltaTime; 
             }
-            // destroy self
-            Destroy(gameObject);
+            else {
+                GameObject collidingObj = hit.collider.gameObject;
+                if (collidingObj.layer == LayerMask.NameToLayer("Player")) {
+                    // damage player
+                    PlayerGeneral playerScript = collidingObj.GetComponent<PlayerGeneral>();
+                    playerScript.TakeDamage(GetDamage());
+                }
+                // destroy self
+                Destroy(gameObject);
+            }
         }
     }
 }

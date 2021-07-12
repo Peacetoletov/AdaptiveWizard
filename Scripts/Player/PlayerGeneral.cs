@@ -17,7 +17,7 @@ public class PlayerGeneral : MonoBehaviour
     }
 
     private void Update() {
-        if (TestRoomManager.GetIsGameActive()) {
+        if (TestRoomManager.IsGameActive()) {
             if (meleeInvulnerability && meleeInvulnerabilityTimer.UpdateAndCheck()) {
                 this.meleeInvulnerability = false;
             }

@@ -13,9 +13,11 @@ public class PlayerMovement : MonoBehaviour
 
     // dashing
     private Vector2 lastNonzeroMovementDir;
+    private bool readyToDash = true;
     private float dashSpeed = 20f;   
     private bool isDashing = false;
     private Timer dashDurationTimer;
+    private Timer dashCooldownTimer;
 
 
     private void Start() {
@@ -25,23 +27,33 @@ public class PlayerMovement : MonoBehaviour
 
         float dashDuration = 0.15f;                             // 20 dashSpeed and 0.15 dashDuration works well
         this.dashDurationTimer = new Timer(dashDuration);
+
+        float dashCooldown = 0.45f;
+        this.dashCooldownTimer = new Timer(dashCooldown);
     }
 
     void Update() {
-        if (TestRoomManager.GetIsGameActive()) {
-            // update timer(s)
+        if (TestRoomManager.IsGameActive()) {
+            // update timers
             if (isDashing && dashDurationTimer.UpdateAndCheck()) {
                 this.isDashing = false;
             }
-
-            // get input
-            this.movementDir = GetInputWASD();
-            if (movementDir != Vector2.zero) {
-                this.lastNonzeroMovementDir = movementDir;
+            if (!readyToDash && dashCooldownTimer.UpdateAndCheck()) {
+                this.readyToDash = true;
             }
 
-            if (Input.GetKeyDown("space")) {
+            // get inputs
+            if (!isDashing) {
+                // ^ ignore movement input during dashing
+                this.movementDir = GetInputWASD();
+                if (movementDir != Vector2.zero) {
+                    this.lastNonzeroMovementDir = movementDir;
+                }
+            }
+
+            if (Input.GetKeyDown("space") && readyToDash) {
                 this.isDashing = true;
+                this.readyToDash = false;
             }
         }
     }
@@ -64,13 +76,15 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void FixedUpdate() {
-        if (isDashing) {
-            SmoothMove(lastNonzeroMovementDir, dashSpeed);
+        if (TestRoomManager.IsGameActive()) {
+            if (isDashing) {
+                SmoothMove(lastNonzeroMovementDir, dashSpeed);
+            }
+            else if (this.movementDir != Vector2.zero) {
+                SmoothMove(movementDir, movementSpeed);
+            }
+            playerGeneral.CheckCollisionWithEnemies();
         }
-        else if (this.movementDir != Vector2.zero) {
-            SmoothMove(movementDir, movementSpeed);
-        }
-        playerGeneral.CheckCollisionWithEnemies();
     }
 
     private void SmoothMove(Vector2 direction, float speed, int precision=5) {

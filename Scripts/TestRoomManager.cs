@@ -44,6 +44,14 @@ public class TestRoomManager : MonoBehaviour
             TestRoomManager.isGameActive = true;
             GenerateRoom();
         }
+
+        if (Input.GetKeyDown(KeyCode.P)) {
+            if (!shouldRestart) {
+                // at least for now, this condition has to be here, otherwise the game would crash if P was pressed at the level was restarting,
+                // due to there being no player object but camera would attempt to use one. This should be reworked later when the restart saystem changes.
+                TestRoomManager.isGameActive = !isGameActive;
+            }
+        }
     }
 
     private void UpdateMiniGameSpawnPeriod() {
@@ -155,7 +163,7 @@ public class TestRoomManager : MonoBehaviour
         }
     }
 
-    public static bool GetIsGameActive() {
+    public static bool IsGameActive() {
         return isGameActive;
     }
 }
