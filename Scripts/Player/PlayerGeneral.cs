@@ -2,12 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerGeneral : MonoBehaviour
+public class PlayerGeneral : PlayerAbstract
 {
     private BoxCollider2D boxCollider;
     private float maxHealth;
     private float curHealth;
-    private bool meleeInvulnerability = false;
+    private bool meleeInvulnerability;
     private Timer meleeInvulnerabilityTimer;
 
     private void Start() {
@@ -22,19 +22,6 @@ public class PlayerGeneral : MonoBehaviour
                 this.meleeInvulnerability = false;
             }
         }
-    }
-
-    private bool IsInitialized() {
-        return !(boxCollider == null);
-    }
-
-    private void Initialize() {
-        this.boxCollider = GetComponent<BoxCollider2D>();
-        this.maxHealth = 100f;
-        this.curHealth = maxHealth;
-        
-        float invulnerabilitySeconds = 0.5f;
-        this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
     }
 
     public void CheckCollisionWithEnemies() {
@@ -74,6 +61,24 @@ public class PlayerGeneral : MonoBehaviour
         }
         TestRoomManager managerScript = objectsWithTag[0].GetComponent<TestRoomManager>();
         managerScript.RestartLevel();
+    }
+
+    private bool IsInitialized() {
+        return !(boxCollider == null);
+    }
+
+    private void Initialize() {
+        Reset();
+    }
+
+    public override void Reset() {
+        this.boxCollider = GetComponent<BoxCollider2D>();
+        this.maxHealth = 100f;
+        this.curHealth = maxHealth;
+        this.meleeInvulnerability = false;
+        
+        float invulnerabilitySeconds = 0.5f;
+        this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
     }
 
     public float GetCurHealth() {

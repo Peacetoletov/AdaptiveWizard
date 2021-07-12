@@ -8,16 +8,9 @@ public class HealthScriptUI : MonoBehaviour
     private PlayerGeneral player;
     public Text healthText;
 
-    private void Update() {
-        // At least for now, I will not check whether game is active in UI update functions.
-        
-        if (player == null) {
-            GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("Player");
-            if (objectsWithTag.Length != 1) {
-                this.healthText.text = "Health: 0";
-                return;
-            }
-            this.player = objectsWithTag[0].GetComponent<PlayerGeneral>();
+    private void Update() {        
+        if (player == null && TestRoomManager.IsGameActive()) {
+            this.player = TestRoomManager.GetPlayer().GetComponent<PlayerGeneral>();
         }
 
         if (player != null) {

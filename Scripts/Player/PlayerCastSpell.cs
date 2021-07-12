@@ -2,16 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCastSpell : MonoBehaviour
+public class PlayerCastSpell : PlayerAbstract
 {
     public GameObject fireball;
 
-    // Start is called before the first frame update
-    void Start() {
-        
-    }
-
-    // Update is called once per frame
     void Update() {
         if (TestRoomManager.IsGameActive()) {
             if (Input.GetMouseButtonDown(0)) {      // 0 = left click
@@ -24,5 +18,9 @@ public class PlayerCastSpell : MonoBehaviour
                 fireballScript.Init(direction);
             }
         }
+    }
+
+    public override void Reset() {
+        // This function will need to be updated once there are variables that meed to be reset in this class
     }
 }

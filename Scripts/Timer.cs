@@ -15,12 +15,10 @@ public class Timer
         if (periodVariance < 0f) {
             throw new System.ArgumentException("Attempted to create a timer with negative period variance, which is forbidden.");
         }
-
         this.basePeriod = basePeriod;
         this.periodVariance = periodVariance;
-        this.period = NewPeriod();
         this.initialDelay = initialDelay;
-        this.initialDelayActive = Mathf.Abs(initialDelay) > 0.00001f;
+        Reset();
     }
 
     public bool UpdateAndCheck() {
@@ -34,6 +32,13 @@ public class Timer
             return true;
         }
         return false;
+    }
+
+    public void Reset() {
+        // maybe I don't actually need this (public) method, as I can always just create a new timer, instead of resetting an existing one
+        this.period = NewPeriod();
+        this.initialDelayActive = Mathf.Abs(initialDelay) > 0.00001f;
+        this.time = 0f;
     }
 
     private float NewPeriod() {

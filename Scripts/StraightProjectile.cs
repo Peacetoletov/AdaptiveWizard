@@ -7,7 +7,7 @@ public abstract class StraightProjectile : MonoBehaviour
     private Vector2 direction;
     private float speed;
     private float damage;
-    // possibly acceleration
+    // possibly add acceleration
 
     protected void Init(Vector2 direction, float speed, float damage) {
         this.direction = direction;

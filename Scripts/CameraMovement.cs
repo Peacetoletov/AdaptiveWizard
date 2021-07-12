@@ -9,19 +9,11 @@ public class CameraMovement : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (TestRoomManager.IsGameActive() && player == null) {
-            SetPlayerReference();
+        if (player == null && TestRoomManager.IsGameActive()) {
+            this.player = TestRoomManager.GetPlayer();
         }
         if (player != null) {
             transform.position = player.transform.position + offset;
         }
-    }
-
-    private void SetPlayerReference() {
-        GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("Player");
-        if (objectsWithTag.Length != 1) {
-            throw new System.InvalidOperationException("ERROR! Incorrect number of \"player\" objects: " + objectsWithTag.Length);
-        }
-        this.player = objectsWithTag[0];
     }
 }

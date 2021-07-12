@@ -2,20 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : PlayerAbstract
 {
     private BoxCollider2D boxCollider;
     private PlayerGeneral playerGeneral;
 
     // moving
-    private float movementSpeed = 4.5f;     // was 3.5
+    private float movementSpeed;         // 4.5f
     private Vector2 movementDir;
 
     // dashing
     private Vector2 lastNonzeroMovementDir;
-    private bool readyToDash = true;
-    private float dashSpeed = 20f;   
-    private bool isDashing = false;
+    private bool readyToDash;            // true
+    private float dashSpeed;             // 20f
+    private bool isDashing;              // false
     private Timer dashDurationTimer;
     private Timer dashCooldownTimer;
 
@@ -23,16 +23,24 @@ public class PlayerMovement : MonoBehaviour
     private void Start() {
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.playerGeneral = GetComponent<PlayerGeneral>();
-        this.lastNonzeroMovementDir = new Vector2(1, 0);        // arbitrarily chosen default dashing direction
+        Reset();
+    }
 
-        float dashDuration = 0.15f;                             // 20 dashSpeed and 0.15 dashDuration works well
+    public override void Reset() {
+        this.movementSpeed = 4.5f;
+        this.lastNonzeroMovementDir = new Vector2(0, -1);        // arbitrarily chosen default dashing direction
+        this.readyToDash = true;
+        this.dashSpeed = 20f;
+        this.isDashing = false;
+
+        float dashDuration = 0.15f;                              // 20 dashSpeed and 0.15 dashDuration works well
         this.dashDurationTimer = new Timer(dashDuration);
 
         float dashCooldown = 0.45f;
         this.dashCooldownTimer = new Timer(dashCooldown);
     }
 
-    void Update() {
+    private void Update() {
         if (TestRoomManager.IsGameActive()) {
             // update timers
             if (isDashing && dashDurationTimer.UpdateAndCheck()) {

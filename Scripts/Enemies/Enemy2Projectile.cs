@@ -6,9 +6,7 @@ public class Enemy2Projectile : StraightProjectile
 {
     private CircleCollider2D circleCollider;
 
-    // Start is called before the first frame update
-    private void Start()
-    {
+    private void Start() {
         this.circleCollider = GetComponent<CircleCollider2D>();
     }
     

@@ -7,8 +7,7 @@ public class Enemy1 : AbstractEnemy
     private float speed = 2.0f;
 
     // Start is called before the first frame update
-    private void Start()
-    {
+    private void Start() {
         base.Start(30f);
     }
 
@@ -20,6 +19,5 @@ public class Enemy1 : AbstractEnemy
 
     private void MoveTowardsPlayer() {
         transform.position += (Vector3) DirectionToPlayer().normalized * speed * Time.deltaTime; 
-        
     }
 }

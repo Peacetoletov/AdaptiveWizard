@@ -7,8 +7,7 @@ public class Enemy2 : AbstractEnemy
     public GameObject projectile;
     private Timer projectileSpawnTimer;
 
-    private void Start()
-    {
+    private void Start() {
         // initialize
         base.Start(100f);
         
