@@ -22,6 +22,13 @@ public class PlayerGeneral : PlayerAbstract
                 this.meleeInvulnerability = false;
             }
         }
+
+        // testing
+        /*
+        Color tmp = gameObject.GetComponent<SpriteRenderer>().color;
+        tmp.a = 0.5f;
+        gameObject.GetComponent<SpriteRenderer>().color = tmp;
+        */
     }
 
     public void CheckCollisionWithEnemies() {

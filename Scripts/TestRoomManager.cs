@@ -43,20 +43,9 @@ public class TestRoomManager : MonoBehaviour
                 SpawnEnemyRandomly();
             }
         } 
-        /*
-        else if (shouldRestart && restartTimer.UpdateAndCheck()) {
-            this.shouldRestart = false;
-            TestRoomManager.isGameActive = true;
-            GenerateRoom();
-        }
-        */
 
         if (Input.GetKeyDown(KeyCode.P)) {
-            //if (!shouldRestart) {
-                // at least for now, this condition has to be here, otherwise the game would crash if P was pressed at the level was restarting,
-                // due to there being no player object but camera would attempt to use one. This should be reworked later when the restart saystem changes.
-                TestRoomManager.isGameActive = !isGameActive;
-            //}
+            TestRoomManager.isGameActive = !isGameActive;
         }
     }
 
@@ -67,18 +56,7 @@ public class TestRoomManager : MonoBehaviour
     }
 
     private void GenerateRoom(bool createNewPlayer) {
-        /*
-        if (limitTesting) {
-            //this.ROOM_WIDTH = 300;
-            //this.ROOM_HEIGHT = 100;
-            LimitTestingRoom();
-        }
-        else {
-            //this.ROOM_WIDTH = 30;
-            //this.ROOM_HEIGHT = 16;
-            GenerateNormalRoom();
-        }   
-        */
+        // LimitTestingRoom();
         GenerateNormalRoom(createNewPlayer);
     }
 
@@ -89,11 +67,7 @@ public class TestRoomManager : MonoBehaviour
                 Destroy(o);
             }
         }
-        //TestRoomManager.isGameActive = false;
-        //this.shouldRestart = true;
-        //this.restartTimer = new Timer(2f);
         this.miniGameSpawnPeriod = INITIAL_ENEMY_SPAWN_PERIOD;
-        //TestRoomManager.isGameActive = true;
         player.GetComponent<PlayerGeneral>().ResetPlayer();
         TestRoomManager.player.transform.position = PLAYER_SPAWN_POS;
         GenerateRoom(false);

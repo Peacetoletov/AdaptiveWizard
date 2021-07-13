@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class PlayerCastSpell : PlayerAbstract
 {
-    public GameObject fireball;
+    public GameObject fireballObj;
+    public GameObject explosionObj;
 
     void Update() {
         if (TestRoomManager.IsGameActive()) {
@@ -13,9 +14,13 @@ public class PlayerCastSpell : PlayerAbstract
                 Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
                 float offset = 0.8f;       // how far away from the player will the fireball spawn 
                 Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
-                GameObject newFireball = Instantiate(fireball, spawnPos, Quaternion.identity) as GameObject;
+                GameObject newFireball = Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
                 Fireball fireballScript = newFireball.GetComponent<Fireball>();
                 fireballScript.Init(direction);
+            }
+
+            if (Input.GetMouseButtonDown(1)) {      // 1 = right click
+                GameObject newExplosion = Instantiate(explosionObj, transform.position, Quaternion.identity) as GameObject;
             }
         }
     }
