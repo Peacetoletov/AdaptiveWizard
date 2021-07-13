@@ -22,13 +22,6 @@ public class PlayerGeneral : PlayerAbstract
                 this.meleeInvulnerability = false;
             }
         }
-
-        // testing
-        /*
-        Color tmp = gameObject.GetComponent<SpriteRenderer>().color;
-        tmp.a = 0.5f;
-        gameObject.GetComponent<SpriteRenderer>().color = tmp;
-        */
     }
 
     public void CheckCollisionWithEnemies() {
@@ -80,7 +73,7 @@ public class PlayerGeneral : PlayerAbstract
 
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
-        this.maxHealth = 100f;
+        this.maxHealth = 100000f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
         

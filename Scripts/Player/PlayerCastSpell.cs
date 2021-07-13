@@ -16,7 +16,7 @@ public class PlayerCastSpell : PlayerAbstract
                 Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
                 GameObject newFireball = Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
                 Fireball fireballScript = newFireball.GetComponent<Fireball>();
-                fireballScript.Init(direction);
+                fireballScript.Start(direction);
             }
 
             if (Input.GetMouseButtonDown(1)) {      // 1 = right click

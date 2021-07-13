@@ -31,6 +31,6 @@ public class Enemy2 : AbstractEnemy
         Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
         GameObject newProjectile = Instantiate(projectile, spawnPos, Quaternion.identity) as GameObject;
         Enemy2Projectile projectileScript = newProjectile.GetComponent<Enemy2Projectile>();
-        projectileScript.Init(direction);
+        projectileScript.Start(direction);
     }
 }

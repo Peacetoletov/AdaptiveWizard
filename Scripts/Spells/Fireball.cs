@@ -10,10 +10,10 @@ public class Fireball : StraightProjectile
         this.circleCollider = GetComponent<CircleCollider2D>();
     }
 
-    public void Init(Vector2 direction) {
+    public void Start(Vector2 direction) {
         float speed = 3.0f;
         float damage = 40f;
-        base.Init(direction, speed, damage);
+        base.Start(direction, speed, damage);
     }
 
     private void FixedUpdate() {
