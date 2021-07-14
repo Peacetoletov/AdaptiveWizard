@@ -6,6 +6,7 @@ public class PlayerCastSpell : PlayerAbstract
 {
     public GameObject fireballObj;
     public GameObject explosionObj;
+    public GameObject cannonballObj;
 
     private PlayerGeneral playerGeneral;
 
@@ -20,14 +21,25 @@ public class PlayerCastSpell : PlayerAbstract
                 Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
                 float offset = 0.8f;       // how far away from the player will the fireball spawn 
                 Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
-                GameObject newFireball = Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
-                Fireball fireballScript = newFireball.GetComponent<Fireball>();
+                GameObject fireball = Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
+                Fireball fireballScript = fireball.GetComponent<Fireball>();
                 fireballScript.Start(direction, playerGeneral);
             }
 
             if (Input.GetMouseButtonDown(1)) {      // 1 = right click
-                if (playerGeneral.CheckAndSpendMana(30f)) {
+                if (playerGeneral.CheckAndSpendMana(20f)) {
                     GameObject newExplosion = Instantiate(explosionObj, transform.position, Quaternion.identity) as GameObject;
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Q)) {
+                if (playerGeneral.CheckAndSpendMana(50f)) {
+                    Vector2 direction = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
+                    float offset = 1.5f;       // how far away from the player will the fireball spawn 
+                    Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
+                    GameObject cannonball = Instantiate(cannonballObj, spawnPos, Quaternion.identity) as GameObject;
+                    Cannonball cannonballScript = cannonball.GetComponent<Cannonball>();
+                    cannonballScript.Start(direction);
                 }
             }
         }
@@ -35,5 +47,6 @@ public class PlayerCastSpell : PlayerAbstract
 
     public override void Reset() {
         // This function will need to be updated once there are variables that meed to be reset in this class
+        // playerGeneral doesn't need to be reset
     }
 }

@@ -82,7 +82,7 @@ public class PlayerGeneral : PlayerAbstract
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
         this.maxMana = 100f;
-        this.curMana = 50f;     //change to maxMana later
+        this.curMana = maxMana;
     }
 
     public float GetCurHealth() {
