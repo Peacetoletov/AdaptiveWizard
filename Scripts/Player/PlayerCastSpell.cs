@@ -7,7 +7,13 @@ public class PlayerCastSpell : PlayerAbstract
     public GameObject fireballObj;
     public GameObject explosionObj;
 
-    void Update() {
+    private PlayerGeneral playerGeneral;
+
+    private void Start() {
+        this.playerGeneral = gameObject.GetComponent<PlayerGeneral>();
+    }
+
+    private void Update() {
         if (TestRoomManager.IsGameActive()) {
             if (Input.GetMouseButtonDown(0)) {      // 0 = left click
                 // I have only 1 basic spell so far. In future, I will first need to check what spell the player is holding, then casting it.
@@ -16,11 +22,13 @@ public class PlayerCastSpell : PlayerAbstract
                 Vector2 spawnPos = (Vector2) transform.position + direction.normalized * offset;
                 GameObject newFireball = Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
                 Fireball fireballScript = newFireball.GetComponent<Fireball>();
-                fireballScript.Start(direction);
+                fireballScript.Start(direction, playerGeneral);
             }
 
             if (Input.GetMouseButtonDown(1)) {      // 1 = right click
-                GameObject newExplosion = Instantiate(explosionObj, transform.position, Quaternion.identity) as GameObject;
+                if (playerGeneral.CheckAndSpendMana(30f)) {
+                    GameObject newExplosion = Instantiate(explosionObj, transform.position, Quaternion.identity) as GameObject;
+                }
             }
         }
     }

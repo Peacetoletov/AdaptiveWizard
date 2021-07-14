@@ -9,6 +9,8 @@ public class PlayerGeneral : PlayerAbstract
     private float curHealth;
     private bool meleeInvulnerability;
     private Timer meleeInvulnerabilityTimer;
+    private float maxMana;
+    private float curMana;
 
     private void Start() {
         if (!IsInitialized()) {
@@ -74,14 +76,33 @@ public class PlayerGeneral : PlayerAbstract
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.maxHealth = 100000f;
+        // this.maxHealth = 100f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
-        
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
+        this.maxMana = 100f;
+        this.curMana = 50f;     //change to maxMana later
     }
 
     public float GetCurHealth() {
         return curHealth;
+    }
+
+    public float GetCurMana() {
+        return curMana;
+    }
+
+    public void AddMana(float amount) {
+        this.curMana = Mathf.Min(curMana + amount, maxMana);    
+    }
+
+    public bool CheckAndSpendMana(float amount) {
+        // returns false if player doesn't have enough mana
+        if (amount > curMana) {
+            return false;
+        }
+        this.curMana -= amount;
+        return true;
     }
 }

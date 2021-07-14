@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HealthScriptUI : MonoBehaviour
+public class ManaScriptUI : MonoBehaviour
 {
     private PlayerGeneral player;
-    private Text healthText;
+    private Text manaText;
 
     private void Start() {
-        this.healthText = gameObject.GetComponent<Text>();
+        this.manaText = gameObject.GetComponent<Text>();
     }
 
     private void Update() {        
@@ -18,7 +18,7 @@ public class HealthScriptUI : MonoBehaviour
         }
 
         if (player != null) {
-            this.healthText.text = "Health: " + player.GetCurHealth();
+            this.manaText.text = "Mana: " + player.GetCurMana();
         }
     }
 }
