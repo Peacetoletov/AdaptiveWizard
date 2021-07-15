@@ -81,7 +81,7 @@ public class PlayerGeneral : PlayerAbstract
         this.meleeInvulnerability = false;
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
-        this.maxMana = 100f;
+        this.maxMana = 100000f;
         this.curMana = maxMana;
     }
 
