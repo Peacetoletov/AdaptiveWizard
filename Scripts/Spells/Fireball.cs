@@ -20,7 +20,8 @@ public class Fireball : StraightProjectile
 
     private void FixedUpdate() {
         if (TestRoomManager.IsGameActive()) {
-            RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, GetDirection(), 0f, LayerMask.GetMask("Enemy", "Wall"));
+            // RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, GetDirection(), 0f, LayerMask.GetMask("Enemy", "Wall"));
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, Vector2.zero, 0f, LayerMask.GetMask("Enemy", "Wall"));
             if (hit.collider == null) {
                 transform.position += (Vector3) GetDirection().normalized * GetSpeed() * Time.deltaTime; 
             }

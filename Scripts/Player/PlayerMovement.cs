@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : PlayerAbstract
+public class PlayerMovement : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
     private PlayerGeneral playerGeneral;

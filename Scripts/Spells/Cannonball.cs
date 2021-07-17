@@ -23,7 +23,7 @@ public class Cannonball : StraightProjectile
 
     public void Start(Vector2 direction) {
         float speed = 9f;
-        float damage = 10f;
+        float damage = 51f;
         base.Start(direction, speed, damage);
     }
 
@@ -35,7 +35,7 @@ public class Cannonball : StraightProjectile
             FindCollidingEnemiesAndWallsAndChangeTheirLayer(collidingEnemies, collidingWalls);
 
             // damage enemies, change layers of colliding objects back
-            DamageEnemiesAndChangeLayerBack(collidingEnemies);      // TODO: add a check for enemies already hit and damaged
+            DamageEnemiesAndChangeLayerBack(collidingEnemies);
             ChangeWallLayerBack(collidingWalls);
             
             // destroy this object if at least one wall was hit

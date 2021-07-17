@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerGeneral : PlayerAbstract
+public class PlayerGeneral : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
     private float maxHealth;

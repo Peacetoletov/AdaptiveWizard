@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerCastSpell : PlayerAbstract
+public class PlayerCastSpell : AbstractPlayer
 {
     public GameObject fireballObj;
     public GameObject explosionObj;
@@ -42,11 +42,44 @@ public class PlayerCastSpell : PlayerAbstract
                     cannonballScript.Start(direction);
                 }
             }
+
+            if (Input.GetKeyDown(KeyCode.E)) {
+                new IcicleManager().TryToCast(playerGeneral);
+            }
         }
     }
 
     public override void Reset() {
         // This function will need to be updated once there are variables that meed to be reset in this class
         // playerGeneral doesn't need to be reset
+    }
+
+    private float GetIcicleRotation(int x, int y) {
+        if (y == -1) {
+            if (x == -1) {
+                return 90f;
+            }
+            if (x == 0) {
+                return 90f;
+            }
+            // x == 1
+            return 180f;
+        }
+        if (y == 0) {
+            if (x == -1) {
+                return 0f;
+            }
+            // x == 1
+            return 180;
+        }
+        // y == 1
+        if (x == -1) {
+            return 0f;
+        }
+        if (x == 0) {
+            return 270f;
+        }
+        // x == 1
+        return 270f;
     }
 }

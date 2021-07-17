@@ -101,10 +101,10 @@ public class TestRoomManager : MonoBehaviour
             
             for (int i = 0; i < 3; i++) {
                 // Melee
-                GameObject newEnemy1 = Instantiate(enemy1Obj, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
+                //GameObject newEnemy1 = Instantiate(enemy1Obj, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
                 for (int j = 0; j < 3; j++) {
                     // Ranged
-                    //GameObject newEnemy2 = Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
+                    GameObject newEnemy2 = Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
                 }
             }
             
