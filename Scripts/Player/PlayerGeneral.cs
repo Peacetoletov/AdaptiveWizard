@@ -76,7 +76,6 @@ public class PlayerGeneral : AbstractPlayer
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.maxHealth = 100000f;
-        // this.maxHealth = 100f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
         float invulnerabilitySeconds = 0.5f;
