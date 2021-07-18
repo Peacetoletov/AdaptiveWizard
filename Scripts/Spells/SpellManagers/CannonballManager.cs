@@ -6,10 +6,12 @@ public class CannonballManager : AbstractSpellManager
 {
     private GameObject cannonballObj;
     private const float manaCost = 50f;
+    private const float cooldown = 4f;
 
-    
-    public CannonballManager() : base(manaCost) {
+
+    public override void Init() {
         this.cannonballObj = Resources.Load("Prefabs/cannonballPrefab") as GameObject;
+        base.Init(manaCost, cooldown);
     }
 
     public override void CastSpell(AbstractPlayer player) {

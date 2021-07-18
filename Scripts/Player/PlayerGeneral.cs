@@ -11,6 +11,7 @@ public class PlayerGeneral : AbstractPlayer
     private Timer meleeInvulnerabilityTimer;
     private float maxMana;
     private float curMana;
+    private Timer manaRegenTimer;
 
     private void Start() {
         if (!IsInitialized()) {
@@ -22,6 +23,10 @@ public class PlayerGeneral : AbstractPlayer
         if (TestRoomManager.IsGameActive()) {
             if (meleeInvulnerability && meleeInvulnerabilityTimer.UpdateAndCheck()) {
                 this.meleeInvulnerability = false;
+            }
+
+            if (manaRegenTimer.UpdateAndCheck()) {
+                AddMana(1f);
             }
         }
     }
@@ -75,13 +80,15 @@ public class PlayerGeneral : AbstractPlayer
 
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
-        this.maxHealth = 100000f;
+        this.maxHealth = 100f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
-        this.maxMana = 100000f;
+        this.maxMana = 100f;
         this.curMana = maxMana;
+        float manaRegenPerSec = 3f;
+        this.manaRegenTimer = new Timer(1 / manaRegenPerSec);
     }
 
     public float GetCurHealth() {

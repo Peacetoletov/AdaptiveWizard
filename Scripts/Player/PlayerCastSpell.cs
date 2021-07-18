@@ -5,34 +5,46 @@ using UnityEngine;
 public class PlayerCastSpell : AbstractPlayer
 {
     private PlayerGeneral playerGeneral;
+    private AbstractSpellManager[] spellManagers;
 
     private void Start() {
         this.playerGeneral = gameObject.GetComponent<PlayerGeneral>();
+        Reset();
     }
 
     private void Update() {
         if (TestRoomManager.IsGameActive()) {
             if (Input.GetMouseButtonDown(0)) {      // 0 = left click
                 // I have only 1 basic spell so far. In future, I will first need to check what spell the player is holding, then casting it.
-                new FireballManager().TryToCast(playerGeneral);
+                spellManagers[0].TryToCast(playerGeneral);
             }
 
             if (Input.GetMouseButtonDown(1)) {      // 1 = right click
-                new ExplosionManager().TryToCast(playerGeneral);
+                spellManagers[1].TryToCast(playerGeneral);
             }
 
             if (Input.GetKeyDown(KeyCode.Q)) {
-                new CannonballManager().TryToCast(playerGeneral);
+                spellManagers[2].TryToCast(playerGeneral);
             }
 
             if (Input.GetKeyDown(KeyCode.E)) {
-                new IcicleManager().TryToCast(playerGeneral);
+                spellManagers[3].TryToCast(playerGeneral);
             }
         }
     }
 
     public override void Reset() {
-        // This function will need to be updated once there are variables that meed to be reset in this class
-        // playerGeneral doesn't need to be reset
+        this.spellManagers = new AbstractSpellManager[4];
+        this.spellManagers[0] = gameObject.AddComponent(typeof(FireballManager)) as AbstractSpellManager;
+        this.spellManagers[1] = gameObject.AddComponent(typeof(ExplosionManager)) as AbstractSpellManager;
+        this.spellManagers[2] = gameObject.AddComponent(typeof(CannonballManager)) as AbstractSpellManager;
+        this.spellManagers[3] = gameObject.AddComponent(typeof(IcicleManager)) as AbstractSpellManager;
+        InitManagers();
+    }
+
+    private void InitManagers() {
+        foreach (AbstractSpellManager manager in spellManagers) {
+            manager.Init();
+        }
     }
 }

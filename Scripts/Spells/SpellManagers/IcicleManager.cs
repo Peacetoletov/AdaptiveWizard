@@ -6,10 +6,12 @@ public class IcicleManager : AbstractSpellManager
 {
     private GameObject icicleObj;
     private const float manaCost = 10f;
+    private const float cooldown = 0.4f;
 
     
-    public IcicleManager() : base(manaCost) {
+    public override void Init() {
         this.icicleObj = Resources.Load("Prefabs/iciclePrefab") as GameObject;
+        base.Init(manaCost, cooldown);
     }
 
     public override void CastSpell(AbstractPlayer player) {

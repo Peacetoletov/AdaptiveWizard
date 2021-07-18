@@ -87,6 +87,9 @@ public class TestRoomManager : MonoBehaviour
             }
         }
 
+        //test 
+        // GameObject newEnemy1 = Instantiate(enemy1Obj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
+
         // Player
         if (createNewPlayer) {
             TestRoomManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;

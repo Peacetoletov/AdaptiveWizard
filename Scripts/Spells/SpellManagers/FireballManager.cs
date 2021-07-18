@@ -6,10 +6,12 @@ public class FireballManager : AbstractSpellManager
 {
     private GameObject fireballObj;
     private const float manaCost = 0f;
+    private const float cooldown = 0.4f;
 
     
-    public FireballManager() : base(manaCost) {
+    public override void Init() {
         this.fireballObj = Resources.Load("Prefabs/fireballPrefab") as GameObject;
+        base.Init(manaCost, cooldown);
     }
 
     public override void CastSpell(AbstractPlayer player) {
