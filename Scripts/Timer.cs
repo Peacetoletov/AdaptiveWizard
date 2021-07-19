@@ -47,4 +47,11 @@ public class Timer
         }
         return basePeriod + Random.Range(0f, periodVariance);
     }
+
+    public float GetPeriod() {
+        return period;
+    }
+    public float GetTime() {
+        return time;
+    }
 }

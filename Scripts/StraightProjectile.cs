@@ -7,12 +7,23 @@ public abstract class StraightProjectile : MonoBehaviour
     private Vector2 direction;
     private float speed;
     private float damage;
-    // possibly add acceleration
+    private float acceleration;
 
-    protected void Start(Vector2 direction, float speed, float damage) {
+    protected void Start(Vector2 direction, float speed, float damage, float acceleration=0f) {
         this.direction = direction;
         this.speed = speed;
         this.damage = damage;
+        this.acceleration = acceleration;
+    }
+
+    protected virtual void FixedUpdate() {
+        if (TestRoomManager.IsGameActive()) {
+            Accelerate();
+        }
+    }
+
+    private void Accelerate() {
+        this.speed += acceleration * Time.deltaTime;
     }
 
     public Vector2 GetDirection() {

@@ -24,7 +24,8 @@ public class Icicle : StraightProjectile
     }
 
 
-    private void FixedUpdate() {
+    protected override void FixedUpdate() {
+        base.FixedUpdate();
         if (TestRoomManager.IsGameActive()) {
             EvaluateCollisionWithCapsuleCollider();
             EvaluateCollisionWithBoxCollider();

@@ -16,7 +16,8 @@ public class Enemy2Projectile : StraightProjectile
         base.Start(direction, speed, damage);
     }
 
-    private void FixedUpdate() {
+    protected override void FixedUpdate() {
+        base.FixedUpdate();
         if (TestRoomManager.IsGameActive()) {
             RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, GetDirection(), 0f, LayerMask.GetMask("Player", "Wall"));
             if (hit.collider == null) {

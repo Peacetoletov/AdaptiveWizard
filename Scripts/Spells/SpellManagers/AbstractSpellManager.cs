@@ -31,4 +31,9 @@ public abstract class AbstractSpellManager : MonoBehaviour
     }
 
     public abstract void CastSpell(AbstractPlayer player);
+
+    public Timer GetTimer() {
+        // this method is necessary for displaying remaining cooldown in UI
+        return cooldownTimer;
+    }
 }

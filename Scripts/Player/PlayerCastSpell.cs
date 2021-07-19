@@ -47,4 +47,8 @@ public class PlayerCastSpell : AbstractPlayer
             manager.Init();
         }
     }
+
+    public AbstractSpellManager GetSpellManager(int index) {
+        return spellManagers[index];
+    }
 }

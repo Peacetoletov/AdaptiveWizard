@@ -27,7 +27,8 @@ public class Cannonball : StraightProjectile
         base.Start(direction, speed, damage);
     }
 
-    private void FixedUpdate() {
+    protected override void FixedUpdate() {
+        base.FixedUpdate();
         if (TestRoomManager.IsGameActive()) {
             // find all enemies and walls hit, change their layer
             List<GameObject> collidingEnemies = new List<GameObject>();

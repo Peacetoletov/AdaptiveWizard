@@ -6,7 +6,7 @@ public class FireballManager : AbstractSpellManager
 {
     private GameObject fireballObj;
     private const float manaCost = 0f;
-    private const float cooldown = 0.4f;
+    private const float cooldown = 0.1f;        // balanced cooldown is 0.4f
 
     
     public override void Init() {
