@@ -8,6 +8,7 @@ public class Fireball : StraightProjectile
     private PlayerGeneral player;
     private SpriteRenderer spriteRenderer;
     private const float baseSpeed = 15f;
+    private const float manaRestoration = 5f;
 
     private void Start() {
         this.circleCollider = GetComponent<CircleCollider2D>();
@@ -44,7 +45,7 @@ public class Fireball : StraightProjectile
                     enemy.TakeDamage(GetDamage());
 
                     // restore mana to player
-                    this.player.AddMana(10f);
+                    this.player.AddMana(manaRestoration);
                 }
                 // destroy self
                 Destroy(gameObject);

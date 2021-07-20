@@ -26,10 +26,7 @@ public class RemainingCooldownUI : MonoBehaviour
                 // time != 0
                 float remainingCooldown = (cooldownTimer.GetPeriod() - time);
                 this.cooldown.text = remainingCooldown.ToString("F1").Replace(",", ".");
-                // ^change this
             }
-            //int roundedToSeconds = (int) cooldownTimer.GetPeriod();
-            //this.cooldown.text = roundedToSeconds.ToString();
         }
     }
 }

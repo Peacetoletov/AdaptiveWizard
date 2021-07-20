@@ -13,6 +13,7 @@ public class TestRoomManager : MonoBehaviour
     public GameObject floorObj;
     public GameObject enemy1Obj;
     public GameObject enemy2Obj;
+    public GameObject enemyGatlingObj;
 
     private const int ROOM_WIDTH = 30;
     private const int ROOM_HEIGHT = 16;
@@ -51,7 +52,7 @@ public class TestRoomManager : MonoBehaviour
 
     private void UpdateMiniGameSpawnPeriod() {
         float spawnRateAcceleration = 0.97f;
-        float minSpawnPeriod = 0.35f;
+        float minSpawnPeriod = 0.4f;
         this.miniGameSpawnPeriod = Mathf.Max(minSpawnPeriod, miniGameSpawnPeriod * spawnRateAcceleration);
     }
 
@@ -104,35 +105,55 @@ public class TestRoomManager : MonoBehaviour
             
             for (int i = 0; i < 3; i++) {
                 // Melee
-                //GameObject newEnemy1 = Instantiate(enemy1Obj, new Vector3(2.0f, -2.0f + 2*i, 0.0f), Quaternion.identity) as GameObject;
+                // Instantiate(enemy1Obj, new Vector3(2.0f, -2.0f + 2*i, 0f), Quaternion.identity) as GameObject;
                 for (int j = 0; j < 3; j++) {
                     // Ranged
-                    GameObject newEnemy2 = Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0.0f), Quaternion.identity) as GameObject;
+                    // Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0f), Quaternion.identity) as GameObject;
                 }
             }
-            
+            Instantiate(enemyGatlingObj, new Vector3(4.0f, 0f, 0f), Quaternion.identity);
         }
 
     }
 
     private void SpawnEnemyRandomly() {
+        float enemyDeterminator = Random.Range(0f, 1f);
+        if (enemyDeterminator < 0.45) {
+            Vector2 spawnPos = RandomSpawnPos(1f);
+            Instantiate(enemy1Obj, spawnPos, Quaternion.identity);
+        }
+        else if (enemyDeterminator < 0.95) {
+            Vector2 spawnPos = RandomSpawnPos(1f);
+            Instantiate(enemy2Obj, spawnPos, Quaternion.identity);
+        }
+        else {
+            Vector2 spawnPos = RandomSpawnPos(1.5f);
+            Instantiate(enemyGatlingObj, spawnPos, Quaternion.identity);
+        }
+    }
+
+    private Vector2 RandomSpawnPos(float enemySize) {
         float minimumDistanceFromPlayer = 4f;
         float distanceFromPlayer;
         Vector2 spawnPos;
         do {
-            float xPos = (float) (Random.Range(1f, ROOM_WIDTH - 2f) + 0.5 - ROOM_WIDTH / 2.0);
-            float yPos = (float) (Random.Range(1f, ROOM_HEIGHT - 2f) + 0.5 - ROOM_HEIGHT / 2.0);
+            float minXPos = enemySize / 2f + 1f - ROOM_WIDTH / 2f;
+            float minYPos = enemySize / 2f + 1f - ROOM_HEIGHT / 2f;
+            float maxXPos = -enemySize / 2f - 1f + ROOM_WIDTH / 2f;
+            float maxYPos = -enemySize / 2f - 1f + ROOM_HEIGHT / 2f;
+            float xPos = (float) (Random.Range(minXPos, maxXPos));
+            float yPos = (float) (Random.Range(minYPos, maxYPos));
+            //
+
+            // good:
+            //float xPos = (float) (enemySize / 2 + 1 - ROOM_WIDTH / 2.0);
+            //float yPos = (float) (enemySize / 2 + 1 - ROOM_HEIGHT / 2.0);
+            //float xPos = (float) ((ROOM_WIDTH - enemySize / 2) - 1 - ROOM_WIDTH / 2.0);
+            //float yPos = (float) ((ROOM_HEIGHT - enemySize / 2) - 1 - ROOM_HEIGHT / 2.0);
             spawnPos = new Vector2(xPos, yPos);
             distanceFromPlayer = (spawnPos - (Vector2) player.transform.position).magnitude;
         } while (distanceFromPlayer < minimumDistanceFromPlayer);
-
-        float enemyDeterminator = Random.Range(0f, 1f);
-        if (enemyDeterminator < 0.5) {
-            Instantiate(enemy1Obj, spawnPos, Quaternion.identity);
-        }
-        else {
-            Instantiate(enemy2Obj, spawnPos, Quaternion.identity);
-        }
+        return spawnPos;
     }
 
     private void LimitTestingRoom() {

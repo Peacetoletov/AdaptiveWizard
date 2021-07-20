@@ -17,7 +17,7 @@ public abstract class AbstractSpellManager : MonoBehaviour
     public abstract void Init();
 
     private void Update() {
-        if (isOnCooldown && cooldownTimer.UpdateAndCheck()) {
+        if (TestRoomManager.IsGameActive() && isOnCooldown && cooldownTimer.UpdateAndCheck()) {
             this.isOnCooldown = false;
         }
     }

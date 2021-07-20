@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerGeneral : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
+    private SpriteRenderer spriteRenderer;
     private float maxHealth;
     private float curHealth;
     private bool meleeInvulnerability;
@@ -12,6 +13,7 @@ public class PlayerGeneral : AbstractPlayer
     private float maxMana;
     private float curMana;
     private Timer manaRegenTimer;
+    
 
     private void Start() {
         if (!IsInitialized()) {
@@ -28,6 +30,8 @@ public class PlayerGeneral : AbstractPlayer
             if (manaRegenTimer.UpdateAndCheck()) {
                 AddMana(1f);
             }
+
+            IncreaseAlphaIfBelowOne();
         }
     }
 
@@ -48,7 +52,12 @@ public class PlayerGeneral : AbstractPlayer
 
     public void TakeDamage(float damage) {
         this.curHealth -= damage;
-        // print("Took " + damage + " damage. Current health: " + curHealth);
+
+        // temporarily decrease alpha to signal taking damage
+        Color tmp = spriteRenderer.color;
+        tmp.a = 0.1f;
+        spriteRenderer.color = tmp;
+
         CheckDeath();
     }
 
@@ -57,6 +66,13 @@ public class PlayerGeneral : AbstractPlayer
             print("You died!");
             RestartLevel();
         }
+    }
+
+    private void IncreaseAlphaIfBelowOne() {
+        // if player sprite's alpha is below 1, slightly increase it
+        Color tmp = spriteRenderer.color;
+        tmp.a = Mathf.Min(1, tmp.a + 1.4f * Time.deltaTime);
+        spriteRenderer.color = tmp;
     }
 
     private void RestartLevel() {
@@ -80,6 +96,8 @@ public class PlayerGeneral : AbstractPlayer
 
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
+        this.spriteRenderer = GetComponent<SpriteRenderer>();
+        SetAlphaToOne();
         this.maxHealth = 100f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
@@ -89,6 +107,12 @@ public class PlayerGeneral : AbstractPlayer
         this.curMana = maxMana;
         float manaRegenPerSec = 3f;
         this.manaRegenTimer = new Timer(1 / manaRegenPerSec);
+    }
+
+    private void SetAlphaToOne() {
+        Color tmp = spriteRenderer.color;
+        tmp.a = 1f;
+        spriteRenderer.color = tmp;
     }
 
     public float GetCurHealth() {
