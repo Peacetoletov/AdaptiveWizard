@@ -5,7 +5,7 @@ using UnityEngine;
 public class TestRoomManager : MonoBehaviour
 {
     // build options
-    private const bool miniGame = true;
+    private const bool miniGame = false;
 
     // these GameObjects are here only for instantiates, never used in other ways
     public GameObject playerObj;
@@ -102,23 +102,22 @@ public class TestRoomManager : MonoBehaviour
             //SpawnEnemyRandomly();
         }
         else {
-            
-            for (int i = 0; i < 3; i++) {
+            for (int i = 2; i < 5; i++) {
                 // Melee
-                // Instantiate(enemy1Obj, new Vector3(2.0f, -2.0f + 2*i, 0f), Quaternion.identity) as GameObject;
-                for (int j = 0; j < 3; j++) {
+                
+                for (int j = 2; j < 5; j++) {
+                    Instantiate(enemy1Obj, new Vector3(2.0f + i * 1.5f, -4.0f + 2*j, 0f), Quaternion.identity);
                     // Ranged
-                    // Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0f), Quaternion.identity) as GameObject;
+                    // Instantiate(enemy2Obj, new Vector3(4.0f + 2.5f * j, -2.5f + 2.5f*i, 0f), Quaternion.identity);
                 }
             }
-            Instantiate(enemyGatlingObj, new Vector3(4.0f, 0f, 0f), Quaternion.identity);
         }
 
     }
 
     private void SpawnEnemyRandomly() {
         float enemyDeterminator = Random.Range(0f, 1f);
-        if (enemyDeterminator < 0.45) {
+        if (enemyDeterminator < 1) {     //0.45
             Vector2 spawnPos = RandomSpawnPos(1f);
             Instantiate(enemy1Obj, spawnPos, Quaternion.identity);
         }

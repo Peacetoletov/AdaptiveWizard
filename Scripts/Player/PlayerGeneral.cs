@@ -98,12 +98,12 @@ public class PlayerGeneral : AbstractPlayer
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.spriteRenderer = GetComponent<SpriteRenderer>();
         SetAlphaToOne();
-        this.maxHealth = 100f;
+        this.maxHealth = 100000f;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
-        this.maxMana = 100f;
+        this.maxMana = 100000f;
         this.curMana = maxMana;
         float manaRegenPerSec = 3f;
         this.manaRegenTimer = new Timer(1 / manaRegenPerSec);
