@@ -4,7 +4,16 @@ using UnityEngine;
 
 public class Cannonball : StraightProjectile
 {
-    private CircleCollider2D circleCollider;
+    /*
+    Cannonball is bigger than the player, so if the player is standing close to a wall and fires a cannonball
+    parallel to the wall, it could instantly collide with the wall and disappear. To prevent this issue, I will
+    use two distinct colliders - one of the same size as the sprite, used for detecting collision with enemies.
+    The second collider will smaller (about the same size as player) and will be used for detection collision
+    with walls.
+    */
+    public CircleCollider2D circleColliderForEnemies;
+    public CircleCollider2D circleColliderForWalls;
+    
 
     /*
     I only want to damage each colliding enemy once. To prevent damaging the same enemy multiple times,
@@ -17,7 +26,6 @@ public class Cannonball : StraightProjectile
     private List<int> enemiesHitID;
 
     private void Start() {
-        this.circleCollider = GetComponent<CircleCollider2D>();
         this.enemiesHitID = new List<int>();
     }
 
@@ -32,40 +40,32 @@ public class Cannonball : StraightProjectile
         if (TestRoomManager.IsGameActive()) {
             // find all enemies and walls hit, change their layer
             List<GameObject> collidingEnemies = new List<GameObject>();
-            List<GameObject> collidingWalls = new List<GameObject>();
-            FindCollidingEnemiesAndWallsAndChangeTheirLayer(collidingEnemies, collidingWalls);
+            FindCollidingEnemiesAndChangeTheirLayer(collidingEnemies);
 
-            // damage enemies, change layers of colliding objects back
+            // damage enemies, change their layer back
             DamageEnemiesAndChangeLayerBack(collidingEnemies);
-            ChangeWallLayerBack(collidingWalls);
             
             // destroy this object if at least one wall was hit
-            DestroySelfIfHitWall(collidingWalls);
+            DestroySelfIfHitWall();
 
             // move
             transform.position += (Vector3) GetDirection().normalized * GetSpeed() * Time.deltaTime; 
         }
     }
 
-    private void FindCollidingEnemiesAndWallsAndChangeTheirLayer(List<GameObject> collidingEnemies, List<GameObject> collidingWalls) {
+    private void FindCollidingEnemiesAndChangeTheirLayer(List<GameObject> collidingEnemies) {
         /*
-        This function finds all colliding enemies and puts them into the collidingEnemies list. Same for all colliding walls and the collidingWalls list.
-        As a side effect, the layer of all colliding enemies and walls is changed to "Tmp" and must be changed back later.
+        This function finds all colliding enemies and puts them into the collidingEnemies list. As a side effect, 
+        the layer of all colliding enemies is changed to "Tmp" and must be changed back later.
         */
+
         while (true) {
-            RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleCollider.radius, Vector2.zero, 0f, LayerMask.GetMask("Enemy", "Wall"));
+            RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleColliderForEnemies.radius, Vector2.zero, 0f, LayerMask.GetMask("Enemy"));
             if (hit.collider == null) {
                 break;
             }
-
-            // add colliding objects to their corresponding list
             GameObject objectHit = hit.transform.gameObject;
-            if (objectHit.layer == LayerMask.NameToLayer("Enemy")) {
-                collidingEnemies.Add(objectHit);
-            }
-            else {
-                collidingWalls.Add(objectHit);
-            }
+            collidingEnemies.Add(objectHit);
 
             // temporarily change the object's layer
             objectHit.layer = LayerMask.NameToLayer("Tmp");
@@ -88,14 +88,9 @@ public class Cannonball : StraightProjectile
         }
     }
 
-    private void ChangeWallLayerBack(List<GameObject> collidingWalls) {
-        foreach (GameObject obj in collidingWalls) {
-            obj.layer = LayerMask.NameToLayer("Wall");
-        }
-    }
-
-    private void DestroySelfIfHitWall(List<GameObject> collidingWalls) {
-        if (collidingWalls.Count > 0) {
+    private void DestroySelfIfHitWall() {
+        RaycastHit2D hit = Physics2D.CircleCast(transform.position, circleColliderForWalls.radius, Vector2.zero, 0f, LayerMask.GetMask("Wall"));
+        if (hit.collider != null) {
             Destroy(gameObject);
         }
     }
