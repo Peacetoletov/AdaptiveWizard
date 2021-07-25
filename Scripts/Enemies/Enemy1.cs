@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class Enemy1 : AbstractEnemy
 {
-    //public BoxCollider2D test1;
-    //public BoxCollider2D test2;
-
     private float speed = 2.0f;
+    private Vector2 lastFrameMovementVector = Vector2.zero;
+    private Vector3 lastFramePlayerPosition;
+    
+    private bool hasPlayerPositionChanged = false;
 
     // Start is called before the first frame update
     private void Start() {
@@ -18,6 +19,15 @@ public class Enemy1 : AbstractEnemy
         if (TestRoomManager.IsGameActive()) {
             // MoveTowardsPlayer();
             MoveTowardsPlayerAndRepulseFromOtherEnemies();
+
+            // update player's position; must be done as the last thing in the update method
+            // TODO: this is wrong and doesn't do what I intended
+            const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
+            if ((TestRoomManager.GetPlayer().transform.position - lastFramePlayerPosition).magnitude > minPlayerPositionDelta) {
+                this.lastFramePlayerPosition = TestRoomManager.GetPlayer().transform.position;
+                this.hasPlayerPositionChanged = true;
+            }
+            // ^ note: computing this in each enemy is inefficient, could be optimized in future
         }
     }
 
@@ -28,10 +38,31 @@ public class Enemy1 : AbstractEnemy
     */
 
     private void MoveTowardsPlayerAndRepulseFromOtherEnemies() {
-        Vector2 repulsionVector = RepulsionVector();
-        Vector2 movementVector = (repulsionVector + DirectionToPlayer()).normalized * speed * Time.deltaTime;
-        transform.position += (Vector3) movementVector; 
         // transform.position += (Vector3) DirectionToPlayer().normalized * speed * Time.deltaTime; 
+        Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
+        const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
+        // print("angle difference: " + Vector2.Angle(movementVector, lastFrameMovementVector));
+        if (Vector2.Angle(movementVector, lastFrameMovementVector) < largeDirectionChange) {
+            // move in the calculated direction if the direction is similar to the last frame's direction
+            Move((Vector3) movementVector);
+        }
+        else {    
+            // if degree between this frame's movement vector and last frame's movement vector is very large 
+            // (indicating a rapid change of direction, possible sign of wiggling in place)
+            
+            // if ((TestRoomManager.GetPlayer().transform.position - lastFramePlayerPosition).magnitude > minPlayerPositionDelta) {
+            if (hasPlayerPositionChanged) {
+                // move in the calculated direction if the direction is largely different but player has moved
+                Move((Vector3) movementVector);
+            }
+            // do not move in the calculated direction if the direction is largely different and player has not moved
+        }
+    }
+
+    private void Move(Vector3 movementVector) {
+        transform.position += movementVector; 
+        this.lastFrameMovementVector = movementVector;
+        this.hasPlayerPositionChanged = false;       // todo: I don't really like this variable's name, possibly change it
     }
 
     private Vector2 RepulsionVector() {
@@ -61,7 +92,7 @@ public class Enemy1 : AbstractEnemy
 
         
         Vector2 finalRepulsionVector = Vector2.zero;
-        const float repulsionConstant = 0.5f;
+        const float repulsionConstant = 0.5f;       
         AbstractEnemy[] enemies = FindObjectsOfType<AbstractEnemy>();
         foreach (AbstractEnemy enemy in enemies) {
             if (enemy.GetID() == GetID()) {
