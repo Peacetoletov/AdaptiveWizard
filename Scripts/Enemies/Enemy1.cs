@@ -5,64 +5,55 @@ using UnityEngine;
 public class Enemy1 : AbstractEnemy
 {
     private float speed = 2.0f;
-    private Vector2 lastFrameMovementVector = Vector2.zero;
-    private Vector3 lastFramePlayerPosition;
-    
-    private bool hasPlayerPositionChanged = false;
+    private Vector2 lastMovementVector = Vector2.zero;
+    private Vector3 lastRecordedPlayerPosition;
+    private bool hasPlayerPositionChangedSinceLastMovement = false;
 
-    // Start is called before the first frame update
+
     private void Start() {
         base.Start(30f);
     }
 
     private void FixedUpdate() {
         if (TestRoomManager.IsGameActive()) {
-            // MoveTowardsPlayer();
             MoveTowardsPlayerAndRepulseFromOtherEnemies();
 
             // update player's position; must be done as the last thing in the update method
-            // TODO: this is wrong and doesn't do what I intended
-            const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
-            if ((TestRoomManager.GetPlayer().transform.position - lastFramePlayerPosition).magnitude > minPlayerPositionDelta) {
-                this.lastFramePlayerPosition = TestRoomManager.GetPlayer().transform.position;
-                this.hasPlayerPositionChanged = true;
-            }
-            // ^ note: computing this in each enemy is inefficient, could be optimized in future
+            // note: computing this in each enemy is inefficient, could be optimized in future
+            UpdatePlayersPosition();
         }
     }
 
-    /*
-    private void MoveTowardsPlayer() {
-        transform.position += (Vector3) DirectionToPlayer().normalized * speed * Time.deltaTime; 
+    private void UpdatePlayersPosition() {
+        const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
+        if ((TestRoomManager.GetPlayer().transform.position - lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
+            this.hasPlayerPositionChangedSinceLastMovement = true;
+        }
     }
-    */
 
     private void MoveTowardsPlayerAndRepulseFromOtherEnemies() {
-        // transform.position += (Vector3) DirectionToPlayer().normalized * speed * Time.deltaTime; 
         Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
         const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
-        // print("angle difference: " + Vector2.Angle(movementVector, lastFrameMovementVector));
-        if (Vector2.Angle(movementVector, lastFrameMovementVector) < largeDirectionChange) {
+        if (Vector2.Angle(movementVector, lastMovementVector) < largeDirectionChange) {
             // move in the calculated direction if the direction is similar to the last frame's direction
             Move((Vector3) movementVector);
         }
-        else {    
-            // if degree between this frame's movement vector and last frame's movement vector is very large 
-            // (indicating a rapid change of direction, possible sign of wiggling in place)
-            
-            // if ((TestRoomManager.GetPlayer().transform.position - lastFramePlayerPosition).magnitude > minPlayerPositionDelta) {
-            if (hasPlayerPositionChanged) {
+        // if degree between this frame's movement vector and last frame's movement vector is very large 
+        // (indicating a rapid change of direction, possible sign of wiggling in place)
+        else {
+            if (hasPlayerPositionChangedSinceLastMovement) {
                 // move in the calculated direction if the direction is largely different but player has moved
                 Move((Vector3) movementVector);
             }
-            // do not move in the calculated direction if the direction is largely different and player has not moved
+            // do not move in the calculated direction if the direction is largely different and player has not moved (prevent wiggling in place)
         }
     }
 
     private void Move(Vector3 movementVector) {
         transform.position += movementVector; 
-        this.lastFrameMovementVector = movementVector;
-        this.hasPlayerPositionChanged = false;       // todo: I don't really like this variable's name, possibly change it
+        this.lastMovementVector = movementVector;
+        this.lastRecordedPlayerPosition = TestRoomManager.GetPlayer().transform.position;
+        this.hasPlayerPositionChangedSinceLastMovement = false;
     }
 
     private Vector2 RepulsionVector() {
