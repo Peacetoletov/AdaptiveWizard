@@ -20,7 +20,7 @@ public class Enemy2 : AbstractEnemy
     private void Update() {
         if (TestRoomManager.IsGameActive()) {
             if (projectileSpawnTimer.UpdateAndCheck()) {
-                // SpawnProjectile();       // temporarily disabled
+                SpawnProjectile();
             }
         }
     }
