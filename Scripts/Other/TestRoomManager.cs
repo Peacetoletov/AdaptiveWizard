@@ -85,11 +85,11 @@ public class TestRoomManager : MonoBehaviour
         */
 
         // Environment
-        int width = roomTiles[0].Length;
-        int height = roomTiles.Length;
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Vector3 coordinates = new Vector3((float) (x + 0.5 - width / 2.0), (float) (y + 0.5 - height / 2.0), 0);
+        int roomWidth = roomTiles[0].Length;
+        int roomHeight = roomTiles.Length;
+        for (int x = 0; x < roomWidth; x++) {
+            for (int y = 0; y < roomHeight; y++) {
+                Vector3 coordinates = new Vector3((float) (x + 0.5 - roomWidth / 2.0), (float) (y + 0.5 - roomHeight / 2.0), 0);
                 if (TileSymbolAtPosition(x, y) == '#') {
                     Instantiate(wallObj, coordinates, Quaternion.identity);
                 } else {
@@ -109,11 +109,15 @@ public class TestRoomManager : MonoBehaviour
         }
         else {
             // whatever needs to be tested here
+            /*
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     Instantiate(enemy1Obj, new Vector3(5f + i, 0f + j, 0f), Quaternion.identity);
                 }
             }
+            */
+            Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
+            Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
         }
     }
 
@@ -147,15 +151,15 @@ public class TestRoomManager : MonoBehaviour
         Vector2 spawnPosInRoomCoordinates;
         Vector2 spawnPosInWorldCoordinates;
         float distanceFromPlayer;
-        int width = roomTiles[0].Length;
-        int height = roomTiles.Length;
+        int roomWidth = roomTiles[0].Length;
+        int roomHeight = roomTiles.Length;
         do {
             // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
             float xPosInRoomCoordinates = (float) (Random.Range(0f, roomTiles[0].Length - 1));
             float yPosInRoomCoordinates = (float) (Random.Range(0f, roomTiles.Length - 1));
             
             spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
-            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + 0.5f - width / 2f), (spawnPosInRoomCoordinates.y + 0.5f - height / 2f));
+            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + 0.5f - roomWidth / 2f), (spawnPosInRoomCoordinates.y + 0.5f - roomHeight / 2f));
             // ^ this only works if there is only 1 room
             distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) player.transform.position).magnitude;
         } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
@@ -172,11 +176,11 @@ public class TestRoomManager : MonoBehaviour
         }
 
         Vector2 spawnPos = spawnPosInRoomCoordinates;
-        int width = roomTiles[0].Length;
-        int height = roomTiles.Length;
+        int roomWidth = roomTiles[0].Length;
+        int roomHeight = roomTiles.Length;
         float enemyDiameter = enemySize / 2f;
-        if (spawnPos.x - enemyDiameter < 0 || spawnPos.x + enemyDiameter > width ||
-                spawnPos.y - enemyDiameter < 0 || spawnPos.y + enemyDiameter > height) {
+        if (spawnPos.x - enemyDiameter < 0 || spawnPos.x + enemyDiameter > roomWidth ||
+                spawnPos.y - enemyDiameter < 0 || spawnPos.y + enemyDiameter > roomHeight) {
             return false;
         }
 

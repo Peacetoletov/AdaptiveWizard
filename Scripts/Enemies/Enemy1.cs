@@ -36,6 +36,7 @@ public class Enemy1 : AbstractEnemy
     private void TryToMove() {
         Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
         const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
+        print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
         if (Vector2.Angle(movementVector, lastMovementVector) < largeDirectionChange) {
             // move in the calculated direction if the direction is similar to the last frame's direction
             Move(movementVector);
@@ -120,6 +121,10 @@ public class Enemy1 : AbstractEnemy
             float distance = (transform.position - enemy.transform.position).magnitude;
             float force = repulsionConstant / (distance * distance);
             Vector2 repulsionVector = new Vector2(repulsionDirection.x * force, repulsionDirection.y * force);
+            if (distance == 0) {
+                // special case when two enemies are in the exact same position and (therefore) normal approach doesn't work
+                repulsionVector = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
+            }
             finalRepulsionVector += repulsionVector;
         }
         return finalRepulsionVector;
