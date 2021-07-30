@@ -36,7 +36,7 @@ public class Enemy1 : AbstractEnemy
     private void TryToMove() {
         Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
         const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
-        print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
+        // print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
         if (Vector2.Angle(movementVector, lastMovementVector) < largeDirectionChange) {
             // move in the calculated direction if the direction is similar to the last frame's direction
             Move(movementVector);
