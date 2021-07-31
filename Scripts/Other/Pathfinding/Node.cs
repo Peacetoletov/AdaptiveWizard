@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Node
+public class Node : IComparable<Node>
 {
     /*
     A node represents a floor block. Floor is the only block that can be freely walked on.
@@ -17,8 +17,10 @@ public class Node
     // List of up to 8 neighbour nodes
     private List<Node> neighbours;
 
-    // Distance from the start node
-    private float distance;
+    // Distance from the start node; straight neighbours have a distance of 10, diagonal neighbours have a distance of 14
+    private int distance;
+
+    private int heuristic;
 
     // Whether this node is currently in the priority queue, ready to be covered
     private bool open;
@@ -26,14 +28,18 @@ public class Node
     // Whether this node was already covered, therefore removed from the priority queue.
     private bool closed;
 
+    // Predecessor of this node
+    private Node parent;
+
+    // Successor of this node; this is only set after (the shortest) path is found
+    private Node child;
+
 
     public Node(Vector2Int position) {
         // Neighbours are set by another function, called from another class
         this.neighbours = new List<Node>();
         this.position = position;
-        this.distance = float.PositiveInfinity;
-        this.open = false;
-        this.closed = false;
+        Reset();
     }
 
     public void AddNeighbour(Node neighbour) {
@@ -41,24 +47,44 @@ public class Node
         this.neighbours.Add(neighbour);
     }
 
-    public float AdjustedDistance(Vector2Int targetPosition) {
-        return distance + Heuristic(targetPosition);
+    public int AdjustedDistance() {
+        return distance + heuristic;
     }
 
-    private float Heuristic(Vector2Int targetPosition) {
+    public void Reset() {
+        //this.distance = float.PositiveInfinity;
+        //this.heuristic = float.PositiveInfinity;
+        this.open = false;
+        this.closed = false;
+    }
+
+    public void SetDistance(int distance) {
+        this.distance = distance;
+    }
+
+    public void OpenAndSetHeuristic(Vector2Int targetPosition) {
+        this.open = true;
+        SetHeuristic(targetPosition);
+    }
+
+    private void SetHeuristic(Vector2Int targetPosition) {
         // Manhattan heuristic 
-        return Math.Abs(targetPosition.x - position.x) + Math.Abs(targetPosition.y - position.y);
+        this.heuristic = (int) Math.Abs(targetPosition.x - position.x) + Math.Abs(targetPosition.y - position.y);
     }
 
-    /*
     public Vector2Int GetPosition() {
         return position;
     }
-    */
 
     /*
     public void MyTest() {
         Debug.Log("Node at position " + position.x + "|" + position.y + " has " + neighbours.Count + " neighbours.");
     }
     */
+
+    public int CompareTo(Node other) {
+        Debug.Log("Comparing!");
+        return AdjustedDistance() - other.AdjustedDistance();
+        //return 1;
+    }
 }

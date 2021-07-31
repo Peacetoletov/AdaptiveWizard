@@ -46,6 +46,13 @@ public class TestRoomManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) {
             TestRoomManager.isGameActive = !isGameActive;
         }
+
+        // test
+        /*
+        if (Input.GetMouseButtonDown(0)) {
+            PositionInRoomToNode(player);
+        }
+        */
     }
 
     private void UpdateMiniGameSpawnPeriod() {
@@ -101,6 +108,10 @@ public class TestRoomManager : MonoBehaviour
         CreateRoomNodes();
         InitializeRoomNodes();
 
+        //testing
+        Pathfinder pathfinder = new Pathfinder();
+        pathfinder.DirectionAndFirstTurn(roomNodes[1, 1], roomNodes[2, 2]);
+
         // Player
         if (createNewPlayer) {
             TestRoomManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
@@ -120,7 +131,7 @@ public class TestRoomManager : MonoBehaviour
             }
             */
             Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
-            Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
+            //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
         }
     }
 
@@ -194,6 +205,16 @@ public class TestRoomManager : MonoBehaviour
         int upperY = lowerY + 1;
         return (TileSymbolAtPosition(lowerX, lowerY) == '.' && TileSymbolAtPosition(lowerX, upperY) == '.' &&
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
+    }
+
+    public Node PositionInRoomToNode(GameObject obj) {
+        // converts object's world position to room position, then returns a node that corresponds to this position
+        int roomWidth = roomVisual[0].Length;
+        int roomHeight = roomVisual.Length;
+        int x = (int) Mathf.Round(obj.transform.position.x - 0.5f + roomWidth / 2f);
+        int y = roomVisual.Length - 1 - (int) Mathf.Round(obj.transform.position.y - 0.5f + roomHeight / 2f);
+        //print("x = " + x + ", y = " + y);
+        return roomNodes[x, y];
     }
 
     private void SpawnEnemyRandomlyInComplexRoom() {
