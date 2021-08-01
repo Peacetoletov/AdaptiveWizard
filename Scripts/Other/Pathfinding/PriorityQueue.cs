@@ -18,6 +18,10 @@ using System.Text;
 /// ordering by using AdjustHeap methods.</remarks>
 public class PriorityQueue<T> : List<T> 
 {
+    public bool IsEmpty() {
+        return Count == 0;
+    }
+
     /// <summary>
     /// Initializes a new instance of the PriorityQueue class that is empty, 
     /// has the default initial capacity, default comparator for the items.

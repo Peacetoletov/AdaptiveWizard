@@ -66,8 +66,8 @@ public class TestRoomManager : MonoBehaviour
         this.roomVisual = new string[] {
             "##############################",
             "#............................#",
-            "#............................#",
-            "#....####..............###...#",
+            "#..#####.....................#",
+            "#......................###...#",
             "#.............##.........#...#",
             "#.............##.........#...#",
             "#...........####.........#...#",
@@ -108,10 +108,6 @@ public class TestRoomManager : MonoBehaviour
         CreateRoomNodes();
         InitializeRoomNodes();
 
-        //testing
-        Pathfinder pathfinder = new Pathfinder();
-        pathfinder.DirectionAndFirstTurn(roomNodes[1, 1], roomNodes[2, 2]);
-
         // Player
         if (createNewPlayer) {
             TestRoomManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
@@ -130,8 +126,10 @@ public class TestRoomManager : MonoBehaviour
                 }
             }
             */
-            Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
             //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
+            //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
+            Pathfinder pathfinder = new Pathfinder();
+            pathfinder.DirectionAndDistanceUntilFirstTurn(roomNodes[4, 4], roomNodes[4, 1]);
         }
     }
 

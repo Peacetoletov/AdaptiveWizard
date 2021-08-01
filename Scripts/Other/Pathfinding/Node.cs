@@ -32,7 +32,7 @@ public class Node : IComparable<Node>
     private Node parent;
 
     // Successor of this node; this is only set after (the shortest) path is found
-    private Node child;
+    //private Node child;
 
 
     public Node(Vector2Int position) {
@@ -48,14 +48,19 @@ public class Node : IComparable<Node>
     }
 
     public int AdjustedDistance() {
+        // TODO: make private
+        //Debug.Log("Calculating adjusted distance in node " + position + ". Distance = " + distance + ", heuristic = " + heuristic + ", adjusted distance = " + (distance + heuristic));
         return distance + heuristic;
     }
 
     public void Reset() {
-        //this.distance = float.PositiveInfinity;
-        //this.heuristic = float.PositiveInfinity;
+        this.distance = 1000000;
+        this.heuristic = 1000000;
+        // ^ these values are practically equal to infinity and won't cause an overflow if they're added together
         this.open = false;
         this.closed = false;
+        this.parent = null;
+        //this.child = null;
     }
 
     public void SetDistance(int distance) {
@@ -68,12 +73,48 @@ public class Node : IComparable<Node>
     }
 
     private void SetHeuristic(Vector2Int targetPosition) {
-        // Manhattan heuristic 
-        this.heuristic = (int) Math.Abs(targetPosition.x - position.x) + Math.Abs(targetPosition.y - position.y);
+        // Modification of Manhattan heuristic to include diagonals
+        // I'm using 10 as the distance between two straight neighbours, and 14 as the distance between two diagonal ones
+        int xDelta = (int) Math.Abs(targetPosition.x - position.x);
+        int yDelta = (int) Math.Abs(targetPosition.y - position.y);
+        int max = Math.Max(xDelta, yDelta);
+        int min = Math.Min(xDelta, yDelta);
+        // this.heuristic = 10 * ((int) Math.Abs(targetPosition.x - position.x) + Math.Abs(targetPosition.y - position.y));
+        this.heuristic = 10 * (max - min) + 14 * min;
+        // Debug.Log("Node " + position + ". Setting heuristic to " + heuristic);
+    }
+
+    public void Close() {
+        this.open = false;
+        this.closed = true;
     }
 
     public Vector2Int GetPosition() {
         return position;
+    }
+
+    public List<Node> GetNeighbours() {
+        return neighbours;
+    }
+
+    public bool IsClosed() {
+        return closed;
+    }
+
+    public bool IsOpen() {
+        return open;
+    }
+
+    public int GetDistance() {
+        return distance;
+    }
+
+    public Node GetParent() {
+        return parent;
+    }
+
+    public void SetParent(Node parent) {
+        this.parent = parent;
     }
 
     /*
@@ -83,8 +124,7 @@ public class Node : IComparable<Node>
     */
 
     public int CompareTo(Node other) {
-        Debug.Log("Comparing!");
+        //Debug.Log("Comparing! " + (AdjustedDistance() - other.AdjustedDistance()));
         return AdjustedDistance() - other.AdjustedDistance();
-        //return 1;
     }
 }
