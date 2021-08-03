@@ -4,8 +4,8 @@ using UnityEngine;
 
 // TODO: clean this class up, divide methods, add comments, possibly create new class/classes to inherit from
 // with some of the movement functionality
-// TODO: after 1 second of following a path, switch back to naive movement (and if a wall is encountered again, find a new path)
-// Don't forget to reset all pathfinding related variables while doing so.
+// TODO: after cleaning this class up, optimize repulsion vector to only take into account enemies within a very
+// short radius. This should incidentally also fix a problem where enemies sometimes get stuck near corners of walls.
 public class Enemy1 : AbstractEnemy
 {
     private BoxCollider2D boxCollider;
@@ -21,6 +21,7 @@ public class Enemy1 : AbstractEnemy
     private bool justFinishedFollowingPath = false;
     private Path path;
     private Vector2 pathOrigin;
+    private Timer pathFollowingTime;
 
 
     // Going towards first path node
@@ -44,6 +45,13 @@ public class Enemy1 : AbstractEnemy
         }
     }
 
+    private void ResetPathRelatedVariables(bool justFinishedFollowingPath) {
+        // TODO: call this function in start() with false as the argument
+        this.isFollowingPath = false;
+        this.justFinishedFollowingPath = justFinishedFollowingPath;
+        this.isGoingTowardsFirstPathNode = false;
+    }
+
     private void UpdatePlayersPosition() {
         const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
         if ((TestRoomManager.GetPlayer().transform.position - lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
@@ -52,6 +60,12 @@ public class Enemy1 : AbstractEnemy
     }
 
     private void DetermineMovement() {
+        // if this enemy is following a path, stop following it if it was already following it for a certain time 
+        if (isFollowingPath && pathFollowingTime.UpdateAndCheck()) {
+            ResetPathRelatedVariables(true);
+            print("1 second has passed, switching to naive movement");
+        }
+
         if (isFollowingPath) {
             FollowPath();
             //print("following path");
@@ -67,8 +81,11 @@ public class Enemy1 : AbstractEnemy
             bool moved = Move(movementVector);
             if ((pathOrigin - (Vector2) transform.position).magnitude > path.DistanceInWorldCoordinates()) {
                 print("no longer following path");
+                /*
                 this.isFollowingPath = false;
                 this.justFinishedFollowingPath = true;
+                */
+                ResetPathRelatedVariables(true);
             }
             if (!moved) {
                 // Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
@@ -143,6 +160,7 @@ public class Enemy1 : AbstractEnemy
             Node nodeOnThisPos = TestRoomManager.WorldPositionToNode(gameObject);
             Node nodeOnPlayerPos = TestRoomManager.WorldPositionToNode(TestRoomManager.GetPlayer());
             this.isFollowingPath = true;
+            this.pathFollowingTime = new Timer(1f);
             this.path = Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
             this.pathOrigin =  transform.position;
             print("Path direction: " + path.DirectionInWorldCoordinates() + ". Distance of this direction: " + path.DistanceInWorldCoordinates());
@@ -216,7 +234,7 @@ public class Enemy1 : AbstractEnemy
         Inspired by magnetic forces, an enemy is repulsed from each other enemy based on the inverse of their distance squared.
         This method computes and returns the sum of all repulsion vectors, one from each other enemy.
         */
-
+        //return Vector2.zero;
         
         Vector2 finalRepulsionVector = Vector2.zero;
         const float repulsionConstant = 0.5f;       
