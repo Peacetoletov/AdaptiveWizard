@@ -27,7 +27,7 @@ public class TestRoomManager : MonoBehaviour
     
     // variables of rooms
     private static string[] roomVisual;        // visual representation of the room
-    private static Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
+    private static Pathfinding.Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
     
     private void Start() {
@@ -139,7 +139,7 @@ public class TestRoomManager : MonoBehaviour
     private void CreateRoomNodes() {
         int roomWidth = roomVisual[0].Length;
         int roomHeight = roomVisual.Length;
-        TestRoomManager.roomNodes = new Node[roomWidth, roomHeight];
+        TestRoomManager.roomNodes = new Pathfinding.Node[roomWidth, roomHeight];
         for (int x = 0; x < roomWidth; x++) {
             for (int y = 0; y < roomHeight; y++) {
                 // first, set null to each element
@@ -147,7 +147,7 @@ public class TestRoomManager : MonoBehaviour
                 TestRoomManager.roomNodes[x, y] = null;
                 if (TileSymbolAtPosition(x, y) == '.') {
                     // second, change null to a node if needed
-                    TestRoomManager.roomNodes[x, y] = new Node(new Vector2Int(x, y));
+                    TestRoomManager.roomNodes[x, y] = new Pathfinding.Node(new Vector2Int(x, y));
                 }
             }
         }
@@ -204,7 +204,7 @@ public class TestRoomManager : MonoBehaviour
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
     }
 
-    public static Node WorldPositionToNode(GameObject obj) {
+    public static Pathfinding.Node WorldPositionToNode(GameObject obj) {
         // converts object's world position to room position, then returns a node that corresponds to this position
         int roomWidth = roomVisual[0].Length;
         int roomHeight = roomVisual.Length;
@@ -318,7 +318,7 @@ public class TestRoomManager : MonoBehaviour
         return player;
     }
 
-    public static Node[,] GetRoomNodes() {
+    public static Pathfinding.Node[,] GetRoomNodes() {
         return roomNodes;
     }
 }
