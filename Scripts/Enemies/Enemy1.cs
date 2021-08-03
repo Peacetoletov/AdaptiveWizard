@@ -2,13 +2,30 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// TODO: clean this class up, divide methods, add comments, possibly create new class/classes to inherit from
+// with some of the movement functionality
+// TODO: after 1 second of following a path, switch back to naive movement (and if a wall is encountered again, find a new path)
+// Don't forget to reset all pathfinding related variables while doing so.
 public class Enemy1 : AbstractEnemy
 {
     private BoxCollider2D boxCollider;
     private float speed = 2.0f;
+
+    // Movement
     private Vector2 lastMovementVector = Vector2.zero;
     private Vector3 lastRecordedPlayerPosition;
     private bool hasPlayerPositionChangedSinceLastMovement = false;
+
+    // Pathfinding
+    private bool isFollowingPath = false;
+    private bool justFinishedFollowingPath = false;
+    private Path path;
+    private Vector2 pathOrigin;
+
+
+    // Going towards first path node
+    private bool isGoingTowardsFirstPathNode = false;
+    private Vector2 goingTowardsFirstPathNodeOrigin;        // the world position from which this enemy started going towards first path node
 
 
     private void Start() {
@@ -18,7 +35,8 @@ public class Enemy1 : AbstractEnemy
 
     private void FixedUpdate() {
         if (TestRoomManager.IsGameActive()) {
-            TryToMove();
+            // TryToMove();
+            DetermineMovement();
 
             // update player's position; must be done as the last thing in the update method
             // note: computing this in each enemy is inefficient, could be optimized in future
@@ -33,11 +51,68 @@ public class Enemy1 : AbstractEnemy
         }
     }
 
-    private void TryToMove() {
+    private void DetermineMovement() {
+        if (isFollowingPath) {
+            FollowPath();
+            //print("following path");
+        } else {
+            TryToMoveNaively();
+            //print("trying to move naively");
+        }
+    }
+
+    private void FollowPath() {
+        if (!isGoingTowardsFirstPathNode) {
+            Vector2 movementVector = (RepulsionVector() + path.DirectionInWorldCoordinates()).normalized * speed * Time.deltaTime;
+            bool moved = Move(movementVector);
+            if ((pathOrigin - (Vector2) transform.position).magnitude > path.DistanceInWorldCoordinates()) {
+                print("no longer following path");
+                this.isFollowingPath = false;
+                this.justFinishedFollowingPath = true;
+            }
+            if (!moved) {
+                // Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
+                /* Note: this is not an issue with the pathfinder, rather with rounding errors when mapping enemy's position
+                to a node. */
+                // Move towards the starting node until the desired path can be followed.
+                //print("wall is blocking path");
+                this.isGoingTowardsFirstPathNode = true;
+                this.goingTowardsFirstPathNodeOrigin = transform.position;
+            }
+        }
+        if (isGoingTowardsFirstPathNode) {
+            Vector2 directionTowardsFirstPathNode = path.StartNodePositionInWorldCoordinates() - goingTowardsFirstPathNodeOrigin;
+            Vector2 movementVector = (RepulsionVector() + directionTowardsFirstPathNode).normalized * speed * Time.deltaTime;
+            Move(movementVector);
+
+            /*
+            If an enemy needs to go towards the first path node, it means a rounding error had occured. This means that the enemy
+            is at most 0.5 nodes away from the first path node (assuming only straight movement, but diagonal movement should be
+            impossible in this scenario). Therefore, I can check the distance traveled towards the first path node with a hard coded
+            constant distnace of 0.5 nodes.
+            Note that this stops working when very narrow corridors (1 node wide) are introduced.
+            */
+            const float desiredDistance = 0.5f;
+
+            if ((pathOrigin - (Vector2) transform.position).magnitude > desiredDistance) {
+                print("reached first path node");
+                // Update the path origin, as the current position is where the actual path following starts.
+                this.pathOrigin = transform.position;
+                this.isGoingTowardsFirstPathNode = false;
+            }
+        }
+    }
+
+    private void TryToMoveNaively() {
         Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
         const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
         // print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
-        if (Vector2.Angle(movementVector, lastMovementVector) < largeDirectionChange) {
+        if (justFinishedFollowingPath) {
+            // possibly move in a different direction, ignoring anti-wiggling rules
+            Move(movementVector);
+            justFinishedFollowingPath = false;
+        }
+        else if (Vector2.Angle(movementVector, lastMovementVector) < largeDirectionChange) {
             // move in the calculated direction if the direction is similar to the last frame's direction
             Move(movementVector);
         }
@@ -49,26 +124,70 @@ public class Enemy1 : AbstractEnemy
                 Move(movementVector);
             }
             // do not move in the calculated direction if the direction is largely different and player has not moved (prevent wiggling in place)
+            //print("cannot move because of anti-wiggling rules");
         }
     }
 
-    private void Move(Vector2 movementVector) {
+    private bool Move(Vector2 movementVector) {
         // set variables related to preventing wiggling in place
         this.lastMovementVector = movementVector;
         this.lastRecordedPlayerPosition = TestRoomManager.GetPlayer().transform.position;
         this.hasPlayerPositionChangedSinceLastMovement = false;
 
-        MoveOnOneAxis(movementVector.x, new Vector2(movementVector.x, 0));
-        MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y));
+        bool canMoveOnX;
+        bool canMoveOnY;
+        bool movedOnX = MoveOnOneAxis(movementVector.x, new Vector2(movementVector.x, 0), out canMoveOnX);
+        bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
+        if (!isFollowingPath && (!canMoveOnX || !canMoveOnY)) {
+            // wall is blocking movement on at least one axis, need to perform A*
+            Node nodeOnThisPos = TestRoomManager.WorldPositionToNode(gameObject);
+            Node nodeOnPlayerPos = TestRoomManager.WorldPositionToNode(TestRoomManager.GetPlayer());
+            this.isFollowingPath = true;
+            this.path = Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
+            this.pathOrigin =  transform.position;
+            print("Path direction: " + path.DirectionInWorldCoordinates() + ". Distance of this direction: " + path.DistanceInWorldCoordinates());
+            
+            /*
+            TODO: Problem - enemies get stuck. The root of the problem lies in rounding errors with regard to converting the world position to a node.
+            If an enemy just barely stumbles into a wall, pathfinder may not take it into account, and return a path that involves going directly into a wall.
+            This is not a problem with the pathfinder, as it thought that the enemy was not in front of a wall.
+            
+            POSSIBLE SOLUTION:
+            When following a path, return a bool to see if I was successful in moving in at least one direction. In general, I should be free to move
+            in both directions, but sometimes only one due to repulsive forces. If I cannot move in either direction, I can be certain that there was
+            a position rounding error, and I can temporarily change direction towards the position of the node that was taken as the starting node in
+            the A* algorithm. This means I move less than half a block in the desired direction before starting to follow the path as intended.
+            NOTE: this does not work for very narrow corridors, and enemies could wiggle at the start of the corridor, failing to fit into it.
+            This is not a real problem because rooms will not be designed with very narrow corridors.
+            */
+        }
+
+        // return true if this enemy moved on at least one axis
+        //print("movedOnX = " + movedOnX + "; movedOnY = " + movedOnY);
+        bool movedOnAtLeastOneAxis = movedOnX || movedOnY;
+        return movedOnAtLeastOneAxis;
     }
 
-    private void MoveOnOneAxis(float delta, Vector2 axisVector) {
+    private bool MoveOnOneAxis(float delta, Vector2 axisVector, out bool canMove) {
+        /* Returns true if movement on the given axis was perfmormed, false otherwise. 
+           Additionally, out parameter canMove signals whether movement on the given axis was possible
+           (regardless of whether it was actually performed or not). 
+           */
+        if (Mathf.Abs(delta) < 0.0000001) {
+            //print("delta = " + delta);
+            // don't move if delta is 0
+            canMove = true;
+            return false;
+        }
+        
+        // ^ this doesn't work because it doesn't distinguish between when I actually cannot move and when I can move but don't want to (delta is 0)
         const float extraBoxDistance = 0.001f;      // without this buffer, enemies could possibly get stuck in a wall on rare occasions (presumably due to floating point errors)
         RaycastHit2D hit;
         hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, axisVector, Mathf.Abs(delta) + extraBoxDistance, LayerMask.GetMask("Wall"));
         if (hit.collider != null) {
-            // wall ahead; don't move on this axis
-            return;
+            // wall ahead; cannot move on this axis
+            canMove = false;
+            return false;
         }
         if (axisVector.x == 0) {
             transform.Translate(0, delta, 0);
@@ -76,6 +195,8 @@ public class Enemy1 : AbstractEnemy
         else {
             transform.Translate(delta, 0, 0);
         }
+        canMove = true;
+        return true;
         // Currently, I will leave this function as is. Enemies might move very slowly next to a wall but that might be fixed by implementing
         // a pathfinding algortihm and calling it every time an enemy is close to a wall for a long time (1 second).
         // Or maybe it won't fix it. Then I would have to correctly implement fast movement next to a wall, which would require an additional box cast,
@@ -85,23 +206,11 @@ public class Enemy1 : AbstractEnemy
 
     private Vector2 RepulsionVector() {
         /*
-        UPDATE: This does not work. Calling an O(n^2) method each frame is not realistic.
-        UPDATE 2: I'm a complete pepega. It wasn't the complexity, it weren't the square roots. It were the print statements
-                  that were responsible for most of the performance issues.
-        */
-
-        /*
         IDEA: Maybe I don't need to calculate repulsion from all other enemies, as the forces from enemies far away are negligable anyway.
         I could use Physics.OverlapSphere function to get only enemies within a certain (very small) radius and perform repulsion calculations
         with just those. Movement could be naive for the most part, only when enemies get close to player will they start to base their movement
         on their mutual positions.
-
-        I still need to figure out how to stop enemies from wiggling around if the player stands still. Maybe always check the angle between 
-        this frame's movement vector and the last frame's movement vector, and if the angle is too large (over 90 degrees), temporarily stop 
-        movement, and resume movement when player's position changes by a significant amount.
         */
-
-        // return Vector2.zero;
 
         /*
         Inspired by magnetic forces, an enemy is repulsed from each other enemy based on the inverse of their distance squared.

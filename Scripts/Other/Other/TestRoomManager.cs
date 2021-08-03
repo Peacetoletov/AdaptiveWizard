@@ -16,7 +16,7 @@ public class TestRoomManager : MonoBehaviour
     public GameObject enemyGatlingObj;
 
     private static bool isGameActive = true;        // false if game is paused or UI is open, true otherwise
-    private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-5.5f, 0.5f, 0.0f);
+    private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-5.5f, -0.5f, 0.0f);
     private static GameObject player;                   // reference to the player
                                                         // I decided to make it static because I don't plan on having multiplayer PvP or coop modes
                                                         
@@ -26,8 +26,8 @@ public class TestRoomManager : MonoBehaviour
     private float miniGameSpawnPeriod = INITIAL_ENEMY_SPAWN_PERIOD;       
     
     // variables of rooms
-    private string[] roomVisual;        // visual representation of the room
-    private Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
+    private static string[] roomVisual;        // visual representation of the room
+    private static Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
     
     private void Start() {
@@ -63,7 +63,7 @@ public class TestRoomManager : MonoBehaviour
 
 
     private void GenerateRoom(bool createNewPlayer) {
-        this.roomVisual = new string[] {
+        TestRoomManager.roomVisual = new string[] {
             "##############################",
             "#............................#",
             "#..#####.....................#",
@@ -96,8 +96,9 @@ public class TestRoomManager : MonoBehaviour
         int roomHeight = roomVisual.Length;
         for (int x = 0; x < roomWidth; x++) {
             for (int y = 0; y < roomHeight; y++) {
-                int inverseY = roomVisual.Length - 1 - y;       // my room coordinates start at top left, but world coordinates start at bottom left
-                Vector3 coordinates = new Vector3((float) (x + 0.5 - roomWidth / 2.0), (float) (inverseY + 0.5 - roomHeight / 2.0), 0);
+                //int inverseY = roomVisual.Length - 1 - y;       // my room coordinates start at top left, but world coordinates start at bottom left
+                //Vector3 coordinates = new Vector3((float) (x + 0.5 - roomWidth / 2.0), (float) (inverseY + 0.5 - roomHeight / 2.0), 0);
+                Vector3 coordinates = (Vector3) PositionInRoomToPositionInWorld(new Vector2Int(x, y));
                 if (TileSymbolAtPosition(x, y) == '.') {
                     Instantiate(floorObj, coordinates, Quaternion.identity);
                 } else {
@@ -119,17 +120,15 @@ public class TestRoomManager : MonoBehaviour
         }
         else {
             // whatever needs to be tested here
-            /*
+            
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     Instantiate(enemy1Obj, new Vector3(5f + i, 0f + j, 0f), Quaternion.identity);
                 }
             }
-            */
+            
             //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
             //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
-            Pathfinder pathfinder = new Pathfinder();
-            pathfinder.DirectionAndDistanceUntilFirstTurn(roomNodes[4, 4], roomNodes[4, 1]);
         }
     }
 
@@ -140,15 +139,15 @@ public class TestRoomManager : MonoBehaviour
     private void CreateRoomNodes() {
         int roomWidth = roomVisual[0].Length;
         int roomHeight = roomVisual.Length;
-        this.roomNodes = new Node[roomWidth, roomHeight];
+        TestRoomManager.roomNodes = new Node[roomWidth, roomHeight];
         for (int x = 0; x < roomWidth; x++) {
             for (int y = 0; y < roomHeight; y++) {
                 // first, set null to each element
                 // print("x = " + x + "; y = " + y);
-                this.roomNodes[x, y] = null;
+                TestRoomManager.roomNodes[x, y] = null;
                 if (TileSymbolAtPosition(x, y) == '.') {
                     // second, change null to a node if needed
-                    this.roomNodes[x, y] = new Node(new Vector2Int(x, y));
+                    TestRoomManager.roomNodes[x, y] = new Node(new Vector2Int(x, y));
                 }
             }
         }
@@ -164,35 +163,35 @@ public class TestRoomManager : MonoBehaviour
                 }
                 // top left
                 if (x - 1 >= 0 && y - 1 >= 0 && IsDiagonalUnobstructed(x - 1, y - 1)) {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y - 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x - 1, y - 1]);
                 }
                 // top
                 if (y - 1 >= 0 && TileSymbolAtPosition(x, y - 1) == '.') {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y - 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x, y - 1]);
                 }
                 // top right
                 if (x + 1 < roomWidth && y - 1 >= 0 && IsDiagonalUnobstructed(x, y - 1)) {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y - 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x + 1, y - 1]);
                 }
                 // left
                 if (x - 1 >= 0 && TileSymbolAtPosition(x - 1, y) == '.') {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x - 1, y]);
                 }
                 // right
                 if (x + 1 < roomWidth && TileSymbolAtPosition(x + 1, y) == '.') {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x + 1, y]);
                 }
                 // bottom left
                 if (x - 1 >= 0 && y + 1 < roomHeight && IsDiagonalUnobstructed(x - 1, y)) {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y + 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x - 1, y + 1]);
                 }
                 // bottom
                 if (y + 1 < roomHeight && TileSymbolAtPosition(x, y + 1) == '.') {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y + 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x, y + 1]);
                 }
                 // bottom right
                 if (x + 1 < roomWidth && y + 1 < roomHeight && IsDiagonalUnobstructed(x, y)) {
-                    this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y + 1]);
+                    TestRoomManager.roomNodes[x, y].AddNeighbour(TestRoomManager.roomNodes[x + 1, y + 1]);
                 }
             }
         }
@@ -205,7 +204,7 @@ public class TestRoomManager : MonoBehaviour
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
     }
 
-    public Node PositionInRoomToNode(GameObject obj) {
+    public static Node WorldPositionToNode(GameObject obj) {
         // converts object's world position to room position, then returns a node that corresponds to this position
         int roomWidth = roomVisual[0].Length;
         int roomHeight = roomVisual.Length;
@@ -213,6 +212,16 @@ public class TestRoomManager : MonoBehaviour
         int y = roomVisual.Length - 1 - (int) Mathf.Round(obj.transform.position.y - 0.5f + roomHeight / 2f);
         //print("x = " + x + ", y = " + y);
         return roomNodes[x, y];
+    }
+
+    public static Vector2 PositionInRoomToPositionInWorld(Vector2Int roomPos) {
+        // Takes a room position and return a corresponding world position
+        // Note: this will need to change once I introduce more than 1 room
+        int roomWidth = roomVisual[0].Length;
+        int roomHeight = roomVisual.Length;
+        int inverseY = roomVisual.Length - 1 - roomPos.y;       // my room coordinates start at top left, but world coordinates start at bottom left
+        Vector2 worldPos = new Vector2((float) (roomPos.x + 0.5 - roomWidth / 2.0), (float) (inverseY + 0.5 - roomHeight / 2.0));
+        return worldPos;
     }
 
     private void SpawnEnemyRandomlyInComplexRoom() {
@@ -307,5 +316,9 @@ public class TestRoomManager : MonoBehaviour
 
     public static GameObject GetPlayer() {
         return player;
+    }
+
+    public static Node[,] GetRoomNodes() {
+        return roomNodes;
     }
 }

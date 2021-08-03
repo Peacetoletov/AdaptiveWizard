@@ -2,25 +2,49 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// The Path class defines how an enemy should move after performing an A* search
 public class Path
 {
-    // initialDirection defines in what direction the enemy should start going as soon as a path is found
+    // what direction the enemy should start going in as soon as a path is found
     // this direction is in room coordinates, meaning that top left corner is (0, 0)
-    private Vector2 initialDirection;
+    private Vector2 direction;
 
-    // turnDirection defines in what direction the enemy should start going after moving a certain distance in the initial direction
-    //public Vector2 turnDirection;
+    /*
+    enemy will follow the given direction until the distance traveled in such direction
+    is greater than this distance 
+    */
+    private float distance;
 
-    // turnDistance is the distance that the enemy must go from the initial position in the initial direction, before changing direction to turnDirection
-    public float turnDistance;
+    // room position of the start node
+    private Vector2Int startNodePosition;
 
-    public Path(Vector2 initialDirection, float turnDistance) {
-        this.initialDirection = initialDirection;
-        //this.turnDirection = turnDirection;
-        this.turnDistance = turnDistance;
+    public Path(Vector2 direction, float distance, Vector2Int startNodePosition) {
+        this.direction = direction;
+        this.distance = distance;
+        this.startNodePosition = startNodePosition;
     }
 
-    public DirectionInWorldCoordinates() {
-        return new Vector2(initialDirection.x, -initialDirection.y);
+    public Vector2 DirectionInWorldCoordinates() {
+        /*
+        In the pathfinding algorithm, I use room coordinates, where top left corner has 
+        coordinates  (0, 0), as opposed to world coordinates, where the bottom left corner
+        has coornidates (0, 0). This function performs the transformation from room 
+        coordinates into world coordinates.
+        */
+        return new Vector2(direction.x, -direction.y);
+    }
+
+    public float DistanceInWorldCoordinates() {
+        /*
+        In the pathfinding algorithm, I use room coordinates, where 10 is the distance between 
+        two straight neighbours.
+        In world coordinates, this distance is 1. This function performs the transformation
+        from room coordinates into world coordinates.
+        */
+        return distance / 10f;
+    }
+
+    public Vector2 StartNodePositionInWorldCoordinates() {
+        return TestRoomManager.PositionInRoomToPositionInWorld(startNodePosition);
     }
 }

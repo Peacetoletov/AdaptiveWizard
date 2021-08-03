@@ -20,6 +20,7 @@ public class Node : IComparable<Node>
     // Distance from the start node; straight neighbours have a distance of 10, diagonal neighbours have a distance of 14
     private int distance;
 
+    // A* heuristic, estimating the distance between this node and target node
     private int heuristic;
 
     // Whether this node is currently in the priority queue, ready to be covered
@@ -30,9 +31,6 @@ public class Node : IComparable<Node>
 
     // Predecessor of this node
     private Node parent;
-
-    // Successor of this node; this is only set after (the shortest) path is found
-    //private Node child;
 
 
     public Node(Vector2Int position) {
@@ -47,20 +45,17 @@ public class Node : IComparable<Node>
         this.neighbours.Add(neighbour);
     }
 
-    public int AdjustedDistance() {
-        // TODO: make private
-        //Debug.Log("Calculating adjusted distance in node " + position + ". Distance = " + distance + ", heuristic = " + heuristic + ", adjusted distance = " + (distance + heuristic));
+    private int AdjustedDistance() {
         return distance + heuristic;
     }
 
     public void Reset() {
         this.distance = 1000000;
         this.heuristic = 1000000;
-        // ^ these values are practically equal to infinity and won't cause an overflow if they're added together
+        // ^ these values are for all practical intents and purposes equal to infinity and won't cause an overflow if they're added together
         this.open = false;
         this.closed = false;
         this.parent = null;
-        //this.child = null;
     }
 
     public void SetDistance(int distance) {
@@ -79,14 +74,17 @@ public class Node : IComparable<Node>
         int yDelta = (int) Math.Abs(targetPosition.y - position.y);
         int max = Math.Max(xDelta, yDelta);
         int min = Math.Min(xDelta, yDelta);
-        // this.heuristic = 10 * ((int) Math.Abs(targetPosition.x - position.x) + Math.Abs(targetPosition.y - position.y));
         this.heuristic = 10 * (max - min) + 14 * min;
-        // Debug.Log("Node " + position + ". Setting heuristic to " + heuristic);
     }
 
     public void Close() {
         this.open = false;
         this.closed = true;
+    }
+
+    public int CompareTo(Node other) {
+        // This method is required by the IComparable<Node> interface and is used to determine the order of nodes in a priority queue
+        return AdjustedDistance() - other.AdjustedDistance();
     }
 
     public Vector2Int GetPosition() {
@@ -115,16 +113,5 @@ public class Node : IComparable<Node>
 
     public void SetParent(Node parent) {
         this.parent = parent;
-    }
-
-    /*
-    public void MyTest() {
-        Debug.Log("Node at position " + position.x + "|" + position.y + " has " + neighbours.Count + " neighbours.");
-    }
-    */
-
-    public int CompareTo(Node other) {
-        //Debug.Log("Comparing! " + (AdjustedDistance() - other.AdjustedDistance()));
-        return AdjustedDistance() - other.AdjustedDistance();
     }
 }
