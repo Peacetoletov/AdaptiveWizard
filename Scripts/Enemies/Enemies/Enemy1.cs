@@ -2,8 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO: clean this class up, divide methods, add comments, possibly create new class/classes to inherit from
-// with some of the movement functionality
+
 // TODO: after cleaning this class up, optimize repulsion vector to only take into account enemies within a very
 // short radius. This should incidentally also fix a problem where enemies sometimes get stuck near corners of walls.
 public class Enemy1 : MovingEnemy

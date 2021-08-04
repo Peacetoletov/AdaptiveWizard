@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyGatling : MovingEnemy
+public class EnemyGatling : AbstractEnemy
 {
     public GameObject projectile;
     private Timer projectileSpawnTimer;

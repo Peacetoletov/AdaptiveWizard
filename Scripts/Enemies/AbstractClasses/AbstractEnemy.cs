@@ -18,6 +18,11 @@ public abstract class AbstractEnemy : MonoBehaviour
         this.curHealth = maxHealth;
     }
 
+    protected Vector2 DirectionToPlayer() {
+        // Returns a vector directed from this enemy to the player 
+        return TestRoomManager.GetPlayer().transform.position - transform.position;
+    }
+
     public void TakeDamage(float damage) {
         this.curHealth -= damage;
         //print("Took " + damage + " damage");

@@ -2,6 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+TODO: maybe I was doing the collision detection in a very inefficient and complicated way.
+Check out CircleCastAll function (https://docs.huihoo.com/unity/5.5/Documentation/ScriptReference/Physics2D.CircleCastAll.html)
+and other Physics2D functions (https://docs.huihoo.com/unity/5.5/Documentation/ScriptReference/Physics2D.html).
+*/
 public class Cannonball : StraightProjectile
 {
     /*
@@ -23,6 +28,7 @@ public class Cannonball : StraightProjectile
     This could be inefficient if many enemies are hit, and could result in O(n^2) complexity each frame.
     If this is a significant problem, I can replace the list with a B-tree to reduce the complexity to O(n * log n).
     */
+    
     private List<int> enemiesHitID;
 
     private void Start() {

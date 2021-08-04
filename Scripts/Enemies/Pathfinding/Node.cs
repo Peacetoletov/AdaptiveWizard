@@ -4,13 +4,14 @@ using UnityEngine;
 using System;
 
 namespace Pathfinding {
+    /*
+    A node represents a floor block. Floor is the only block that can be freely walked on.
+    This class represents all values necessary to find the (shortest) path between two nodes
+    using the A* pathfinding algortihm, defined in Pathfinder class.
+    */
     public class Node : IComparable<Node>
     {
-        /*
-        A node represents a floor block. Floor is the only block that can be freely walked on.
-        This class represents all values necessary to find the (shortest) path between two nodes
-        using the A* pathfinding algortihm, defined in Pathfinder class.
-        */
+        
 
         // Position of this node relative to other nodes in the room, used for calculating the A* heuristic
         private Vector2Int position;
@@ -42,7 +43,7 @@ namespace Pathfinding {
         }
 
         public void AddNeighbour(Node neighbour) {
-            System.Diagnostics.Debug.Assert(neighbour != null);
+            UnityEngine.Assertions.Assert.IsTrue(neighbour != null);
             this.neighbours.Add(neighbour);
         }
 

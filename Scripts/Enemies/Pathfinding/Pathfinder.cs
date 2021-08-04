@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace Pathfinding {
+namespace Pathfinding 
+{
     public static class Pathfinder
     {
         // List of modified nodes that need to be reset after performing an A* search

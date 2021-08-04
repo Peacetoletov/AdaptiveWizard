@@ -5,7 +5,7 @@ using UnityEngine;
 public class TestRoomManager : MonoBehaviour
 {
     // build options
-    private const bool miniGame = false;
+    private const bool miniGame = true;
 
     // these GameObjects are here only for instantiates, never used in other ways
     public GameObject playerObj;
@@ -56,24 +56,26 @@ public class TestRoomManager : MonoBehaviour
     }
 
     private void UpdateMiniGameSpawnPeriod() {
-        float spawnRateAcceleration = 0.97f;    
-        float minSpawnPeriod = 0.4f;    
+        float spawnRateAcceleration = 0.97f;        //0.97    
+        float minSpawnPeriod = 0.4f;                //0.4
         this.miniGameSpawnPeriod = Mathf.Max(minSpawnPeriod, miniGameSpawnPeriod * spawnRateAcceleration);
     }
 
 
     private void GenerateRoom(bool createNewPlayer) {
+        /*
+        // Limit testing room:
         TestRoomManager.roomVisual = new string[] {
             "##############################",
             "#............................#",
-            "#..#####.....................#",
-            "#......................###...#",
+            "#............................#",
+            "#..#####...............###...#",
             "#.............##.........#...#",
             "#.............##.........#...#",
             "#...........####.........#...#",
             "#...........####.........#...#",
-            "#............................#",
-            "#............................#",
+            "#...#........................#",
+            "#...#........................#",
             "#.....................###....#",
             "#.........###############....#",
             "#.........###############....#",
@@ -81,15 +83,47 @@ public class TestRoomManager : MonoBehaviour
             "#............................#",
             "##############################"
         };
+        */
         
         /*
-        this.roomVisual = new string[] {
-            "#####",
-            "#...#",
-            "#...#",
-            "#####",
+        TestRoomManager.roomVisual = new string[] {
+            "##############################",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "##############################"
         };
         */
+
+        TestRoomManager.roomVisual = new string[] {
+            "##############################",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "##############################"
+        };
 
         // Environment
         int roomWidth = roomVisual[0].Length;
@@ -120,15 +154,22 @@ public class TestRoomManager : MonoBehaviour
         }
         else {
             // whatever needs to be tested here
-            
+            /*
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     Instantiate(enemy1Obj, new Vector3(5f + i, 0f + j, 0f), Quaternion.identity);
                 }
             }
-            
-            //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
-            //Instantiate(enemy1Obj, new Vector3(5f, 0f, 0f), Quaternion.identity);
+            */
+            /*
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    Instantiate(enemy1Obj, new Vector3(3f + i*0.3f, -1f + j*0.3f, 0f), Quaternion.identity);
+                }
+            }
+            */
+            //Instantiate(enemy1Obj, new Vector3(-12f, 0f, 0f), Quaternion.identity);
+            //Instantiate(enemy1Obj, new Vector3(12f, 0f, 0f), Quaternion.identity);
         }
     }
 
@@ -226,12 +267,12 @@ public class TestRoomManager : MonoBehaviour
 
     private void SpawnEnemyRandomlyInComplexRoom() {
         float enemyDeterminator = Random.Range(0f, 1f);
-        if (enemyDeterminator < 0) {            // 0.45
+        if (enemyDeterminator < 0.45) {            // 0.45
             Vector2 spawnPos = RandomSpawnPos(1f);
             Instantiate(enemy1Obj, spawnPos, Quaternion.identity);
         }
         
-        else if (enemyDeterminator < 0) {        // 0.95
+        else if (enemyDeterminator < 0.95) {        // 0.95
             Vector2 spawnPos = RandomSpawnPos(1f);
             Instantiate(enemy2Obj, spawnPos, Quaternion.identity);
         }
@@ -255,7 +296,8 @@ public class TestRoomManager : MonoBehaviour
             float yPosInRoomCoordinates = (float) (Random.Range(0f, roomVisual.Length - 1));
             
             spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
-            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + 0.5f - roomWidth / 2f), (spawnPosInRoomCoordinates.y + 0.5f - roomHeight / 2f));
+            float inverseY = roomVisual.Length - 1 - yPosInRoomCoordinates;
+            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + 0.5f - roomWidth / 2f), (inverseY + 0.5f - roomHeight / 2f));
             // ^ this only works if there is only 1 room
             distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) player.transform.position).magnitude;
         } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
@@ -264,8 +306,6 @@ public class TestRoomManager : MonoBehaviour
     }
 
     private bool IsSpawnPosValid(Vector2 spawnPosInRoomCoordinates, float enemySize, float distanceFromPlayer) {
-        // TODO: fix a bug that flags all position in a 2 block wide corridor as invalid
-        // Another (possibly the same) bug is that enemies never spawn closer than 0.5 blocks from a wall
         const float minimumDistanceFromPlayer = 4f;     
         if (distanceFromPlayer < minimumDistanceFromPlayer) {
             return false;
