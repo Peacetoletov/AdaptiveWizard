@@ -24,7 +24,7 @@ public class Fireball : StraightProjectile
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             // Adjust sprite's alpha based on current speed, destroy this object if speed turns negative
             if (GetSpeed() < 0) {
                 Destroy(gameObject);

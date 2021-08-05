@@ -54,7 +54,7 @@ public abstract class MovingEnemy : AbstractEnemy
     
     protected virtual void FixedUpdate() {
         // Move each frame
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             DetermineMovement();
 
             // Update player's position; must be done as the last thing in the update method
@@ -74,7 +74,7 @@ public abstract class MovingEnemy : AbstractEnemy
         // Player's position is needed to prevent wiggling in place.
         // Note: computing this in each enemy is inefficient, could be optimized in future
         const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
-        if ((TestRoomManager.GetPlayer().transform.position - generalMovement.lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
+        if ((MainGameManager.GetPlayer().transform.position - generalMovement.lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
             this.generalMovement.hasPlayerPositionChangedSinceLastMovement = true;
         }
     }
@@ -197,8 +197,8 @@ public abstract class MovingEnemy : AbstractEnemy
         bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
         if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
             // Wall is blocking movement on at least one axis, need to perform A* to find a path.
-            Pathfinding.Node nodeOnThisPos = TestRoomManager.WorldPositionToNode(gameObject);
-            Pathfinding.Node nodeOnPlayerPos = TestRoomManager.WorldPositionToNode(TestRoomManager.GetPlayer());
+            Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().WorldPositionToNode(gameObject);
+            Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().WorldPositionToNode(MainGameManager.GetPlayer());
             this.path.isFollowing = true;
             this.path.followingTime = new Timer(1f);
             this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
@@ -215,7 +215,7 @@ public abstract class MovingEnemy : AbstractEnemy
     private void UpdateAntiWigglingVariables(Vector2 movementVector) {
         // These variables are used in the anti-wiggling condition
         this.generalMovement.lastMovementVector = movementVector;
-        this.generalMovement.lastRecordedPlayerPosition = TestRoomManager.GetPlayer().transform.position;
+        this.generalMovement.lastRecordedPlayerPosition = MainGameManager.GetPlayer().transform.position;
         this.generalMovement.hasPlayerPositionChangedSinceLastMovement = false;
     }
 
@@ -229,7 +229,7 @@ public abstract class MovingEnemy : AbstractEnemy
         */
         if (Mathf.Abs(delta) < 0.0000001) {
             //print("delta = " + delta);
-            // No need to attempt movement is delta is 0
+            // No need to attempt movement if delta is 0
             canMove = true;
             return false;
         }

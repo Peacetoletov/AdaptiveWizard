@@ -26,7 +26,7 @@ public class Icicle : StraightProjectile
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             EvaluateCollisionWithCapsuleCollider();
             EvaluateCollisionWithBoxCollider();
             transform.position += (Vector3) GetDirection().normalized * GetSpeed() * Time.deltaTime;

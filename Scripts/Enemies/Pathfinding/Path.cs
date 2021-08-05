@@ -46,7 +46,8 @@ namespace Pathfinding {
         }
 
         public Vector2 StartNodePositionInWorldCoordinates() {
-            return TestRoomManager.PositionInRoomToPositionInWorld(startNodePosition);
+            //return RoomManager.PositionInRoomToPositionInWorld(startNodePosition);
+            return MainGameManager.GetRoomManager().PositionInRoomToPositionInWorld(startNodePosition);
         }
     }
 }

@@ -20,7 +20,7 @@ public abstract class AbstractEnemy : MonoBehaviour
 
     protected Vector2 DirectionToPlayer() {
         // Returns a vector directed from this enemy to the player 
-        return TestRoomManager.GetPlayer().transform.position - transform.position;
+        return MainGameManager.GetPlayer().transform.position - transform.position;
     }
 
     public void TakeDamage(float damage) {

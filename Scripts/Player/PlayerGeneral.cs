@@ -22,7 +22,7 @@ public class PlayerGeneral : AbstractPlayer
     }
 
     private void Update() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             if (meleeInvulnerability && meleeInvulnerabilityTimer.UpdateAndCheck()) {
                 this.meleeInvulnerability = false;
             }
@@ -64,7 +64,7 @@ public class PlayerGeneral : AbstractPlayer
     private void CheckDeath() {
         if (curHealth <= 0) {
             print("You died!");
-            RestartLevel();
+            RestartGame();
         }
     }
 
@@ -75,15 +75,15 @@ public class PlayerGeneral : AbstractPlayer
         spriteRenderer.color = tmp;
     }
 
-    private void RestartLevel() {
+    private void RestartGame() {
         GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("GameController");
         if (objectsWithTag.Length != 1) {
             string message = "ERROR! Incorrect number of \"GameController\" objects found when attempting to spawn an enemy. " +
                             "Number of GameController objects found: " + objectsWithTag.Length;
             throw new System.InvalidOperationException(message);
         }
-        TestRoomManager managerScript = objectsWithTag[0].GetComponent<TestRoomManager>();
-        managerScript.RestartLevel();
+        MainGameManager managerScript = objectsWithTag[0].GetComponent<MainGameManager>();
+        managerScript.RestartGame();
     }
 
     private bool IsInitialized() {

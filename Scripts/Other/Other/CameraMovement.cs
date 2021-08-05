@@ -9,8 +9,8 @@ public class CameraMovement : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (player == null && TestRoomManager.IsGameActive()) {
-            this.player = TestRoomManager.GetPlayer();
+        if (player == null && MainGameManager.IsGameActive()) {
+            this.player = MainGameManager.GetPlayer();
         }
         if (player != null) {
             transform.position = player.transform.position + offset;

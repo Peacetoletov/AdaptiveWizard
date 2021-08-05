@@ -16,7 +16,7 @@ public class EnemyGatling : AbstractEnemy
     }
 
     private void Update() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             if (projectileSpawnTimer.UpdateAndCheck()) {
                 SpawnProjectile();
             }

@@ -13,7 +13,7 @@ public class PlayerCastSpell : AbstractPlayer
     }
 
     private void Update() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             if (Input.GetMouseButtonDown(0)) {      // 0 = left click
                 // I have only 1 basic spell so far. In future, I will first need to check what spell the player is holding, then casting it.
                 spellManagers[0].TryToCast(playerGeneral);

@@ -21,7 +21,7 @@ public class OneTimeAnimation : AbstractAnimation
 
     protected override void Update() {
         base.Update();
-        if (TestRoomManager.IsGameActive() && animationTimer.UpdateAndCheck()) {
+        if (MainGameManager.IsGameActive() && animationTimer.UpdateAndCheck()) {
             Destroy(gameObject);
             //print("destroying");
         }

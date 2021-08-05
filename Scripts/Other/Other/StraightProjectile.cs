@@ -17,7 +17,7 @@ public abstract class StraightProjectile : MonoBehaviour
     }
 
     protected virtual void FixedUpdate() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             Accelerate();
         }
     }

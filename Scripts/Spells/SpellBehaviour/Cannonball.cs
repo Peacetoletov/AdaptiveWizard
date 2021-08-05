@@ -43,7 +43,7 @@ public class Cannonball : StraightProjectile
 
     protected override void FixedUpdate() {
         base.FixedUpdate();
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             // find all enemies and walls hit, change their layer
             List<GameObject> collidingEnemies = new List<GameObject>();
             FindCollidingEnemiesAndChangeTheirLayer(collidingEnemies);

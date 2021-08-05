@@ -14,8 +14,8 @@ public class RemainingCooldownUI : MonoBehaviour
     }
 
     private void Update() {        
-        if (player == null && TestRoomManager.IsGameActive()) {
-            this.player = TestRoomManager.GetPlayer().GetComponent<PlayerCastSpell>();
+        if (player == null && MainGameManager.IsGameActive()) {
+            this.player = MainGameManager.GetPlayer().GetComponent<PlayerCastSpell>();
         }
 
         if (player != null) {

@@ -12,7 +12,7 @@ public abstract class AbstractAnimation : MonoBehaviour
 
     protected virtual void Update() {
         // pause the animation if the game is paused
-        this.animator.speed = TestRoomManager.IsGameActive() ? 1f : 0f;
+        this.animator.speed = MainGameManager.IsGameActive() ? 1f : 0f;
     }
 
     public Animator GetAnimator() {

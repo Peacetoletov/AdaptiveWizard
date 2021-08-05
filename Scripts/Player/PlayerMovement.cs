@@ -41,7 +41,7 @@ public class PlayerMovement : AbstractPlayer
     }
 
     private void Update() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             // update timers
             if (isDashing && dashDurationTimer.UpdateAndCheck()) {
                 this.isDashing = false;
@@ -84,7 +84,7 @@ public class PlayerMovement : AbstractPlayer
     }
 
     private void FixedUpdate() {
-        if (TestRoomManager.IsGameActive()) {
+        if (MainGameManager.IsGameActive()) {
             if (isDashing) {
                 SmoothMove(lastNonzeroMovementDir, dashSpeed);
             }
