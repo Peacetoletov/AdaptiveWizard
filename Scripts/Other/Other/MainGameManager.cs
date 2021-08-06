@@ -6,7 +6,7 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     // build options
-    public const bool minigame = true;
+    public const bool minigame = false;
 
     // public GameObjects used for instantiating
     public GameObject playerObj;
@@ -47,11 +47,25 @@ public class MainGameManager : MonoBehaviour
 
     
     private void Start() {
-        MainGameManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
+        CreateAndInitializePlayer();
+
+        //test
+        Items.PassiveItem test = new Items.HealthCrystal();
+        InventoryNS.Inventory.passiveItems.AddItem(test);
+        Items.PassiveItem test2 = new Items.DivineSphere();
+        InventoryNS.Inventory.passiveItems.AddItem(test2);
+        Items.PassiveItem test3 = new Items.DivineSphere();
+        InventoryNS.Inventory.passiveItems.AddItem(test3);
+
         MainGameManager.roomManager = Instantiate(roomManagerObj, Vector2.zero, Quaternion.identity).GetComponent<RoomManager>();
         if (minigame) {
             MainGameManager.minigameManager = Instantiate(minigameManagerObj, Vector2.zero, Quaternion.identity).GetComponent<MinigameManager>();
         }    
+    }
+
+    private void CreateAndInitializePlayer() {
+        MainGameManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
+        player.GetComponent<PlayerGeneral>().Initialize();
     }
 
     private void Update() {

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using InventoryNS;
+
 public class PlayerGeneral : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
@@ -14,11 +16,18 @@ public class PlayerGeneral : AbstractPlayer
     private float curMana;
     private Timer manaRegenTimer;
     
+    public void Initialize() {
+        // Initialize() must be called as soon as player is created
+        Reset();
+    }
 
     private void Start() {
+        UnityEngine.Assertions.Assert.IsTrue(IsInitialized());
+        /*
         if (!IsInitialized()) {
             Initialize();
         }
+        */
     }
 
     private void Update() {
@@ -36,10 +45,13 @@ public class PlayerGeneral : AbstractPlayer
     }
 
     public void CheckCollisionWithEnemies() {
+        UnityEngine.Assertions.Assert.IsTrue(IsInitialized());
+        /*
         if (!IsInitialized()) {
             // this function can be called from other scripts (before Start happens), therefore I need to check this here
             Initialize();
         }
+        */
         RaycastHit2D hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, Vector2.zero, 0, LayerMask.GetMask("Enemy"));
         if (hit.collider != null) {
             if (!meleeInvulnerability) {
@@ -90,10 +102,6 @@ public class PlayerGeneral : AbstractPlayer
         return !(boxCollider == null);
     }
 
-    private void Initialize() {
-        Reset();
-    }
-
     public override void Reset() {
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.spriteRenderer = GetComponent<SpriteRenderer>();
@@ -107,6 +115,7 @@ public class PlayerGeneral : AbstractPlayer
         this.curMana = maxMana;
         float manaRegenPerSec = 3f;
         this.manaRegenTimer = new Timer(1 / manaRegenPerSec);
+        Inventory.Initialize();
     }
 
     private void SetAlphaToOne() {
