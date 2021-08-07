@@ -51,11 +51,11 @@ public class MainGameManager : MonoBehaviour
 
         //test
         Items.PassiveItem test = new Items.HealthCrystal();
-        InventoryNS.Inventory.passiveItems.AddItem(test);
+        InventoryNS.Inventory.passiveItemsManager.AddItem(test);
         Items.PassiveItem test2 = new Items.DivineSphere();
-        InventoryNS.Inventory.passiveItems.AddItem(test2);
+        InventoryNS.Inventory.passiveItemsManager.AddItem(test2);
         Items.PassiveItem test3 = new Items.DivineSphere();
-        InventoryNS.Inventory.passiveItems.AddItem(test3);
+        InventoryNS.Inventory.passiveItemsManager.AddItem(test3);
 
         MainGameManager.roomManager = Instantiate(roomManagerObj, Vector2.zero, Quaternion.identity).GetComponent<RoomManager>();
         if (minigame) {

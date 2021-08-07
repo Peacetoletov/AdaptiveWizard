@@ -14,7 +14,7 @@ namespace InventoryNS {
         */
 
         // private List<GameObject> passiveItems;
-        public static PassiveItems passiveItems;
+        public static PassiveItemsManager passiveItemsManager;
 
         // TODO: come up with a solution to the inventory system implementation
         /* Possible solution: create an interface for each type of action an item can have,
@@ -31,7 +31,7 @@ namespace InventoryNS {
         */
 
         public static void Initialize() {
-            Inventory.passiveItems = new PassiveItems();
+            Inventory.passiveItemsManager = new PassiveItemsManager();
         }
     }
 }
