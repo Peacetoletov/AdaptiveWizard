@@ -36,9 +36,9 @@ public class PlayerCastSpell : AbstractPlayer
     public override void Reset() {
         this.spellManagers = new AbstractSpellManager[4];
         this.spellManagers[0] = gameObject.AddComponent(typeof(FireballManager)) as AbstractSpellManager;
-        this.spellManagers[1] = gameObject.AddComponent(typeof(ExplosionManager)) as AbstractSpellManager;
+        this.spellManagers[1] = gameObject.AddComponent(typeof(IcicleManager)) as AbstractSpellManager;
         this.spellManagers[2] = gameObject.AddComponent(typeof(CannonballManager)) as AbstractSpellManager;
-        this.spellManagers[3] = gameObject.AddComponent(typeof(IcicleManager)) as AbstractSpellManager;
+        this.spellManagers[3] = gameObject.AddComponent(typeof(ExplosionManager)) as AbstractSpellManager;
         InitManagers();
     }
 

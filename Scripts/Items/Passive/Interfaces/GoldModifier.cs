@@ -7,6 +7,6 @@ using Items;
 namespace Items {
     public interface GoldModifier
     {
-        float GoldMultiplier(float gold);
+        float GoldModified(float gold);
     }
 }

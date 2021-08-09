@@ -10,7 +10,7 @@ public class IcicleManager : AbstractSpellManager
 
     
     public override void Init() {
-        this.icicleObj = Resources.Load("Prefabs/iciclePrefab") as GameObject;
+        this.icicleObj = Resources.Load("Prefabs/Other/iciclePrefab") as GameObject;
         base.Init(manaCost, cooldown);
     }
 

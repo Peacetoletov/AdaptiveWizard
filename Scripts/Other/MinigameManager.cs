@@ -24,11 +24,16 @@ public class MinigameManager : MonoBehaviour
 
     private void Start() {
         this.roomManager = MainGameManager.GetRoomManager();
-        this.spawnTimer = new Timer(spawnPeriod);
+        Restart();
+    }
+
+    public void Restart() {
+        this.spawnTimer = new Timer(INITIAL_SPAWN_PERIOD);
+        this.spawnPeriod = INITIAL_SPAWN_PERIOD;
     }
 
     private void Update() {
-        if (spawnTimer.UpdateAndCheck()) {
+        if (MainGameManager.IsGameActive() && spawnTimer.UpdateAndCheck()) {
             UpdateSpawnPeriod();
             this.spawnTimer = new Timer(spawnPeriod);
             SpawnEnemyRandomly();

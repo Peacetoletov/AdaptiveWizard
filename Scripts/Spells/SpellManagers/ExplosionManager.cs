@@ -10,7 +10,7 @@ public class ExplosionManager : AbstractSpellManager
 
 
     public override void Init() {
-        this.explosionObj = Resources.Load("Prefabs/explosionPrefab") as GameObject;
+        this.explosionObj = Resources.Load("Prefabs/Other/explosionPrefab") as GameObject;
         base.Init(manaCost, cooldown);
     }
 

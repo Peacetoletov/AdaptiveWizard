@@ -11,6 +11,8 @@ public class RoomManager : MonoBehaviour
     public GameObject wallObj;
     public GameObject floorObj;
     public GameObject enemy1Obj;        // only for testing
+    public GameObject enemy2Obj;        // only for testing
+    public GameObject enemyGatlingObj;        // only for testing
 
     
     private string[] roomVisual;        // visual representation of the room
@@ -18,10 +20,14 @@ public class RoomManager : MonoBehaviour
 
 
     private void Start() {
-        GenerateRoom(false);
+        Restart();
     }
 
-    private void GenerateRoom(bool createNewPlayer=true) {
+    public void Restart() {
+        GenerateRoom();
+    }
+
+    private void GenerateRoom() {
         /*
         // Limit testing room:
         MainGameManager.roomVisual = new string[] {
@@ -102,12 +108,9 @@ public class RoomManager : MonoBehaviour
 
         // Player is instantiated from MainGameManager
 
-        // Start spawning enemies
-        if (MainGameManager.minigame) {
-            //this.spawnEnemiesTimer = new Timer(miniGameSpawnPeriod);
-        }
-        else {
-            // whatever needs to be tested here
+
+        // Whatever needs to be tested here
+        if (!MainGameManager.minigame) {
             /*
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
@@ -122,8 +125,8 @@ public class RoomManager : MonoBehaviour
                 }
             }
             */
-            Instantiate(enemy1Obj, new Vector3(-12f, 0f, 0f), Quaternion.identity);
-            Instantiate(enemy1Obj, new Vector3(12f, 0f, 0f), Quaternion.identity);
+            //Instantiate(enemy1Obj, new Vector3(-12f, 0f, 0f), Quaternion.identity);
+            Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
         }
     }
 

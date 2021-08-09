@@ -6,9 +6,9 @@ namespace Items {
     public class HealthCrystal : PassiveItem, PlayerHealthModifier
     {
         // Health Crystal increases player health by 20 %
-        private float multiplier = 1.2f;
+        private const float multiplier = 1.2f;
 
-        public float HealthMultiplier(float health) {
+        public float HealthModified(float health) {
             return health * multiplier;
         }
     }

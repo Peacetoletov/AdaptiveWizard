@@ -3,15 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using InventoryNS;
+using Items;
 
+// TODO: create subclasses and move some functionality there from here (PlayerHealthManager, PlayerManaManager, ...)
 public class PlayerGeneral : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
     private SpriteRenderer spriteRenderer;
+    private const float baseMaxHealth = 100f;
     private float maxHealth;
     private float curHealth;
     private bool meleeInvulnerability;
     private Timer meleeInvulnerabilityTimer;
+    private const float baseMaxMana = 100f;
     private float maxMana;
     private float curMana;
     private Timer manaRegenTimer;
@@ -88,6 +92,7 @@ public class PlayerGeneral : AbstractPlayer
     }
 
     private void RestartGame() {
+        /*
         GameObject[] objectsWithTag = GameObject.FindGameObjectsWithTag("GameController");
         if (objectsWithTag.Length != 1) {
             string message = "ERROR! Incorrect number of \"GameController\" objects found when attempting to spawn an enemy. " +
@@ -95,6 +100,8 @@ public class PlayerGeneral : AbstractPlayer
             throw new System.InvalidOperationException(message);
         }
         MainGameManager managerScript = objectsWithTag[0].GetComponent<MainGameManager>();
+        */
+        MainGameManager managerScript = (MainGameManager) FindObjectOfType(typeof(MainGameManager));
         managerScript.RestartGame();
     }
 
@@ -106,12 +113,12 @@ public class PlayerGeneral : AbstractPlayer
         this.boxCollider = GetComponent<BoxCollider2D>();
         this.spriteRenderer = GetComponent<SpriteRenderer>();
         SetAlphaToOne();
-        this.maxHealth = 100000f;
+        this.maxHealth = baseMaxHealth;
         this.curHealth = maxHealth;
         this.meleeInvulnerability = false;
         float invulnerabilitySeconds = 0.5f;
         this.meleeInvulnerabilityTimer = new Timer(invulnerabilitySeconds);
-        this.maxMana = 100000f;
+        this.maxMana = baseMaxMana;
         this.curMana = maxMana;
         float manaRegenPerSec = 3f;
         this.manaRegenTimer = new Timer(1 / manaRegenPerSec);
@@ -143,5 +150,58 @@ public class PlayerGeneral : AbstractPlayer
         }
         this.curMana -= amount;
         return true;
+    }
+
+    public void UpdateMaxHealth() {
+        float oldMaxHealth = maxHealth;
+        float newMaxHealth = baseMaxHealth;
+        foreach (PlayerHealthModifier item in Inventory.passiveItemsManager.playerHealthModifiers) {
+            newMaxHealth = item.HealthModified(newMaxHealth);
+        }
+        this.maxHealth = newMaxHealth;
+        float maxHealthDelta = newMaxHealth - oldMaxHealth;
+        if (maxHealthDelta > 0) {
+            Heal(maxHealthDelta);
+        }
+        else if (maxHealthDelta < 0 && curHealth > maxHealth) {
+            DecreaseCurHealth(maxHealth);
+        }
+        print("health: " + curHealth + "/" + maxHealth);
+    }
+
+    private void Heal(float amount) {
+        // in distant future, add a condition to check if player is allowed to heal
+        this.curHealth = Mathf.Min(curHealth + amount, maxHealth);
+    }
+
+    private void DecreaseCurHealth(float newCurHealth) {
+        // This action is different from taking damage, player cannot die from decreasing health.
+        // Current health is decreased when maxHealth drops below curHealth.
+        UnityEngine.Assertions.Assert.IsTrue(newCurHealth > 0);
+        this.curHealth = newCurHealth;
+    }
+
+    public void UpdateMaxMana() {
+        float oldMaxMana = maxMana;
+        float newMaxmana = baseMaxMana;
+        foreach (MaxManaModifier item in Inventory.passiveItemsManager.maxManaModifiers) {
+            newMaxmana = item.ManaModified(newMaxmana);
+        }
+        this.maxMana = newMaxmana;
+        float maxManaDelta = newMaxmana - oldMaxMana;
+        if (maxManaDelta > 0) {
+            AddMana(maxManaDelta);
+        }
+        else if (maxManaDelta < 0 && curMana > maxMana) {
+            DecreaseCurMana(maxMana);
+        }
+        print("mana: " + curMana + "/" + maxMana);
+    }
+
+    private void DecreaseCurMana(float newCurMana) {
+        // This action is different from spending mana, actions associated with spending mana do not apply here.
+        // Current mana is decreased when maxMana drops below curMana.
+        UnityEngine.Assertions.Assert.IsTrue(newCurMana >= 0);
+        this.curMana = newCurMana;
     }
 }

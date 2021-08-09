@@ -29,9 +29,9 @@ the player and start following it for a short while, before switching back to si
 */
 public abstract class MovingEnemy : AbstractEnemy
 {
-    // add short comments here; long comments will be in each class
     // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
     // of enemy shape. More precise colliders can be used for collision with player and player spells.
+    // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
     public BoxCollider2D terrainCollider;
 
     // Current speed of the enemy. Possibly divide this into curSpeed and baseSpeed in future.

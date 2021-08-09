@@ -10,6 +10,7 @@ namespace InventoryNS {
         private int gold;
         private int spellOrbs;
         private int skillTreeOrbs;
+        private int superchargedOrbs;
         private GameObject[] activeItems = new activeItems[3];
         */
 

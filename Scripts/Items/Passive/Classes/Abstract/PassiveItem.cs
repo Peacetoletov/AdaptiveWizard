@@ -6,7 +6,7 @@ namespace Items {
     public abstract class PassiveItem
     {
         private static int staticID = 0;
-        private int ID;
+        private int ID;     // ID will be used for deleting items
 
         public PassiveItem() {
             // set ID and increment staticID

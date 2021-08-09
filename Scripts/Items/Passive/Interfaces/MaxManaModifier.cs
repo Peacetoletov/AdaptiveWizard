@@ -5,8 +5,8 @@ using UnityEngine;
 using Items;
 
 namespace Items {
-    public interface PlayerHealthModifier
+    public interface MaxManaModifier
     {
-        float HealthModified(float health);
+        float ManaModified(float health);
     }
 }

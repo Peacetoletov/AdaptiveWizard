@@ -10,7 +10,7 @@ public class FireballManager : AbstractSpellManager
 
     
     public override void Init() {
-        this.fireballObj = Resources.Load("Prefabs/fireballPrefab") as GameObject;
+        this.fireballObj = Resources.Load("Prefabs/Other/fireballPrefab") as GameObject;
         base.Init(manaCost, cooldown);
     }
 

@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyGatling : AbstractEnemy
+public class EnemyGatling : MovingEnemy
 {
     public GameObject projectile;
     private Timer projectileSpawnTimer;
 
     private void Start() {
         // initialize
-        base.Start(200f);
+        base.Start(200f, 0.9f);
         
         float projectileSpawnPeriod = 0.33f;
         this.projectileSpawnTimer = new Timer(projectileSpawnPeriod);

@@ -5,9 +5,9 @@ using UnityEngine;
 namespace Items {
     public class DivineSphere : PassiveItem, GoldModifier
     {
-        private float multiplier = 1.35f;
+        private const float multiplier = 1.35f;
         
-        public float GoldMultiplier(float gold) {
+        public float GoldModified(float gold) {
             return gold * multiplier;
         }
     }

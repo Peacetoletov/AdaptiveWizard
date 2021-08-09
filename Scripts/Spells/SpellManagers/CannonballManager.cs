@@ -10,7 +10,7 @@ public class CannonballManager : AbstractSpellManager
 
 
     public override void Init() {
-        this.cannonballObj = Resources.Load("Prefabs/cannonballPrefab") as GameObject;
+        this.cannonballObj = Resources.Load("Prefabs/Other/cannonballPrefab") as GameObject;
         base.Init(manaCost, cooldown);
     }
 

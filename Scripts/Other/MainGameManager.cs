@@ -6,49 +6,30 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     // build options
-    public const bool minigame = false;
+    public const bool minigame = true;
 
     // public GameObjects used for instantiating
     public GameObject playerObj;
     public GameObject roomManagerObj;
     public GameObject minigameManagerObj;
 
-    // these GameObjects are here only for instantiates, never used in other ways
-    /*
-    public GameObject playerObj;
-    public GameObject wallObj;
-    public GameObject floorObj;
-    */
-    /*
-    public GameObject enemy1Obj;
-    public GameObject enemy2Obj;
-    public GameObject enemyGatlingObj;
-    */
 
     private static bool isGameActive = true;        // false if game is paused or UI is open, true otherwise
     private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-5.5f, -0.5f, 0.0f);
     private static GameObject player;                   // reference to the player
                                                         // I decided to make it static because I don't plan on having multiplayer PvP or coop modes
 
-    /*            
-    // variables related to enemies
-    private Timer spawnEnemiesTimer;
-    private const float INITIAL_ENEMY_SPAWN_PERIOD = 1.5f;
-    private float miniGameSpawnPeriod = INITIAL_ENEMY_SPAWN_PERIOD;       
-    */
+    private static UI_Manager UI_manager;
     private static MinigameManager minigameManager;
-    
-    /*
-    // variables of rooms
-    private static string[] roomVisual;        // visual representation of the room
-    private static Pathfinding.Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
-    */
     private static RoomManager roomManager;
 
     
     private void Start() {
         CreateAndInitializePlayer();
 
+        MainGameManager.UI_manager = (UI_Manager) FindObjectOfType(typeof(UI_Manager));
+
+        /*
         //test
         Items.PassiveItem test = new Items.HealthCrystal();
         InventoryNS.Inventory.passiveItemsManager.AddItem(test);
@@ -56,6 +37,7 @@ public class MainGameManager : MonoBehaviour
         InventoryNS.Inventory.passiveItemsManager.AddItem(test2);
         Items.PassiveItem test3 = new Items.DivineSphere();
         InventoryNS.Inventory.passiveItemsManager.AddItem(test3);
+        */
 
         MainGameManager.roomManager = Instantiate(roomManagerObj, Vector2.zero, Quaternion.identity).GetComponent<RoomManager>();
         if (minigame) {
@@ -87,11 +69,12 @@ public class MainGameManager : MonoBehaviour
         }
 
         // test
-        /*
-        if (Input.GetMouseButtonDown(0)) {
-            PositionInRoomToNode(player);
+        if (Input.GetKeyDown(KeyCode.N)) {
+            InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
         }
-        */
+        if (Input.GetKeyDown(KeyCode.M)) {
+            InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.ManaCrystal());
+        }
     }
 
 
@@ -102,16 +85,29 @@ public class MainGameManager : MonoBehaviour
                 Destroy(o);
             }
         }
+        /*
         // TODO: change
         //this.miniGameSpawnPeriod = INITIAL_ENEMY_SPAWN_PERIOD;
         player.GetComponent<PlayerGeneral>().ResetPlayer();
         MainGameManager.player.transform.position = PLAYER_SPAWN_POS;
         //GenerateRoom(false);
+        */
+
+        player.GetComponent<PlayerGeneral>().ResetPlayer();
+        MainGameManager.player.transform.position = PLAYER_SPAWN_POS;
+        MainGameManager.roomManager.Restart();
+        if (minigame) {
+            MainGameManager.minigameManager.Restart();
+        }
     }
 
 
     public static bool IsGameActive() {
         return isGameActive;
+    }
+
+    public static UI_Manager GetUI_Manager() {
+        return UI_manager;
     }
 
     public static GameObject GetPlayer() {
