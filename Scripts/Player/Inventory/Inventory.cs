@@ -11,11 +11,10 @@ namespace InventoryNS {
         private int spellOrbs;
         private int skillTreeOrbs;
         private int superchargedOrbs;
-        private GameObject[] activeItems = new activeItems[3];
         */
 
-        // private List<GameObject> passiveItems;
         public static PassiveItemsManager passiveItemsManager;
+        public static ActiveItemsManager activeItemsManager;
 
         // TODO: come up with a solution to the inventory system implementation
         /* Possible solution: create an interface for each type of action an item can have,
@@ -33,6 +32,7 @@ namespace InventoryNS {
 
         public static void Initialize() {
             Inventory.passiveItemsManager = new PassiveItemsManager();
+            Inventory.activeItemsManager = new ActiveItemsManager();
         }
     }
 }

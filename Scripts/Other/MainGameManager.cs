@@ -6,7 +6,7 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     // build options
-    public const bool minigame = true;
+    public const bool minigame = false;
 
     // public GameObjects used for instantiating
     public GameObject playerObj;
@@ -62,18 +62,35 @@ public class MainGameManager : MonoBehaviour
             if (minigame) {
                 //minigameManager.Update();
             }
+
+            // using active items
+            if (Input.GetKeyDown(KeyCode.Alpha1)) {
+                InventoryNS.Inventory.activeItemsManager.UseItem(0);
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2)) {
+                InventoryNS.Inventory.activeItemsManager.UseItem(1);
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha3)) {
+                InventoryNS.Inventory.activeItemsManager.UseItem(2);
+            }
+
+            // test
+            if (Input.GetKeyDown(KeyCode.N)) {
+                InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
+            }
+            if (Input.GetKeyDown(KeyCode.M)) {
+                InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.ManaCrystal());
+            }
+            if (Input.GetKeyDown(KeyCode.V)) {
+                InventoryNS.Inventory.activeItemsManager.AddItem(new Items.HealthPotion());
+            }
+            if (Input.GetKeyDown(KeyCode.B)) {
+                InventoryNS.Inventory.activeItemsManager.AddItem(new Items.ManaPotion());
+            }
         } 
 
         if (Input.GetKeyDown(KeyCode.P)) {
             MainGameManager.isGameActive = !isGameActive;
-        }
-
-        // test
-        if (Input.GetKeyDown(KeyCode.N)) {
-            InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
-        }
-        if (Input.GetKeyDown(KeyCode.M)) {
-            InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.ManaCrystal());
         }
     }
 
