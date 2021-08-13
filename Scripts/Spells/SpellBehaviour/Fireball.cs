@@ -8,7 +8,7 @@ public class Fireball : StraightProjectile
     private PlayerGeneral player;
     private SpriteRenderer spriteRenderer;
     private const float baseSpeed = 15f;
-    private const float manaRestoration = 5f;
+    private const float manaRestoration = 3f;
 
     private void Start() {
         this.circleCollider = GetComponent<CircleCollider2D>();

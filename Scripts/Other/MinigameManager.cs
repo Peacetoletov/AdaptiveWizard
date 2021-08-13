@@ -42,7 +42,7 @@ public class MinigameManager : MonoBehaviour
 
     private void UpdateSpawnPeriod() {
         float spawnRateAcceleration = 0.97f;        //0.97    
-        float minSpawnPeriod = 0.4f;                //0.4
+        float minSpawnPeriod = 0.35f;                //0.4
         this.spawnPeriod = Mathf.Max(minSpawnPeriod, spawnPeriod * spawnRateAcceleration);
     }
 

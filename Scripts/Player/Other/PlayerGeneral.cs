@@ -169,7 +169,7 @@ public class PlayerGeneral : AbstractPlayer
         print("health: " + curHealth + "/" + maxHealth);
     }
 
-    private void Heal(float amount) {
+    public void Heal(float amount) {
         // in distant future, add a condition to check if player is allowed to heal
         this.curHealth = Mathf.Min(curHealth + amount, maxHealth);
     }
@@ -203,5 +203,13 @@ public class PlayerGeneral : AbstractPlayer
         // Current mana is decreased when maxMana drops below curMana.
         UnityEngine.Assertions.Assert.IsTrue(newCurMana >= 0);
         this.curMana = newCurMana;
+    }
+
+    public float GetMaxHealth() {
+        return maxHealth;
+    }
+
+    public float GetMaxMana() {
+        return maxMana;
     }
 }

@@ -126,7 +126,7 @@ public class RoomManager : MonoBehaviour
             }
             */
             //Instantiate(enemy1Obj, new Vector3(-12f, 0f, 0f), Quaternion.identity);
-            //Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
+            Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
         }
     }
 

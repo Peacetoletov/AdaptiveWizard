@@ -6,7 +6,7 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     // build options
-    public const bool minigame = false;
+    public const bool minigame = true;
 
     // public GameObjects used for instantiating
     public GameObject playerObj;
@@ -74,6 +74,7 @@ public class MainGameManager : MonoBehaviour
                 InventoryNS.Inventory.activeItemsManager.UseItem(2);
             }
 
+            /*
             // test
             if (Input.GetKeyDown(KeyCode.N)) {
                 InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
@@ -87,6 +88,7 @@ public class MainGameManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.B)) {
                 InventoryNS.Inventory.activeItemsManager.AddItem(new Items.ManaPotion());
             }
+            */
         } 
 
         if (Input.GetKeyDown(KeyCode.P)) {

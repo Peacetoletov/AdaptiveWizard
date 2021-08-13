@@ -32,6 +32,18 @@ public abstract class AbstractEnemy : MonoBehaviour
     private void CheckDeath() {
         if (curHealth <= 0) {
             Destroy(gameObject);
+            
+            // temporarily
+            ScoreScriptUI.IncreaseScore((int) Mathf.Round(maxHealth / 30f));
+        }
+
+        // temporary - small chance to receive a potion after killing an enemy
+        if (Random.Range(0f, 1f) < 0.04f) {
+            if (Random.Range(0f, 1f) < 0.5f) {
+                InventoryNS.Inventory.activeItemsManager.AddItem(new Items.HealthPotion());
+            } else {
+                InventoryNS.Inventory.activeItemsManager.AddItem(new Items.ManaPotion());
+            }
         }
     }
 
