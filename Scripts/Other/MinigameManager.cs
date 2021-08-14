@@ -30,6 +30,7 @@ public class MinigameManager : MonoBehaviour
     public void Restart() {
         this.spawnTimer = new Timer(INITIAL_SPAWN_PERIOD);
         this.spawnPeriod = INITIAL_SPAWN_PERIOD;
+        ScoreScriptUI.ResetScore();
     }
 
     private void Update() {

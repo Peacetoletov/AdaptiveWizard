@@ -24,4 +24,8 @@ public class ScoreScriptUI : MonoBehaviour
     public static void IncreaseScore(int amount) {
         ScoreScriptUI.score += amount;
     }
+
+    public static void ResetScore() {
+        ScoreScriptUI.score = 0;
+    }
 }
