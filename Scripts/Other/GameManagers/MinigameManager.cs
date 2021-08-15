@@ -19,11 +19,11 @@ public class MinigameManager : MonoBehaviour
     private float spawnPeriod = INITIAL_SPAWN_PERIOD;
 
     // Syntactic sugar
-    private RoomManager roomManager;
+    private ManagerOfRoomManagers managerOfRoomManagers;
 
 
     private void Start() {
-        this.roomManager = MainGameManager.GetRoomManager();
+        this.managerOfRoomManagers = MainGameManager.GetManagerOfRoomManagers();
         Restart();
     }
 
@@ -64,6 +64,9 @@ public class MinigameManager : MonoBehaviour
     }
 
     private Vector2 RandomSpawnPos(float enemySize) {
+        // Currently commented out because this doesn't work with multiple rooms
+
+        /*
         Vector2 spawnPosInRoomCoordinates;
         Vector2 spawnPosInWorldCoordinates;
         float distanceFromPlayer;
@@ -80,9 +83,14 @@ public class MinigameManager : MonoBehaviour
         } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
 
         return spawnPosInWorldCoordinates;
+        */
+        return Vector2.zero;
     }
 
     private bool IsSpawnPosValid(Vector2 spawnPosInRoomCoordinates, float enemySize, float distanceFromPlayer) {
+        // Currently commented out because this doesn't work with multiple rooms
+
+        /*
         const float minimumDistanceFromPlayer = 4f;     
         if (distanceFromPlayer < minimumDistanceFromPlayer) {
             return false;
@@ -107,6 +115,9 @@ public class MinigameManager : MonoBehaviour
                 }
             }
         }
+
+        return true;
+        */
 
         return true;
     }    

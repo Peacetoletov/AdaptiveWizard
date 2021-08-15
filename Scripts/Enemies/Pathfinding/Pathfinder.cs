@@ -10,14 +10,14 @@ namespace Pathfinding
         // List of modified nodes that need to be reset after performing an A* search
         private static List<Node> modifiedNodes = new List<Node>();
 
-        public static Path DirectionAndDistanceUntilFirstTurn(Node start, Node target) {
+        public static Path DirectionAndDistanceUntilFirstTurn(Node start, Node target, int roomIndex) {
             /*
             Returns a Path structure that can be used to navigate an enemy towards the player.
             This function calls the A* algorithm, constructs a Path object from the modified 
             Node objects and finally resets the nodes.
             */
-            A_Star(start, target.GetPosition());                             // modify nodes
-            Path path = CreatePath(target, start.GetPosition());             // create a path from modified nodes
+            A_Star(start, target.GetPosition());                                        // modify nodes
+            Path path = CreatePath(target, start.GetPosition(), roomIndex);             // create a path from modified nodes
             ResetModifiedNodes();
             return path;
         }
@@ -64,7 +64,7 @@ namespace Pathfinding
             }
         }
 
-        private static Path CreatePath(Node target, Vector2Int startPos) {
+        private static Path CreatePath(Node target, Vector2Int startPos, int roomIndex) {
             /*
             This function creates a Path object by tracing the path from target node to start node, using the parent of each node.
             During this process, I keep track of the direction of the current parent. If there are multiple nodes in the same
@@ -76,7 +76,7 @@ namespace Pathfinding
             if (target.GetParent() == null) {
                 // Special case when target node == start node
                 // Theoretically, there should never be an opportunity to call A* in such situation, but just in case
-                return new Path(Vector2.left, 0f, startPos);     // direction chosen arbitrarily, as it doesn't matter because of 0 distance
+                return new Path(Vector2.left, 0f, startPos, roomIndex);     // direction chosen arbitrarily, as it doesn't matter because of 0 distance
             }
             Vector2Int lastParentPositionDelta = new Vector2Int(0, 0);
             int nodesInOneDirection = 1;
@@ -94,7 +94,7 @@ namespace Pathfinding
             }
             Vector2 direction = -lastParentPositionDelta;         // reverse direction: from (child->parent) to (parent->child)
             int distance = DistanceBetweenNeighbours(lastParentPositionDelta) * nodesInOneDirection;
-            return new Path(direction, distance, startPos);
+            return new Path(direction, distance, startPos, roomIndex);
         }
 
         private static void AddToOpenNodes(Node node, int distance, Vector2Int targetPosition, PriorityQueue<Node> openNodes, List<Node> modifiedNodes) {

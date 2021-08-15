@@ -2,12 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO: possibly divide this into RoomManager and Room classes, with one (static?) RoomManager class containing multiple Room objects
-// TODO: come up for a solution to having multiple rooms (how does PositionInRoomToPositionInWorld() work with many rooms?) - maybe
-// add variable roomID to each Node object, and keep a table mapping roomIDs to world coordinate offsets?
+// TODO: add a Vector2 "offset" variable and adjust methods that convert to or from world coordinates to include the offset in the calculation 
 public class RoomManager : MonoBehaviour
 {
-    // public GameObjects used for instantiating
+     // public GameObjects used for instantiating
     public GameObject wallObj;
     public GameObject floorObj;
     public GameObject enemy1Obj;        // only for testing
@@ -18,59 +16,9 @@ public class RoomManager : MonoBehaviour
     private string[] roomVisual;        // visual representation of the room
     private Pathfinding.Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
+    private Vector2 positionOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
 
     private void Start() {
-        Restart();
-    }
-
-    public void Restart() {
-        GenerateRoom();
-    }
-
-    private void GenerateRoom() {
-        /*
-        // Limit testing room:
-        MainGameManager.roomVisual = new string[] {
-            "##############################",
-            "#............................#",
-            "#............................#",
-            "#..#####...............###...#",
-            "#.............##.........#...#",
-            "#.............##.........#...#",
-            "#...........####.........#...#",
-            "#...........####.........#...#",
-            "#...#........................#",
-            "#...#........................#",
-            "#.....................###....#",
-            "#.........###############....#",
-            "#.........###############....#",
-            "#............................#",
-            "#............................#",
-            "##############################"
-        };
-        */
-        
-        /*
-        MainGameManager.roomVisual = new string[] {
-            "##############################",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "#............................#",
-            "##############################"
-        };
-        */
-
         this.roomVisual = new string[] {
             "##############################",
             "#............................#",
@@ -89,7 +37,15 @@ public class RoomManager : MonoBehaviour
             "#............................#",
             "##############################"
         };
+        Restart();
+    }
 
+    public void Restart() {
+        //GenerateRoom();
+    }
+
+    /*
+    private void GenerateRoom() {
         // Environment
         for (int x = 0; x < RoomWidth(); x++) {
             for (int y = 0; y < RoomHeight(); y++) {
@@ -106,30 +62,14 @@ public class RoomManager : MonoBehaviour
         CreateRoomNodes();
         InitializeRoomNodes();
 
-        // Player is instantiated from MainGameManager
-
-
         // Whatever needs to be tested here
         if (!MainGameManager.minigame) {
-            /*
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    Instantiate(enemy1Obj, new Vector3(5f + i, 0f + j, 0f), Quaternion.identity);
-                }
-            }
-            */
-            /*
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
-                    Instantiate(enemy1Obj, new Vector3(3f + i*0.3f, -1f + j*0.3f, 0f), Quaternion.identity);
-                }
-            }
-            */
-            //Instantiate(enemy1Obj, new Vector3(-12f, 0f, 0f), Quaternion.identity);
             Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
         }
     }
+    */
 
+    /*
     public char TileSymbolAtPosition(int x, int y) {
         return roomVisual[y][x];
     }
@@ -148,7 +88,9 @@ public class RoomManager : MonoBehaviour
             }
         }
     }
+    */
 
+    /*
     private void InitializeRoomNodes() {
         for (int x = 0; x < RoomWidth(); x++) {
             for (int y = 0; y < RoomHeight(); y++) {
@@ -190,30 +132,35 @@ public class RoomManager : MonoBehaviour
             }
         }
     }
+    */
 
+    /*
     private bool IsDiagonalUnobstructed(int lowerX, int lowerY) {
         int upperX = lowerX + 1;
         int upperY = lowerY + 1;
         return (TileSymbolAtPosition(lowerX, lowerY) == '.' && TileSymbolAtPosition(lowerX, upperY) == '.' &&
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
     }
+    */
 
     public Pathfinding.Node WorldPositionToNode(GameObject obj) {
+        // TODO: change this to incorporate room offset
         // converts object's world position to room position, then returns a node that corresponds to this position
         int x = (int) Mathf.Round(obj.transform.position.x - 0.5f + RoomWidth() / 2f);
         int y = roomVisual.Length - 1 - (int) Mathf.Round(obj.transform.position.y - 0.5f + RoomHeight() / 2f);
         //print("x = " + x + ", y = " + y);
         return roomNodes[x, y];
     }
+    
 
     public Vector2 PositionInRoomToPositionInWorld(Vector2Int roomPos) {
-        // Takes a room position and return a corresponding world position
-        // Note: this will need to change once I introduce more than 1 room
+        // TODO: change this to incorporate room offset
         int inverseY = roomVisual.Length - 1 - roomPos.y;       // my room coordinates start at top left, but world coordinates start at bottom left
         Vector2 worldPos = new Vector2((float) (roomPos.x + 0.5 - RoomWidth() / 2.0), (float) (inverseY + 0.5 - RoomHeight() / 2.0));
         return worldPos;
     }
 
+    
     public int RoomWidth() {
         return roomVisual[0].Length;
     }
@@ -221,11 +168,5 @@ public class RoomManager : MonoBehaviour
     public int RoomHeight() {
         return roomVisual.Length;
     }
-
-    // do not use a static function for getting room nodes
-    /*
-    public static Pathfinding.Node[,] GetRoomNodes() {
-        return roomNodes;
-    }
-    */
+    
 }

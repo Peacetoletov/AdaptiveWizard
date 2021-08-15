@@ -6,11 +6,11 @@ using UnityEngine;
 public class MainGameManager : MonoBehaviour
 {
     // build options
-    public const bool minigame = true;
+    public const bool minigame = false;     // must be false until room management is fully implemented
 
     // public GameObjects used for instantiating
     public GameObject playerObj;
-    public GameObject roomManagerObj;
+    public GameObject managerOfRoomManagersObj;
     public GameObject minigameManagerObj;
 
 
@@ -21,7 +21,7 @@ public class MainGameManager : MonoBehaviour
 
     private static UI_Manager UI_manager;
     private static MinigameManager minigameManager;
-    private static RoomManager roomManager;
+    private static ManagerOfRoomManagers managerOfRoomManagers;
 
     
     private void Start() {
@@ -39,7 +39,7 @@ public class MainGameManager : MonoBehaviour
         InventoryNS.Inventory.passiveItemsManager.AddItem(test3);
         */
 
-        MainGameManager.roomManager = Instantiate(roomManagerObj, Vector2.zero, Quaternion.identity).GetComponent<RoomManager>();
+        //MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
         if (minigame) {
             MainGameManager.minigameManager = Instantiate(minigameManagerObj, Vector2.zero, Quaternion.identity).GetComponent<MinigameManager>();
         }    
@@ -104,19 +104,12 @@ public class MainGameManager : MonoBehaviour
                 Destroy(o);
             }
         }
-        /*
-        // TODO: change
-        //this.miniGameSpawnPeriod = INITIAL_ENEMY_SPAWN_PERIOD;
-        player.GetComponent<PlayerGeneral>().ResetPlayer();
-        MainGameManager.player.transform.position = PLAYER_SPAWN_POS;
-        //GenerateRoom(false);
-        */
 
         player.GetComponent<PlayerGeneral>().ResetPlayer();
         MainGameManager.player.transform.position = PLAYER_SPAWN_POS;
-        MainGameManager.roomManager.Restart();
+        managerOfRoomManagers.Restart();
         if (minigame) {
-            MainGameManager.minigameManager.Restart();
+            minigameManager.Restart();
         }
     }
 
@@ -133,7 +126,7 @@ public class MainGameManager : MonoBehaviour
         return player;
     }
 
-    public static RoomManager GetRoomManager() {
-        return roomManager;
+    public static ManagerOfRoomManagers GetManagerOfRoomManagers() {
+        return managerOfRoomManagers;
     }
 }

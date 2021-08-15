@@ -43,6 +43,9 @@ public abstract class MovingEnemy : AbstractEnemy
     // Struct with variables related following a path
     private Path path;
 
+    // Index of the room that this enemy spawned in
+    private int roomIndex;
+
 
     protected virtual void Start(float maxHealth, float speed) {
         // Initialize variables
@@ -50,6 +53,7 @@ public abstract class MovingEnemy : AbstractEnemy
         this.speed = speed;
         this.generalMovement = new GeneralMovement();
         this.path = new Path();
+        this.roomIndex = ManagerOfRoomManagers.WorldPositionToRoomIndex(transform.position);
     }
     
     protected virtual void FixedUpdate() {
@@ -197,11 +201,11 @@ public abstract class MovingEnemy : AbstractEnemy
         bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
         if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
             // Wall is blocking movement on at least one axis, need to perform A* to find a path.
-            Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().WorldPositionToNode(gameObject);
-            Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().WorldPositionToNode(MainGameManager.GetPlayer());
+            Pathfinding.Node nodeOnThisPos = MainGameManager.GetManagerOfRoomManagers().GetRoomManager(roomIndex).WorldPositionToNode(gameObject);
+            Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetManagerOfRoomManagers().GetRoomManager(roomIndex).WorldPositionToNode(MainGameManager.GetPlayer());
             this.path.isFollowing = true;
             this.path.followingTime = new Timer(1f);
-            this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
+            this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos, roomIndex);
             this.path.movementOrigin = transform.position;
             //print("Path direction: " + path.path.DirectionInWorldCoordinates() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());
         }
