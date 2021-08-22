@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO: possibly divide this into RoomManager and Room classes, with one (static?) RoomManager class containing multiple Room objects
+// TODO: possibly divide this into RoomManager and Room classes, with one (static?) RoomManager class containing multiple Room objects DONE
 // TODO: come up for a solution to having multiple rooms (how does PositionInRoomToPositionInWorld() work with many rooms?) - maybe
 // add variable roomID to each Room object, and keep a table mapping roomIDs to world coordinate offsets?
 // Also add this roomID to an enemy when it spawns
 // TODO: add a method that converts an object's (enemy's) position to a roomID. I can use the fact that two rooms' bounding boxes will
 // never overlap
+// TODO: connect two rooms together (done) and change MinigameManager so that it spawns enemies in player's current room
 public class ManagerOfRoomManagers : MonoBehaviour
 {
     /*
@@ -40,9 +41,43 @@ public class ManagerOfRoomManagers : MonoBehaviour
     }
 
     private void GenerateRoomManagers() {
-        // TODO: iterate through all room managers here
+        // Room 1
         GameObject newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
         this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
+        string[] roomVisual = new string[] {
+            "##############################",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "............######...........#",
+            "............######...........#",
+            "#...........######...........#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "##############################"
+        };
+        roomManagers[0].Init(new Vector2(5, 1), roomVisual);
+
+        // Room 2
+        newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
+        this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
+        roomVisual = new string[] {
+            "########",
+            "#......#",
+            "#......#",
+            "#.......",
+            "#.......",
+            "#......#",
+            "#......#",
+            "########"
+        };
+        roomManagers[1].Init(new Vector2(-3, 4), roomVisual);
     }
 
     public static int WorldPositionToRoomIndex(Vector2 pos) {
@@ -52,6 +87,5 @@ public class ManagerOfRoomManagers : MonoBehaviour
 
     public RoomManager GetRoomManager(int roomIndex) {
         return roomManagers[roomIndex];
-        //return roomManagers[0];
     }
 }

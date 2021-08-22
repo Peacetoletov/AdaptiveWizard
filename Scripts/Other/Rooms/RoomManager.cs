@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// TODO: add a Vector2 "offset" variable and adjust methods that convert to or from world coordinates to include the offset in the calculation 
+// TODO: THOROUGHLY TEST EVERYTHING IN HERE!!!
 public class RoomManager : MonoBehaviour
 {
      // public GameObjects used for instantiating
@@ -16,8 +16,9 @@ public class RoomManager : MonoBehaviour
     private string[] roomVisual;        // visual representation of the room
     private Pathfinding.Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
-    private Vector2 positionOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
+    private Vector2 posOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
 
+    /*
     private void Start() {
         this.roomVisual = new string[] {
             "##############################",
@@ -37,14 +38,52 @@ public class RoomManager : MonoBehaviour
             "#............................#",
             "##############################"
         };
+        System.Array.Reverse(roomVisual);       // I want the position [0, 0] to be in the bottom left corner, just like in world coordinates
+        Restart();
+    }
+    */
+
+    /*
+    private void Update() {
+        // only a test, remove this function later
+        if (Input.GetMouseButtonDown(0)) {
+            WorldPositionToNode(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+        }
+    }
+    */
+
+    public void Init(Vector2 posOffset, string[] roomVisual) {
+        this.posOffset = posOffset;
+        this.roomVisual = roomVisual;
+        /*
+        this.roomVisual = new string[] {
+            "##############################",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#...........######...........#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "##############################"
+        };
+        */
+        System.Array.Reverse(roomVisual);       // I want the position [0, 0] to be in the bottom left corner, just like in world coordinates
         Restart();
     }
 
     public void Restart() {
-        //GenerateRoom();
+        GenerateRoom();
     }
 
-    /*
+    
     private void GenerateRoom() {
         // Environment
         for (int x = 0; x < RoomWidth(); x++) {
@@ -64,12 +103,11 @@ public class RoomManager : MonoBehaviour
 
         // Whatever needs to be tested here
         if (!MainGameManager.minigame) {
-            Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
+            //Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
         }
     }
-    */
+    
 
-    /*
     public char TileSymbolAtPosition(int x, int y) {
         return roomVisual[y][x];
     }
@@ -88,24 +126,22 @@ public class RoomManager : MonoBehaviour
             }
         }
     }
-    */
 
-    /*
     private void InitializeRoomNodes() {
         for (int x = 0; x < RoomWidth(); x++) {
             for (int y = 0; y < RoomHeight(); y++) {
                 if (TileSymbolAtPosition(x, y) != '.') {
                     continue;
                 }
-                // top left
+                // bottom left
                 if (x - 1 >= 0 && y - 1 >= 0 && IsDiagonalUnobstructed(x - 1, y - 1)) {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y - 1]);
                 }
-                // top
+                // bottom
                 if (y - 1 >= 0 && TileSymbolAtPosition(x, y - 1) == '.') {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y - 1]);
                 }
-                // top right
+                // bottom right
                 if (x + 1 < RoomWidth() && y - 1 >= 0 && IsDiagonalUnobstructed(x, y - 1)) {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y - 1]);
                 }
@@ -117,46 +153,53 @@ public class RoomManager : MonoBehaviour
                 if (x + 1 < RoomWidth() && TileSymbolAtPosition(x + 1, y) == '.') {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y]);
                 }
-                // bottom left
+                // top left
                 if (x - 1 >= 0 && y + 1 < RoomHeight() && IsDiagonalUnobstructed(x - 1, y)) {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y + 1]);
                 }
-                // bottom
+                // top
                 if (y + 1 < RoomHeight() && TileSymbolAtPosition(x, y + 1) == '.') {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y + 1]);
                 }
-                // bottom right
+                // top right
                 if (x + 1 < RoomWidth() && y + 1 < RoomHeight() && IsDiagonalUnobstructed(x, y)) {
                     this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y + 1]);
                 }
             }
         }
     }
-    */
 
-    /*
     private bool IsDiagonalUnobstructed(int lowerX, int lowerY) {
         int upperX = lowerX + 1;
         int upperY = lowerY + 1;
         return (TileSymbolAtPosition(lowerX, lowerY) == '.' && TileSymbolAtPosition(lowerX, upperY) == '.' &&
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
     }
-    */
 
     public Pathfinding.Node WorldPositionToNode(GameObject obj) {
-        // TODO: change this to incorporate room offset
-        // converts object's world position to room position, then returns a node that corresponds to this position
-        int x = (int) Mathf.Round(obj.transform.position.x - 0.5f + RoomWidth() / 2f);
-        int y = roomVisual.Length - 1 - (int) Mathf.Round(obj.transform.position.y - 0.5f + RoomHeight() / 2f);
-        //print("x = " + x + ", y = " + y);
+        return WorldPositionToNode(obj.transform.position);
+    }
+
+    public Pathfinding.Node WorldPositionToNode(Vector2 position) {
+        int x = (int) Mathf.Round(position.x - posOffset.x);
+        int y = (int) Mathf.Round(position.y - posOffset.y);
+        //print("object position = " + position + ". room position =" + new Vector2(x, y));
+        /*
+        if (x < 0 || x > RoomWidth() || y < 0 || y > RoomHeight()) {
+            print("Outside of array bounds!");
+            return roomNodes[0, 0];
+        }
+        */
         return roomNodes[x, y];
     }
     
 
     public Vector2 PositionInRoomToPositionInWorld(Vector2Int roomPos) {
-        // TODO: change this to incorporate room offset
-        int inverseY = roomVisual.Length - 1 - roomPos.y;       // my room coordinates start at top left, but world coordinates start at bottom left
-        Vector2 worldPos = new Vector2((float) (roomPos.x + 0.5 - RoomWidth() / 2.0), (float) (inverseY + 0.5 - RoomHeight() / 2.0));
+        // TODO: change this to incorporate room offset DONE
+        //int inverseY = roomVisual.Length - 1 - roomPos.y;       // my room coordinates start at top left, but world coordinates start at bottom left
+        //Vector2 worldPos = new Vector2((float) (roomPos.x + 0.5 - RoomWidth() / 2.0), (float) (inverseY + 0.5 - RoomHeight() / 2.0));
+        // ^ old version; now I simply reverse the visual array
+        Vector2 worldPos = new Vector2(roomPos.x + posOffset.x, roomPos.y + posOffset.y);
         return worldPos;
     }
 

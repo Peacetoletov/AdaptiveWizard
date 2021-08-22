@@ -15,7 +15,7 @@ public class MainGameManager : MonoBehaviour
 
 
     private static bool isGameActive = true;        // false if game is paused or UI is open, true otherwise
-    private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-5.5f, -0.5f, 0.0f);
+    private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(7f, 3f, 0.0f);
     private static GameObject player;                   // reference to the player
                                                         // I decided to make it static because I don't plan on having multiplayer PvP or coop modes
 
