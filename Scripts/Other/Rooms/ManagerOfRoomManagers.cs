@@ -62,7 +62,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "#............................#",
             "##############################"
         };
-        roomManagers[0].Init(new Vector2(5, 1), roomVisual);
+        roomManagers[0].Init(new Vector2(5, 1), roomVisual, RoomType.COMBAT);
 
         // Room 2
         newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
@@ -77,7 +77,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "#......#",
             "########"
         };
-        roomManagers[1].Init(new Vector2(-3, 4), roomVisual);
+        roomManagers[1].Init(new Vector2(-3, 4), roomVisual, RoomType.COMBAT);
     }
 
     public static int WorldPositionToRoomIndex(Vector2 pos) {
