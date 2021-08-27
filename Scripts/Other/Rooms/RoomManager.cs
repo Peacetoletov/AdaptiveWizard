@@ -8,6 +8,7 @@ public class RoomManager : MonoBehaviour
      // public GameObjects used for instantiating
     public GameObject wallObj;
     public GameObject floorObj;
+    public GameObject doorObj;
     public GameObject enemy1Obj;        // only for testing
     public GameObject enemy2Obj;        // only for testing
     public GameObject enemyGatlingObj;        // only for testing
@@ -18,6 +19,8 @@ public class RoomManager : MonoBehaviour
 
     private Vector2 posOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
     private RoomType type;                // type of this room (combat, event, corridor)
+
+    private List<Door> doors = new List<Door>();        // list of doors in this room
 
 
     public void Init(Vector2 posOffset, string[] roomVisual, RoomType type) {
@@ -40,8 +43,15 @@ public class RoomManager : MonoBehaviour
                 Vector3 coordinates = (Vector3) PositionInRoomToPositionInWorld(new Vector2Int(x, y));
                 if (TileSymbolAtPosition(x, y) == '.') {
                     Instantiate(floorObj, coordinates, Quaternion.identity);
-                } else {
+                } else if (TileSymbolAtPosition(x, y) == '#') {
                     Instantiate(wallObj, coordinates, Quaternion.identity);
+                } else if (TileSymbolAtPosition(x, y) == '/') {
+                    // door
+                    GameObject newDoor = Instantiate(doorObj, coordinates, Quaternion.identity) as GameObject;
+                    this.doors.Add(newDoor.GetComponent<Door>());
+                    if (type != RoomType.COMBAT) {
+                        print("WARNING: Creating doors in a non-combat room. Did you intend this?");
+                    }
                 }
             }
         }
