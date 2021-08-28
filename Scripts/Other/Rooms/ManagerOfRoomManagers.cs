@@ -30,14 +30,45 @@ public class ManagerOfRoomManagers : MonoBehaviour
 
     private List<RoomManager> roomManagers;
 
+    // player position on map
+    private int playerCurRoomID;
+    private int playerLastRoomID;
+
 
     private void Start() {
         Restart();
     }
 
     public void Restart() {
+        InitPlayerRoomID();
         this.roomManagers = new List<RoomManager>();
         GenerateRoomManagers();
+    }
+
+    private void InitPlayerRoomID() {
+        this.playerCurRoomID = GetNewPlayerCurRoomID();
+        this.playerLastRoomID = playerCurRoomID;
+    }
+
+    private void Update() {
+        if (MainGameManager.IsGameActive()) {
+            // update the ID of the room player is currently in
+            UpdatePlayerRoomID();
+        }
+    }
+
+    private void UpdatePlayerRoomID() {
+        // updates the ID of the room player is currently in and was previously in
+        int newPlayerCurRoomID = GetNewPlayerCurRoomID();
+        if (newPlayerCurRoomID != playerCurRoomID) {
+            this.playerLastRoomID = playerCurRoomID;
+        }
+        this.playerCurRoomID = newPlayerCurRoomID;
+    }
+
+    private int GetNewPlayerCurRoomID() {
+        // TODO: change this
+        return 0;
     }
 
     private void GenerateRoomManagers() {
@@ -69,12 +100,12 @@ public class ManagerOfRoomManagers : MonoBehaviour
         newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
         this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
         roomVisual = new string[] {
-            "####",
-            "....",
-            "....",
-            "####"
+            "##########",
+            "..........",
+            "..........",
+            "##########"
         };
-        roomManagers[1].Init(new Vector2(1, 6), roomVisual, RoomType.CORRIDOR);
+        roomManagers[1].Init(new Vector2(-5, 6), roomVisual, RoomType.CORRIDOR);
 
         
         // Room 3
@@ -90,7 +121,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "#......#",
             "########"
         };
-        roomManagers[2].Init(new Vector2(-7, 4), roomVisual, RoomType.COMBAT);
+        roomManagers[2].Init(new Vector2(-13, 4), roomVisual, RoomType.COMBAT);
         
     }
 

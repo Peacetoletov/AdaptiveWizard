@@ -7,7 +7,7 @@ public class Door : MonoBehaviour
     public Sprite openSpr;
     public Sprite closedSpr;
 
-    private bool isOpen = false;
+    private bool isOpen = true;
 
     private void Start() {
         UpdateState();
