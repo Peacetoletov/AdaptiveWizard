@@ -5,13 +5,14 @@ using UnityEngine;
 // TODO: tidy this class up
 public class RoomManager : MonoBehaviour
 {
-     // public GameObjects used for instantiating
+    // public GameObjects used for instantiating
     public GameObject wallObj;
     public GameObject floorObj;
     public GameObject doorObj;
     public GameObject enemy1Obj;        // only for testing
     public GameObject enemy2Obj;        // only for testing
     public GameObject enemyGatlingObj;        // only for testing
+    public GameObject combatManagerObj;
 
     
     private string[] roomVisual;        // visual representation of the room
@@ -21,6 +22,9 @@ public class RoomManager : MonoBehaviour
     private RoomType type;                // type of this room (combat, event, corridor)
 
     private List<Door> doors = new List<Door>();        // list of doors in this room
+
+    private CombatManager combatManager;                  // combat related variables (only applies to combat rooms)
+    
 
 
     public void Init(Vector2 posOffset, string[] roomVisual, RoomType type) {
@@ -32,6 +36,11 @@ public class RoomManager : MonoBehaviour
     }
 
     public void Restart() {
+        if (type == RoomType.COMBAT) {
+            //this.combat = new Combat(this);
+            this.combatManager = Instantiate(combatManagerObj, Vector3.zero, Quaternion.identity).GetComponent<CombatManager>();
+            combatManager.Init(this);
+        }
         GenerateRoom();
     }
 
@@ -163,5 +172,37 @@ public class RoomManager : MonoBehaviour
     public int RoomHeight() {
         return roomVisual.Length;
     }
-    
+
+    public Vector2 GetPosOffset() {
+        return posOffset;
+    }
+
+    public bool IsCombatRoom() {
+        return type == RoomType.COMBAT;
+    }
+
+    public CombatManager GetCombatManager() {
+        return combatManager;
+    }
+
+    public bool TryToCloseDoors(Vector2 playerPos) {
+        const float minDist = 2.1f;
+        foreach (Door door in doors) {
+            if (Vector2.Distance(playerPos, door.transform.position) < minDist) {
+                // player is too close to a door, cannot close
+                return false;
+            }
+        }
+        // player is far enough from each door, doors can close
+        foreach (Door door in doors) {
+            door.Close();
+        }
+        return true;
+    }
+
+    public void OpenDoors() {
+        foreach (Door door in doors) {
+            door.Open();
+        }
+    }
 }

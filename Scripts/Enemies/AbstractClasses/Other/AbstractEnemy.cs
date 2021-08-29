@@ -8,6 +8,7 @@ public abstract class AbstractEnemy : MonoBehaviour
     private int ID;
     private float maxHealth;
     private float curHealth;
+    private CombatManager combatManager;
 
     protected virtual void Start(float maxHealth) {
         // set ID and increment ID counter
@@ -16,6 +17,10 @@ public abstract class AbstractEnemy : MonoBehaviour
         // set health
         this.maxHealth = maxHealth;
         this.curHealth = maxHealth;
+    }
+
+    public void SetCombatManager(CombatManager combatManager) {
+        this.combatManager = combatManager;
     }
 
     protected Vector2 DirectionToPlayer() {
@@ -32,6 +37,8 @@ public abstract class AbstractEnemy : MonoBehaviour
     private void CheckDeath() {
         if (curHealth <= 0) {
             Destroy(gameObject);
+
+            combatManager.OnEnemyDeath();
             
             // temporarily
             ScoreScriptUI.IncreaseScore((int) Mathf.Round(maxHealth / 30f));

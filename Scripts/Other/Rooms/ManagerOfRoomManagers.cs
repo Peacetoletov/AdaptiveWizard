@@ -40,38 +40,63 @@ public class ManagerOfRoomManagers : MonoBehaviour
     }
 
     public void Restart() {
-        InitPlayerRoomID();
-        this.roomManagers = new List<RoomManager>();
         GenerateRoomManagers();
+        InitPlayerRoomID();
     }
 
     private void InitPlayerRoomID() {
-        this.playerCurRoomID = GetNewPlayerCurRoomID();
+        this.playerCurRoomID = RoomIDOfObject(MainGameManager.GetPlayer());
         this.playerLastRoomID = playerCurRoomID;
     }
 
     private void Update() {
         if (MainGameManager.IsGameActive()) {
-            // update the ID of the room player is currently in
+            // update the ID of the room that the player is currently in
             UpdatePlayerRoomID();
+
+            RoomManager playerRoom = roomManagers[playerCurRoomID];
+            if (playerRoom.IsCombatRoom() && !playerRoom.GetCombatManager().DidCombatBegin()) {
+                if (playerRoom.TryToCloseDoors(MainGameManager.GetPlayer().transform.position)) {
+                    playerRoom.GetCombatManager().BeginCombat();
+                }
+                // change room's state to start spawning enemies
+                /*
+                ...
+                */
+            }
         }
     }
 
     private void UpdatePlayerRoomID() {
         // updates the ID of the room player is currently in and was previously in
-        int newPlayerCurRoomID = GetNewPlayerCurRoomID();
+        int newPlayerCurRoomID = RoomIDOfObject(MainGameManager.GetPlayer());
         if (newPlayerCurRoomID != playerCurRoomID) {
             this.playerLastRoomID = playerCurRoomID;
         }
         this.playerCurRoomID = newPlayerCurRoomID;
     }
 
-    private int GetNewPlayerCurRoomID() {
-        // TODO: change this
-        return 0;
+    private int RoomIDOfObject(GameObject obj) {
+        for (int id = 0; id < roomManagers.Count; id++) {
+            RoomManager rm = roomManagers[id];
+            Vector2 positionOfRoom = rm.PositionInRoomToPositionInWorld(new Vector2Int(0, 0));
+            if (isObjectInsideRectangle(obj.transform.position, positionOfRoom, rm.RoomWidth(), rm.RoomHeight())) {
+                //print(Time.time + ". Object is in room " + id);
+                return id;
+            }
+        }
+        throw new System.Exception("ERROR: object outside of all rooms!");
+    }
+
+    private bool isObjectInsideRectangle(Vector2 objPos, Vector2 rectPos, float width, float height) {
+        //print(Time.time + ". objPos = " + objPos + ". rectPos = " + rectPos + ". width = " + width + ". height = " + height);
+        // subtract 0.5 to adjust for centering
+        return objPos.x >= rectPos.x - 0.5f && objPos.x <= rectPos.x + width - 0.5f && objPos.y >= rectPos.y - 0.5f && objPos.y <= rectPos.y + height - 0.5f;
     }
 
     private void GenerateRoomManagers() {
+        this.roomManagers = new List<RoomManager>();
+
         // Room 1
         GameObject newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
         this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
@@ -91,7 +116,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "#............................#",
             "#............................#",
             "#............................#",
-            "##############################"
+            "#//###########################"
         };
         roomManagers[0].Init(new Vector2(5, 1), roomVisual, RoomType.COMBAT);
 

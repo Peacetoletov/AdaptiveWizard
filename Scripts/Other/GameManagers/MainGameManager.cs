@@ -25,9 +25,9 @@ public class MainGameManager : MonoBehaviour
 
     
     private void Start() {
-        MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
-
         CreateAndInitializePlayer();
+
+        MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
 
         MainGameManager.UI_manager = (UI_Manager) FindObjectOfType(typeof(UI_Manager));
 

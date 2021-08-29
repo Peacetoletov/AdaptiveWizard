@@ -13,6 +13,7 @@ public class Door : MonoBehaviour
         UpdateState();
     }
 
+    /*
     private void Update() {
         // JUST A TEST, REMOVE THIS FUNCTION LATER!
         if (Input.GetMouseButtonDown(0)) {
@@ -23,6 +24,7 @@ public class Door : MonoBehaviour
             }
         }
     }
+    */
 
     public void Open() {
         this.isOpen = true;
