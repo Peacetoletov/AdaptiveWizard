@@ -23,7 +23,7 @@ public class CombatManager : MonoBehaviour
         this.didCombatBegin = true;
         this.isCombatActive = true;
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 100; i++) {
             Vector2 spawnPos = RandomSpawnPos(1f);
             AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
             enemy.SetCombatManager(this);
@@ -47,23 +47,53 @@ public class CombatManager : MonoBehaviour
 
     // TODO: fix a bug that causes enemies to sometimes spawn too close to a wall, getting themselves stuck
     // ^ UPDATE: An easy way to replicate this bug is to go into a very small room and spawn multiple enemies in there.
-    // I noticed that when the bug occurs, I get a following error: IndexOutOfBoundsException: Index was outside of the bounds of the array. RoomManager.WorldPositionToNode
-    
-    // TODO: fix a bug that breaks pathfinding (enemies seem to go the opposite way of the shortest path, this 
-    // is very likely related to the way I reverse the visual representation of the room)
+    // UPDATE: I found specific spawn coordinates that trigger this bug.
+    // UPDATE: This might be caused by the broken pathfinding. Fix that bug first. DONE, this bug still persists. Ugh.
+    // UPDATE: The root of the problem lies in the Move() function, specifically in incorrect collision detection (function MoveOnOneAxis()).
+    // Enemy is considered as colliding, even though there is still some space between the enemy and the wall.
+    // UPDATE: For some unknown reason, BoxCast always registers a hit even with direction away from the wall and zero delta. For now,
+    // a reasonable solution is to ensure that enemies spawn a small distance away from walls.
     private Vector2 RandomSpawnPos(float enemySize) {
         Vector2 spawnPosInRoomCoordinates;
-        Vector2 spawnPosInWorldCoordinates;
+        Vector2 spawnPosInWorldCoordinates = Vector2.zero;
         float distanceFromPlayer;
+        
         do {
             // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
             float xPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomWidth() - 1));
             float yPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomHeight() - 1));
-            
+            //float xPosInRoomCoordinates = 1.77902ff;
+            //float yPosInRoomCoordinates = 1.005072f;
+
             spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
             spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + rm.GetPosOffset().x), (spawnPosInRoomCoordinates.y + rm.GetPosOffset().y));
             distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) MainGameManager.GetPlayer().transform.position).magnitude;
         } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
+        
+        
+        /*
+        for (int i = 0; i < 1000; i++) {
+            // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
+            //float xPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomWidth() - 1));
+            //float yPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomHeight() - 1));
+            float xPosInRoomCoordinates = 1.77902f;
+            float yPosInRoomCoordinates = 1.005072f;
+            // ^ these coordinates are problematic - the spawn position is valid, but enemy gets stuck.
+
+            //float xPosInRoomCoordinates = 2.5f;
+            //float yPosInRoomCoordinates = 2.5f;
+
+            spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
+            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + rm.GetPosOffset().x), (spawnPosInRoomCoordinates.y + rm.GetPosOffset().y));
+            distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) MainGameManager.GetPlayer().transform.position).magnitude;
+
+            
+            if (IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer)) {
+                break;
+            }
+        }
+        */
+        
 
         return spawnPosInWorldCoordinates;
         //return Vector2.zero;
@@ -72,6 +102,7 @@ public class CombatManager : MonoBehaviour
     private bool IsSpawnPosValid(Vector2 spawnPosInRoomCoordinates, float enemySize, float distanceFromPlayer) {
         const float minimumDistanceFromPlayer = 4f;     
         if (distanceFromPlayer < minimumDistanceFromPlayer) {
+            //print("SpawnPos is not valid. Too close to player");
             return false;
         }
 
@@ -79,22 +110,26 @@ public class CombatManager : MonoBehaviour
         float enemyDiameter = enemySize / 2f;
         if (spawnPos.x - enemyDiameter < 0 || spawnPos.x + enemyDiameter > rm.RoomWidth() ||
                 spawnPos.y - enemyDiameter < 0 || spawnPos.y + enemyDiameter > rm.RoomHeight()) {
+            //print("SpawnPos is not valid. Outside of valid bounds");
             return false;
         }
 
-        int leftBound = (int) Mathf.Round(spawnPos.x - enemyDiameter);
-        int rightBound = (int) Mathf.Round(spawnPos.x + enemyDiameter);
-        int upperBound = (int) Mathf.Round(spawnPos.y - enemyDiameter);
-        int lowerBound = (int) Mathf.Round(spawnPos.y + enemyDiameter);
+        int leftBound = (int) Mathf.Round(spawnPos.x - enemyDiameter - AbstractEnemy.extraDistanceFromWall);
+        int rightBound = (int) Mathf.Round(spawnPos.x + enemyDiameter + AbstractEnemy.extraDistanceFromWall);
+        int upperBound = (int) Mathf.Round(spawnPos.y - enemyDiameter - AbstractEnemy.extraDistanceFromWall);
+        int lowerBound = (int) Mathf.Round(spawnPos.y + enemyDiameter + AbstractEnemy.extraDistanceFromWall);
 
         for (int x = leftBound; x <= rightBound; x++) {
             for (int y = upperBound; y <= lowerBound; y++) {
                 if (rm.TileSymbolAtPosition(x, y) != '.') {
+                    //print("SpawnPos is not valid. Position is colliding with a non-floor block.");
+                    //print("spawnPos.x = " + spawnPos.x + ". spawnPos.y = " + spawnPos.y + ". leftBound = " + leftBound + ". rightBound = " + rightBound + ". upperBound = " + upperBound + ". lowerBound = " + lowerBound);
                     return false;
                 }
             }
         }
 
+        //print("SpawnPos is valid.");
         return true;
     }
 }

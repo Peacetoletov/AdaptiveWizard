@@ -29,14 +29,16 @@ namespace Pathfinding {
             this.roomIndex = roomIndex;
         }
 
-        public Vector2 DirectionInWorldCoordinates() {
+        public Vector2 GetDirection() {
             /*
             In the pathfinding algorithm, I use room coordinates, where top left corner has 
             coordinates  (0, 0), as opposed to world coordinates, where the bottom left corner
             has coornidates (0, 0). This function performs the transformation from room 
             coordinates into world coordinates.
             */
-            return new Vector2(direction.x, -direction.y);
+            //return new Vector2(direction.x, -direction.y);
+            //return new Vector2(direction.x, direction.y);
+            return direction;
         }
 
         public float DistanceInWorldCoordinates() {

@@ -10,12 +10,12 @@ public class PlayerGeneral : AbstractPlayer
 {
     private BoxCollider2D boxCollider;
     private SpriteRenderer spriteRenderer;
-    private const float baseMaxHealth = 100f;
+    private const float baseMaxHealth = 100000f;
     private float maxHealth;
     private float curHealth;
     private bool meleeInvulnerability;
     private Timer meleeInvulnerabilityTimer;
-    private const float baseMaxMana = 100f;
+    private const float baseMaxMana = 100000f;
     private float maxMana;
     private float curMana;
     private Timer manaRegenTimer;

@@ -10,6 +10,12 @@ public abstract class AbstractEnemy : MonoBehaviour
     private float curHealth;
     private CombatManager combatManager;
 
+    // Extra distance is used when spawning enemies to ensure they don't spawn too close to a wall. 
+    // This distance is also added to delta when checking collisions (casting a box). Without this 
+    // buffer, enemies could possibly get stuck in a wall on rare occasions (presumably due to
+    // floating point errors).
+    public const float extraDistanceFromWall = 0.001f;
+
     protected virtual void Start(float maxHealth) {
         // set ID and increment ID counter
         this.ID = AbstractEnemy.ID_Counter++;

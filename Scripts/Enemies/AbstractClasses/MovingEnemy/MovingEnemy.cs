@@ -53,7 +53,7 @@ public abstract class MovingEnemy : AbstractEnemy
         this.speed = speed;
         this.generalMovement = new GeneralMovement();
         this.path = new Path();
-        this.roomIndex = ManagerOfRoomManagers.WorldPositionToRoomIndex(transform.position);
+        this.roomIndex = MainGameManager.GetManagerOfRoomManagers().RoomIDOfObject(gameObject);
     }
     
     protected virtual void FixedUpdate() {
@@ -69,6 +69,7 @@ public abstract class MovingEnemy : AbstractEnemy
     private void StopFollowingPath() {
         // Sets control variables that signal to stop following a path
         UnityEngine.Assertions.Assert.IsTrue(path.isFollowing);
+        //print(Time.time + ". Stopped following path");
         this.path.isFollowing = false;
         this.path.justFinishedFollowing = true;
         this.path.firstNode.goingTowards = false;
@@ -93,11 +94,11 @@ public abstract class MovingEnemy : AbstractEnemy
         }
 
         if (path.isFollowing) {
+            //print(Time.time + ". following path");
             MoveOnPath();
-            //print("following path");
         } else {
+            //print(Time.time + ". trying to move simply");
             TryToMoveSimply();
-            //print("trying to move simply");
         }
     }
 
@@ -113,7 +114,7 @@ public abstract class MovingEnemy : AbstractEnemy
         3) If this enemy is going towards the first path node, it moves in the required direction, adjusted by repulsion forces.
         */
         if (!path.firstNode.goingTowards) {
-            Vector2 movementVector = (RepulsionVector() + path.path.DirectionInWorldCoordinates()).normalized * speed * Time.deltaTime;
+            Vector2 movementVector = (RepulsionVector() + path.path.GetDirection()).normalized * speed * Time.deltaTime;
             //print("Moving on path. movementVector: " + (RepulsionVector() + path.path.DirectionInWorldCoordinates()).normalized * speed);
             bool moved = Move(movementVector);
             if ((path.movementOrigin - (Vector2) transform.position).magnitude > path.path.DistanceInWorldCoordinates()) {
@@ -199,6 +200,8 @@ public abstract class MovingEnemy : AbstractEnemy
         bool canMoveOnY;
         bool movedOnX = MoveOnOneAxis(movementVector.x, new Vector2(movementVector.x, 0), out canMoveOnX);
         bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
+        //print(Time.time + ". is following path = " + path.isFollowing);
+        //print(Time.time + ". movedOnX = " + movedOnX + ". movedOnY = " + movedOnY);
         if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
             // Wall is blocking movement on at least one axis, need to perform A* to find a path.
             Pathfinding.Node nodeOnThisPos = MainGameManager.GetManagerOfRoomManagers().GetRoomManager(roomIndex).WorldPositionToNode(gameObject);
@@ -207,12 +210,14 @@ public abstract class MovingEnemy : AbstractEnemy
             this.path.followingTime = new Timer(1f);
             this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos, roomIndex);
             this.path.movementOrigin = transform.position;
-            //print("Path direction: " + path.path.DirectionInWorldCoordinates() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());
+            //print(Time.time + ". Wall is blocking movement on at least one axis, need to perform A* to find a path");
+            //print(Time.time + ". Path direction: " + path.path.GetDirection() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());
         }
 
         // Return true if this enemy moved at least on one axis
         //print("movedOnX = " + movedOnX + "; movedOnY = " + movedOnY);
         bool movedAtLeastOnOneAxis = movedOnX || movedOnY;
+        //print(Time.time + ". Moved at least on one axis = " + movedAtLeastOnOneAxis);
         return movedAtLeastOnOneAxis;
     }
 
@@ -238,9 +243,8 @@ public abstract class MovingEnemy : AbstractEnemy
             return false;
         }
 
-        const float extraBoxDistance = 0.001f;      // without this buffer, enemies could possibly get stuck in a wall on rare occasions (presumably due to floating point errors)
-        RaycastHit2D hit;
-        hit = Physics2D.BoxCast(transform.position, terrainCollider.size, 0, axisVector, Mathf.Abs(delta) + extraBoxDistance, LayerMask.GetMask("Wall"));
+        RaycastHit2D hit = Physics2D.BoxCast(transform.position, terrainCollider.size, 0, axisVector, Mathf.Abs(delta) + 
+                                             AbstractEnemy.extraDistanceFromWall, LayerMask.GetMask("Wall"));
         if (hit.collider != null) {
             // wall ahead; cannot move on this axis
             canMove = false;

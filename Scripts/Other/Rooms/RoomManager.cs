@@ -148,7 +148,7 @@ public class RoomManager : MonoBehaviour
     public Pathfinding.Node WorldPositionToNode(Vector2 position) {
         int x = (int) Mathf.Round(position.x - posOffset.x);
         int y = (int) Mathf.Round(position.y - posOffset.y);
-        //print("object position = " + position + ". room position =" + new Vector2(x, y));
+        //print("object position = " + position + ". offset = " + posOffset + ". room width = " + RoomWidth() + ". room height = " + RoomHeight() + ". room position =" + new Vector2(x, y));
         /*
         if (x < 0 || x > RoomWidth() || y < 0 || y > RoomHeight()) {
             print("Outside of array bounds!");

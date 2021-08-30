@@ -76,7 +76,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
         this.playerCurRoomID = newPlayerCurRoomID;
     }
 
-    private int RoomIDOfObject(GameObject obj) {
+    public int RoomIDOfObject(GameObject obj) {
         for (int id = 0; id < roomManagers.Count; id++) {
             RoomManager rm = roomManagers[id];
             Vector2 positionOfRoom = rm.PositionInRoomToPositionInWorld(new Vector2Int(0, 0));
@@ -150,10 +150,13 @@ public class ManagerOfRoomManagers : MonoBehaviour
         
     }
 
+    /*
     public static int WorldPositionToRoomIndex(Vector2 pos) {
         // TODO: implement this
+        // UPDATE: unnecessary, use case already covered by RoomIDOfObject
         return 0;
     }
+    */
 
     public RoomManager GetRoomManager(int roomIndex) {
         return roomManagers[roomIndex];
