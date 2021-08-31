@@ -14,6 +14,9 @@ public class CombatManager : MonoBehaviour
     private bool didCombatBegin = false;          // did enemies start spawning?
     private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
+    private const int totalEnemies = 10;
+    private int enemiesDead = 0;
+
     public void Init(RoomManager rm) {
         this.rm = rm;
     }
@@ -23,7 +26,8 @@ public class CombatManager : MonoBehaviour
         this.didCombatBegin = true;
         this.isCombatActive = true;
 
-        for (int i = 0; i < 100; i++) {
+        // TODO: make enemy spawning more complex, implement spawn waves etc.
+        for (int i = 0; i < totalEnemies; i++) {
             Vector2 spawnPos = RandomSpawnPos(1f);
             AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
             enemy.SetCombatManager(this);
@@ -32,9 +36,11 @@ public class CombatManager : MonoBehaviour
     }
 
     public void OnEnemyDeath() {
-        // temporarily simplified
-        this.isCombatActive = false;
-        rm.OpenDoors();
+        this.enemiesDead++;
+        if (enemiesDead == totalEnemies) {
+            this.isCombatActive = false;
+            rm.OpenDoors();
+        }
     }
 
     private bool IsRoomCleared() {
