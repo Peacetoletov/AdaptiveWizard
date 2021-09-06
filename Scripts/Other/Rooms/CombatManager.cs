@@ -8,6 +8,7 @@ public class CombatManager : MonoBehaviour
     public GameObject enemy1Obj;
     public GameObject enemy2Obj;
     public GameObject enemyGatlingObj;
+    public GameObject chestObj;
 
 
     private RoomManager rm;                       // reference to the room manager of this combat
@@ -39,8 +40,29 @@ public class CombatManager : MonoBehaviour
         this.enemiesDead++;
         if (enemiesDead == totalEnemies) {
             this.isCombatActive = false;
+            SpawnChest();
             rm.OpenDoors();
         }
+    }
+
+    private void SpawnChest() {
+        // TODO: rework the design of chest spawning. Currently, I have at least 2 position in each room where a chest can spawn, and immediately
+        // spawns at one of those positions when the room is cleared. The reworked design will only have 1 position (which can be graphically highlighted
+        // to show where the player should expect the chest) and the chest will only spawn once the position becomes unobstructed by the player.
+        GameObject chest = Instantiate(chestObj, Vector2.zero, Quaternion.identity) as GameObject;
+        List<Vector2> possiblePositions = rm.PossibleChestWorldPositions();
+        foreach (Vector2 position in possiblePositions) {
+            // Move the chest to a possible position, and if it collides with the player, try another position.
+            // This feels super hacky but works
+            chest.transform.position = position;
+            BoxCollider2D chestCollider = chest.GetComponent<BoxCollider2D>();
+            RaycastHit2D hit = Physics2D.BoxCast(chest.transform.position, chestCollider.size, 0, Vector2.zero, 0, LayerMask.GetMask("Player"));
+            if (hit.collider == null) {
+                // not colliding with player, this position is ok
+                return;
+            }
+        }
+        throw new System.Exception("ERROR: No viable chest spawn position!");
     }
 
     private bool IsRoomCleared() {

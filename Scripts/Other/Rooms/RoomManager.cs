@@ -50,11 +50,12 @@ public class RoomManager : MonoBehaviour
         for (int x = 0; x < RoomWidth(); x++) {
             for (int y = 0; y < RoomHeight(); y++) {
                 Vector3 coordinates = (Vector3) PositionInRoomToPositionInWorld(new Vector2Int(x, y));
-                if (TileSymbolAtPosition(x, y) == '.') {
+                char symbol = TileSymbolAtPosition(x, y);
+                if (IsFloor(symbol)) {
                     Instantiate(floorObj, coordinates, Quaternion.identity);
-                } else if (TileSymbolAtPosition(x, y) == '#') {
+                } else if (symbol == '#') {
                     Instantiate(wallObj, coordinates, Quaternion.identity);
-                } else if (TileSymbolAtPosition(x, y) == '/') {
+                } else if (symbol == '/') {
                     // door
                     GameObject newDoor = Instantiate(doorObj, coordinates, Quaternion.identity) as GameObject;
                     this.doors.Add(newDoor.GetComponent<Door>());
@@ -84,12 +85,16 @@ public class RoomManager : MonoBehaviour
             for (int y = 0; y < RoomHeight(); y++) {
                 // first, set null to each element
                 this.roomNodes[x, y] = null;
-                if (TileSymbolAtPosition(x, y) == '.') {
+                if (IsFloor(TileSymbolAtPosition(x, y))) {
                     // second, change null to a node if needed
                     this.roomNodes[x, y] = new Pathfinding.Node(new Vector2Int(x, y));
                 }
             }
         }
+    }
+
+    private bool IsFloor(char symbol) {
+        return symbol == '.' || symbol == 'c';
     }
 
     private void InitializeRoomNodes() {
@@ -204,5 +209,19 @@ public class RoomManager : MonoBehaviour
         foreach (Door door in doors) {
             door.Open();
         }
+    }
+
+    public List<Vector2> PossibleChestWorldPositions() {
+        // Returns all possible positions where a chest could spawn
+        // Note that this function is super inefficient but should be called very rarely so it shouldn't be a problem
+        List<Vector2> positions = new List<Vector2>();
+        for (int x = 0; x < RoomWidth(); x++) {
+            for (int y = 0; y < RoomHeight(); y++) {
+                if (TileSymbolAtPosition(x, y) == 'c') {
+                    positions.Add(PositionInRoomToPositionInWorld(new Vector2Int(x, y)));
+                }
+            }
+        }
+        return positions;
     }
 }
