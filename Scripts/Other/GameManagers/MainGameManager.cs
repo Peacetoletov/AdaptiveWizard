@@ -8,6 +8,9 @@ public class MainGameManager : MonoBehaviour
     // build options
     public const bool minigame = false;     // must be false until room management is fully implemented
 
+    // constants
+    public const int PIXELS_PER_UNIT = 16;          // how many pixels are in 1 unit. Currently 16, might change to 32 in the future if I want more detailed art
+
     // public GameObjects used for instantiating
     public GameObject playerObj;
     public GameObject managerOfRoomManagersObj;

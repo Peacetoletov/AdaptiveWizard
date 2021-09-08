@@ -18,8 +18,41 @@ public class CombatManager : MonoBehaviour
     private const int totalEnemies = 10;
     private int enemiesDead = 0;
 
+    private Vector2 CHEST_POS;                    // position where the chest will spawn, in world coordinates
+    private Vector2 CHEST_SIZE;                   // size of the chest sprite (width x height) (not in pixels, rather as a multiple of the base unit)
+    private bool chestSpawned = false;            // did a chest already spawn (as a reward for clearing the room)?
+    private Timer timeBetweenChestSpawnAttempts;
+
     public void Init(RoomManager rm) {
         this.rm = rm;
+
+        this.CHEST_POS = rm.GetChestPosition();
+        Sprite chestSprite = Resources.Load<Sprite>("Sprites/Environment/chestClosedSpr");
+        this.CHEST_SIZE = new Vector2(chestSprite.rect.width, chestSprite.rect.height) / MainGameManager.PIXELS_PER_UNIT;
+        this.timeBetweenChestSpawnAttempts = new Timer(0f);
+    }
+
+    public void Update() {
+        if (MainGameManager.IsGameActive()) {
+            if (IsRoomCleared() && !chestSpawned && timeBetweenChestSpawnAttempts.UpdateAndCheck()) {
+                TryToSpawnChest();
+                // if a chest cannot be spawned, wait a short moment and try again
+                if (!chestSpawned) {
+                    const float chestSpawnAttemptCooldown = 0.5f;
+                    this.timeBetweenChestSpawnAttempts = new Timer(chestSpawnAttemptCooldown);
+                }
+            }
+        }
+    }
+
+    private void TryToSpawnChest() {
+        Collider2D collider = Physics2D.OverlapBox(CHEST_POS, CHEST_SIZE, 0, LayerMask.GetMask("Player"));
+        if (collider == null) {
+            // player wasn't hit, the spawn can chest
+            Instantiate(chestObj, CHEST_POS, Quaternion.identity);
+            this.chestSpawned = true;
+            return;
+        }
     }
 
     public void BeginCombat() {
@@ -49,6 +82,7 @@ public class CombatManager : MonoBehaviour
         // TODO: rework the design of chest spawning. Currently, I have at least 2 position in each room where a chest can spawn, and immediately
         // spawns at one of those positions when the room is cleared. The reworked design will only have 1 position (which can be graphically highlighted
         // to show where the player should expect the chest) and the chest will only spawn once the position becomes unobstructed by the player.
+        /*
         GameObject chest = Instantiate(chestObj, Vector2.zero, Quaternion.identity) as GameObject;
         List<Vector2> possiblePositions = rm.PossibleChestWorldPositions();
         foreach (Vector2 position in possiblePositions) {
@@ -63,6 +97,7 @@ public class CombatManager : MonoBehaviour
             }
         }
         throw new System.Exception("ERROR: No viable chest spawn position!");
+        */
     }
 
     private bool IsRoomCleared() {
