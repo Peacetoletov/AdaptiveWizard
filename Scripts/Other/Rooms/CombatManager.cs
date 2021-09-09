@@ -49,7 +49,7 @@ public class CombatManager : MonoBehaviour
         Collider2D collider = Physics2D.OverlapBox(CHEST_POS, CHEST_SIZE, 0, LayerMask.GetMask("Player"));
         if (collider == null) {
             // player wasn't hit, the spawn can chest
-            Instantiate(chestObj, CHEST_POS, Quaternion.identity);
+            Instantiate(chestObj, CHEST_POS, Quaternion.identity).GetComponent<Chest>().Init(CHEST_SIZE);
             this.chestSpawned = true;
             return;
         }

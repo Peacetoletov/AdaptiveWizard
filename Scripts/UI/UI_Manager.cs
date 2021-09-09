@@ -17,7 +17,9 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject healthPotionUI_obj;
     public GameObject manaPotionUI_obj;
-    
+
+    public GameObject interactionPromptIconObj;
+
 
     // passive items
     List<GameObject> passiveItemObjects = new List<GameObject>();
@@ -50,7 +52,6 @@ public class UI_Manager : MonoBehaviour
         */
         
     }
-
     
     public void UpdatePassiveItems(List<PassiveItem> items) {
         DestroyPassiveItemObjects();
