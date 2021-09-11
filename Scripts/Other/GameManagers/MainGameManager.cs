@@ -17,7 +17,17 @@ public class MainGameManager : MonoBehaviour
     public GameObject minigameManagerObj;
 
 
-    private static bool isGameActive = true;        // false if game is paused or UI is open, true otherwise
+    public enum GameState {
+        // Most common, player can freely move around
+        ACTIVE,
+
+        // Player cannot move and only interacts with gameplay related UI (chests)
+        PARTIALLY_ACTIVE,
+
+        // Player cannot move and only interacts with gameplay unrelated UI (menu, options)
+        INACTIVE
+    }
+    private static GameState gameState = GameState.ACTIVE;
     private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-0.5f, 7.5f, 0.0f);
     private static GameObject player;                   // reference to the player
                                                         // I decided to make it static because I don't plan on having multiplayer PvP or coop modes
@@ -56,7 +66,7 @@ public class MainGameManager : MonoBehaviour
     }
 
     private void Update() {
-        if (isGameActive) {
+        if (IsGameActive()) {
             /*
             if (miniGame && spawnEnemiesTimer.UpdateAndCheck()) {
                 UpdateMiniGameSpawnPeriod();
@@ -97,7 +107,11 @@ public class MainGameManager : MonoBehaviour
         } 
 
         if (Input.GetKeyDown(KeyCode.P)) {
-            MainGameManager.isGameActive = !isGameActive;
+            if (gameState == GameState.ACTIVE) {
+                MainGameManager.gameState = GameState.INACTIVE;
+            } else if (gameState == GameState.INACTIVE) {
+                MainGameManager.gameState = GameState.ACTIVE;
+            }
         }
     }
 
@@ -118,9 +132,16 @@ public class MainGameManager : MonoBehaviour
         }
     }
 
+    public static void SetGameState(GameState state) {
+        MainGameManager.gameState = state;
+    }
 
     public static bool IsGameActive() {
-        return isGameActive;
+        return gameState == GameState.ACTIVE;
+    }
+
+    public static bool IsGamePartiallyActive() {
+        return gameState == GameState.PARTIALLY_ACTIVE;
     }
 
     public static UI_Manager GetUI_Manager() {

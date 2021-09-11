@@ -10,6 +10,7 @@ public class Chest : MonoBehaviour
 
     private Vector2 CHEST_SIZE;
     private GameObject interactionPromptIcon = null;
+    private bool currentlyOpen = false;
 
 
     private void Start() {
@@ -17,20 +18,42 @@ public class Chest : MonoBehaviour
     }
 
     private void Update() {
-        // TODO: check if player is close, and spawn a prompt icon if so
-        // TODO: make the distance the same on x and y axis
         if (MainGameManager.IsGameActive()) {
-            Collider2D collider = Physics2D.OverlapBox(gameObject.transform.position, BoxSize(), 0, LayerMask.GetMask("Player"));
-            if (interactionPromptIcon == null && collider != null) {
-                // Create a prompt
-                this.interactionPromptIcon = Instantiate(interactionPromptIconPrefab, gameObject.transform.position, Quaternion.identity) as GameObject;
+            // prompt an interaction
+            CreateInteractionPromptIfPlayerIsClose();
+
+            if (interactionPromptIcon != null && Input.GetKeyDown(KeyCode.F) && !currentlyOpen) {
+                // open the chest, set the game state as partially active, remove the interaction prompt
+                this.currentlyOpen = true;
+                MainGameManager.GetUI_Manager().ShowChestContent();
+                MainGameManager.SetGameState(MainGameManager.GameState.PARTIALLY_ACTIVE);
+                RemoveInteractionPrompt();
             }
-            else if (interactionPromptIcon != null && collider == null) {
-                // Destroy the prompt
-                Destroy(interactionPromptIcon);
-                this.interactionPromptIcon = null;
+        } else if (MainGameManager.IsGamePartiallyActive()) {
+            if ((Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Escape)) && currentlyOpen) {
+                // close the chest, set the game state as active
+                this.currentlyOpen = false;
+                MainGameManager.GetUI_Manager().HideChestContent();
+                MainGameManager.SetGameState(MainGameManager.GameState.ACTIVE);
             }
         }
+    }
+
+    private void CreateInteractionPromptIfPlayerIsClose() {
+        // checks if player is close, and spawns a prompt icon if so
+        Collider2D collider = Physics2D.OverlapBox(gameObject.transform.position, BoxSize(), 0, LayerMask.GetMask("Player"));
+        if (interactionPromptIcon == null && collider != null) {
+            // Create a prompt
+            this.interactionPromptIcon = Instantiate(interactionPromptIconPrefab, gameObject.transform.position, Quaternion.identity) as GameObject;
+        }
+        else if (interactionPromptIcon != null && collider == null) {
+            RemoveInteractionPrompt();
+        }
+    }
+
+    private void RemoveInteractionPrompt() {
+        Destroy(interactionPromptIcon);
+        this.interactionPromptIcon = null;
     }
 
     private Vector2 BoxSize() {

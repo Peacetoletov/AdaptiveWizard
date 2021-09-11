@@ -11,12 +11,14 @@ public class UI_Manager : MonoBehaviour
 {
     // GameObjects used for instantiates
     public GameObject canvasObj;
-    public GameObject healthCrystalUI_Obj;
-    public GameObject divineSphereUI_Obj;
-    public GameObject manaCrystalUI_obj;
+    public GameObject healthCrystalUI_Prefab;
+    public GameObject divineSphereUI_Prefab;
+    public GameObject manaCrystalUI_Prefab;
 
-    public GameObject healthPotionUI_obj;
-    public GameObject manaPotionUI_obj;
+    public GameObject healthPotionUI_Prefab;
+    public GameObject manaPotionUI_Prefab;
+
+    public GameObject chestContentUI_Prefab;
 
     // passive items
     List<GameObject> passiveItemObjects = new List<GameObject>();
@@ -27,10 +29,9 @@ public class UI_Manager : MonoBehaviour
     // active items
     public GameObject[] activeItemBoxes;
     private GameObject[] activeItemObjects = new GameObject[3];
-    /*
-    public GameObject activeItemBox2;
-    public GameObject activeItemBox3;
-    */
+
+    // chests
+    private GameObject chestContent;
 
     void Start() {
         //print("UI manager is running");
@@ -55,11 +56,11 @@ public class UI_Manager : MonoBehaviour
         foreach (PassiveItem item in items) {
             GameObject itemObj;
             if (item is HealthCrystal) {
-                itemObj = Instantiate(healthCrystalUI_Obj) as GameObject;
+                itemObj = Instantiate(healthCrystalUI_Prefab) as GameObject;
             } else if (item is DivineSphere) {
-                itemObj = Instantiate(divineSphereUI_Obj) as GameObject;
+                itemObj = Instantiate(divineSphereUI_Prefab) as GameObject;
             } else {
-                itemObj = Instantiate(manaCrystalUI_obj) as GameObject;
+                itemObj = Instantiate(manaCrystalUI_Prefab) as GameObject;
             }
             /*
             else if (item is DivineSphere) {
@@ -87,10 +88,10 @@ public class UI_Manager : MonoBehaviour
             if (items[i] != null) {
                 GameObject itemObj;
                 if (items[i] is HealthPotion) {
-                    itemObj = Instantiate(healthPotionUI_obj) as GameObject;
+                    itemObj = Instantiate(healthPotionUI_Prefab) as GameObject;
                 }
                 else {
-                    itemObj = Instantiate(manaPotionUI_obj) as GameObject;
+                    itemObj = Instantiate(manaPotionUI_Prefab) as GameObject;
                 }
                 itemObj.transform.SetParent(activeItemBoxes[i].transform, false);
                 this.activeItemObjects[i] = itemObj;
@@ -103,5 +104,16 @@ public class UI_Manager : MonoBehaviour
             Destroy(activeItemObjects[i]);
             activeItemObjects[i] = null;
         }
+    }
+
+    public void ShowChestContent() {
+        // TODO: make this prefab better suited for different types of screen sizes (currently it only looks good with 1920x1080 resolution)
+        this.chestContent = Instantiate(chestContentUI_Prefab) as GameObject;
+        this.chestContent.transform.SetParent(canvasObj.transform, false);
+    }
+
+    public void HideChestContent() {
+        Destroy(chestContent);
+        this.chestContent = null;
     }
 }
