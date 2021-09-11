@@ -27,8 +27,11 @@ public class CombatManager : MonoBehaviour
         this.rm = rm;
 
         this.CHEST_POS = rm.GetChestPosition();
+        /*
         Sprite chestSprite = Resources.Load<Sprite>("Sprites/Environment/chestClosedSpr");
         this.CHEST_SIZE = new Vector2(chestSprite.rect.width, chestSprite.rect.height) / MainGameManager.PIXELS_PER_UNIT;
+        */
+        this.CHEST_SIZE = Utility.SpriteSize("Sprites/Environment/chestClosedSpr");
         this.timeBetweenChestSpawnAttempts = new Timer(0f);
     }
 
@@ -49,7 +52,7 @@ public class CombatManager : MonoBehaviour
         Collider2D collider = Physics2D.OverlapBox(CHEST_POS, CHEST_SIZE, 0, LayerMask.GetMask("Player"));
         if (collider == null) {
             // player wasn't hit, the spawn can chest
-            Instantiate(chestObj, CHEST_POS, Quaternion.identity).GetComponent<Chest>().Init(CHEST_SIZE);
+            Instantiate(chestObj, CHEST_POS, Quaternion.identity).GetComponent<Chest>();
             this.chestSpawned = true;
             return;
         }

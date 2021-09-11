@@ -18,9 +18,6 @@ public class UI_Manager : MonoBehaviour
     public GameObject healthPotionUI_obj;
     public GameObject manaPotionUI_obj;
 
-    public GameObject interactionPromptIconObj;
-
-
     // passive items
     List<GameObject> passiveItemObjects = new List<GameObject>();
     readonly Vector3 passiveItemOffset = new Vector3(70f, 0f, 0f);
