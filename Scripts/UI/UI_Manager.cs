@@ -18,7 +18,8 @@ public class UI_Manager : MonoBehaviour
     public GameObject healthPotionUI_Prefab;
     public GameObject manaPotionUI_Prefab;
 
-    public GameObject chestContentUI_Prefab;
+    public GameObject chestContentBackgroundUI_Prefab;
+    public GameObject chestContentSlotUI_Prefab;
 
     // passive items
     List<GameObject> passiveItemObjects = new List<GameObject>();
@@ -31,7 +32,8 @@ public class UI_Manager : MonoBehaviour
     private GameObject[] activeItemObjects = new GameObject[3];
 
     // chests
-    private GameObject chestContent;
+    private GameObject chestContentBackground;
+    private GameObject chestContentSlot;
 
     void Start() {
         //print("UI manager is running");
@@ -108,12 +110,28 @@ public class UI_Manager : MonoBehaviour
 
     public void ShowChestContent() {
         // TODO: make this prefab better suited for different types of screen sizes (currently it only looks good with 1920x1080 resolution)
-        this.chestContent = Instantiate(chestContentUI_Prefab) as GameObject;
-        this.chestContent.transform.SetParent(canvasObj.transform, false);
+        // TODO: this will need even more work when I start to replace the simple backgrounds with actual sprites (but it should mostly be
+        // just figuring out the unity engine, not modifying code)
+
+        // Create the background
+        this.chestContentBackground = Instantiate(chestContentBackgroundUI_Prefab) as GameObject;
+        this.chestContentBackground.transform.SetParent(canvasObj.transform, false);
+
+        // Create content slots
+        // For now, I will only have one slot - TODO: soon implement multiple slots (as a list)
+        // TODO: Create multiple UI sorting layers to differenciate between multiple overlapping UI elements (currently,
+        // the order in which the overlapping UI elements are drawn is undefined, which could cause severe problems in the future,
+        // despite working as intented currently)
+        this.chestContentSlot = Instantiate(chestContentSlotUI_Prefab) as GameObject;
+        this.chestContentSlot.transform.SetParent(chestContentBackground.transform, false);
+        chestContentSlot.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(0f, -20f, 0f);
     }
 
     public void HideChestContent() {
-        Destroy(chestContent);
-        this.chestContent = null;
+        Destroy(chestContentBackground);
+        this.chestContentBackground = null;
+
+        // I don't need to explicitely destroy chest content's slots because I'm destroying their parent and Unity will handle
+        // destruction of the children
     }
 }
