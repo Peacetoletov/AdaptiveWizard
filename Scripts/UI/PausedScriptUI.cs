@@ -11,7 +11,7 @@ public class PausedScriptUI : MonoBehaviour
         // At least for now, I will not check whether game is active in UI update functions.
 
         this.pausedText.text = "";
-        if (!MainGameManager.IsGameActive()) {
+        if (MainGameManager.IsGameInactive()) {
             this.pausedText.text = "Paused";
         }
     }

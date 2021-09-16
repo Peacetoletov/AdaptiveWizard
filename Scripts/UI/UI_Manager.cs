@@ -11,9 +11,12 @@ public class UI_Manager : MonoBehaviour
 {
     // GameObjects used for instantiates
     public GameObject canvasObj;
+    /*
     public GameObject healthCrystalUI_Prefab;
     public GameObject divineSphereUI_Prefab;
     public GameObject manaCrystalUI_Prefab;
+    */
+    public GameObject passiveItemsUI_ManagerPrefab;
 
     public GameObject healthPotionUI_Prefab;
     public GameObject manaPotionUI_Prefab;
@@ -22,10 +25,14 @@ public class UI_Manager : MonoBehaviour
     public GameObject chestContentSlotUI_Prefab;
 
     // passive items
+    /*
     List<GameObject> passiveItemObjects = new List<GameObject>();
     readonly Vector3 passiveItemOffset = new Vector3(70f, 0f, 0f);
     readonly Vector3 basePassiveItemPos = new Vector3(20f, -20f, 0f);
     Vector3 nextPassiveItemPos = new Vector3(20f, -20f, 0f);
+    */
+
+    private PassiveItemsUI_Manager passiveItemsUI_Manager;
 
     // active items
     public GameObject[] activeItemBoxes;
@@ -51,9 +58,17 @@ public class UI_Manager : MonoBehaviour
         itemUI3.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(160f, -20f, 0f);
         */
         
+        this.passiveItemsUI_Manager = Instantiate(passiveItemsUI_ManagerPrefab, Vector2.zero, Quaternion.identity).GetComponent<PassiveItemsUI_Manager>();
+        passiveItemsUI_Manager.Init(canvasObj);
+    }
+
+    public PassiveItemsUI_Manager GetPassiveItemsUI_Manager() {
+        return passiveItemsUI_Manager;
     }
     
+    /*
     public void UpdatePassiveItems(List<PassiveItem> items) {
+        
         DestroyPassiveItemObjects();
         foreach (PassiveItem item in items) {
             GameObject itemObj;
@@ -64,18 +79,18 @@ public class UI_Manager : MonoBehaviour
             } else {
                 itemObj = Instantiate(manaCrystalUI_Prefab) as GameObject;
             }
-            /*
-            else if (item is DivineSphere) {
-                itemObj = Instantiate(divineSphereUI_Obj) as GameObject;
-            } else { ... }
-            */
+            //else if (item is DivineSphere) {
+            //    itemObj = Instantiate(divineSphereUI_Obj) as GameObject;
+            //} else { ... }
             itemObj.transform.SetParent(canvasObj.transform, false);
             itemObj.GetComponent<RectTransform>().anchoredPosition3D = nextPassiveItemPos;
             this.nextPassiveItemPos += passiveItemOffset;
             this.passiveItemObjects.Add(itemObj);
-        }
+        }   
     }
+    */
 
+    /*
     private void DestroyPassiveItemObjects() {
         this.nextPassiveItemPos = basePassiveItemPos;
         foreach (GameObject obj in passiveItemObjects) {
@@ -83,6 +98,7 @@ public class UI_Manager : MonoBehaviour
         }
         this.passiveItemObjects = new List<GameObject>();
     }
+    */
 
     public void UpdateActiveItems(ActiveItem[] items) {
         DestroyActiveItemObjects();

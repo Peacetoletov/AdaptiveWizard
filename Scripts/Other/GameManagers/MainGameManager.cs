@@ -89,8 +89,9 @@ public class MainGameManager : MonoBehaviour
                 InventoryNS.Inventory.activeItemsManager.UseItem(2);
             }
 
-            /*
+            
             // test
+            /*
             if (Input.GetKeyDown(KeyCode.N)) {
                 InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
             }
@@ -142,6 +143,10 @@ public class MainGameManager : MonoBehaviour
 
     public static bool IsGamePartiallyActive() {
         return gameState == GameState.PARTIALLY_ACTIVE;
+    }
+
+    public static bool IsGameInactive() {
+        return gameState == GameState.INACTIVE;
     }
 
     public static UI_Manager GetUI_Manager() {
