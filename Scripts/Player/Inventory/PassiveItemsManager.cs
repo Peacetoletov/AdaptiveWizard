@@ -19,7 +19,7 @@ namespace InventoryNS {
 
         public void AddItem(PassiveItem item) {
             this.allItems.Add(item);
-            MainGameManager.GetUI_Manager().GetPassiveItemsUI_Manager().UpdateItems(allItems);
+            MainGameManager.GetUI_Manager().GetUI_PassiveItemsManager().UpdateItems(allItems);
 
             if (item is PlayerHealthModifier) {
                 playerHealthModifiers.Add(item as PlayerHealthModifier);

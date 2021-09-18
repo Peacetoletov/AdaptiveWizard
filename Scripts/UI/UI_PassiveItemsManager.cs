@@ -4,7 +4,7 @@ using UnityEngine;
 
 using Items;
 
-public class PassiveItemsUI_Manager : MonoBehaviour
+public class UI_PassiveItemsManager : MonoBehaviour
 {
     // GameObjects used for instantiates
     public GameObject healthCrystalUI_Prefab;

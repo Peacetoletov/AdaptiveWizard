@@ -29,7 +29,7 @@ namespace InventoryNS {
                 break;
             }
             //Debug.Log("item added");
-            MainGameManager.GetUI_Manager().UpdateActiveItems(items);
+            MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().UpdateActiveItems(items);
             return true;
         }
 
@@ -38,7 +38,7 @@ namespace InventoryNS {
             if (items[index] != null) {
                 items[index].Use();
                 items[index] = null;
-                MainGameManager.GetUI_Manager().UpdateActiveItems(items);
+                MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().UpdateActiveItems(items);
             }
         }
     }

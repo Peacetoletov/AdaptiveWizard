@@ -25,7 +25,7 @@ public class Chest : MonoBehaviour
             if (interactionPromptIcon != null && Input.GetKeyDown(KeyCode.F) && !currentlyOpen) {
                 // open the chest, set the game state as partially active, remove the interaction prompt
                 this.currentlyOpen = true;
-                MainGameManager.GetUI_Manager().ShowChestContent();
+                MainGameManager.GetUI_Manager().GetUI_ChestContentManager().ShowChestContent();
                 MainGameManager.SetGameState(MainGameManager.GameState.PARTIALLY_ACTIVE);
                 RemoveInteractionPrompt();
             }
@@ -33,7 +33,7 @@ public class Chest : MonoBehaviour
             if ((Input.GetKeyDown(KeyCode.F) || Input.GetKeyDown(KeyCode.Escape)) && currentlyOpen) {
                 // close the chest, set the game state as active
                 this.currentlyOpen = false;
-                MainGameManager.GetUI_Manager().HideChestContent();
+                MainGameManager.GetUI_Manager().GetUI_ChestContentManager().HideChestContent();
                 MainGameManager.SetGameState(MainGameManager.GameState.ACTIVE);
             }
         }

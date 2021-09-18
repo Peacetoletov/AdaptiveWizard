@@ -6,41 +6,22 @@ using UnityEngine;
 using Items;
 
 
-// TODO: create 2 additional classes for UI management of passive items and active items
+// TODO: create 1 additional classes for UI management of chest content
 public class UI_Manager : MonoBehaviour
 {
     // GameObjects used for instantiates
     public GameObject canvasObj;
-    /*
-    public GameObject healthCrystalUI_Prefab;
-    public GameObject divineSphereUI_Prefab;
-    public GameObject manaCrystalUI_Prefab;
-    */
-    public GameObject passiveItemsUI_ManagerPrefab;
+    public GameObject UI_passiveItemsManagerPrefab;
+    public GameObject UI_chestContentManagerPrefab;
+    public GameObject UI_chestContentBackgroundPrefab;
+    public GameObject UI_chestContentSlotPrefab;
 
-    public GameObject healthPotionUI_Prefab;
-    public GameObject manaPotionUI_Prefab;
 
-    public GameObject chestContentBackgroundUI_Prefab;
-    public GameObject chestContentSlotUI_Prefab;
+    // Submanagers
+    private UI_PassiveItemsManager UI_passiveItemsManager;
+    private UI_ActiveItemsManager UI_activeItemsManager;
+    private UI_ChestContentManager UI_chestContentManager;
 
-    // passive items
-    /*
-    List<GameObject> passiveItemObjects = new List<GameObject>();
-    readonly Vector3 passiveItemOffset = new Vector3(70f, 0f, 0f);
-    readonly Vector3 basePassiveItemPos = new Vector3(20f, -20f, 0f);
-    Vector3 nextPassiveItemPos = new Vector3(20f, -20f, 0f);
-    */
-
-    private PassiveItemsUI_Manager passiveItemsUI_Manager;
-
-    // active items
-    public GameObject[] activeItemBoxes;
-    private GameObject[] activeItemObjects = new GameObject[3];
-
-    // chests
-    private GameObject chestContentBackground;
-    private GameObject chestContentSlot;
 
     void Start() {
         //print("UI manager is running");
@@ -58,79 +39,37 @@ public class UI_Manager : MonoBehaviour
         itemUI3.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(160f, -20f, 0f);
         */
         
-        this.passiveItemsUI_Manager = Instantiate(passiveItemsUI_ManagerPrefab, Vector2.zero, Quaternion.identity).GetComponent<PassiveItemsUI_Manager>();
-        passiveItemsUI_Manager.Init(canvasObj);
+        this.UI_passiveItemsManager = Instantiate(UI_passiveItemsManagerPrefab, Vector2.zero, Quaternion.identity).GetComponent<UI_PassiveItemsManager>();
+        UI_passiveItemsManager.Init(canvasObj);
+
+        // Active items manager must be already in the scene (cannot be instantiated from here) because it needs references to the active item boxes in the scene
+        this.UI_activeItemsManager = (UI_ActiveItemsManager) FindObjectOfType(typeof(UI_ActiveItemsManager));
+
+        this.UI_chestContentManager = Instantiate(UI_chestContentManagerPrefab, Vector2.zero, Quaternion.identity).GetComponent<UI_ChestContentManager>();
+        UI_chestContentManager.Init(canvasObj);
     }
 
-    public PassiveItemsUI_Manager GetPassiveItemsUI_Manager() {
-        return passiveItemsUI_Manager;
+    public UI_PassiveItemsManager GetUI_PassiveItemsManager() {
+        return UI_passiveItemsManager;
     }
-    
-    /*
-    public void UpdatePassiveItems(List<PassiveItem> items) {
-        
-        DestroyPassiveItemObjects();
-        foreach (PassiveItem item in items) {
-            GameObject itemObj;
-            if (item is HealthCrystal) {
-                itemObj = Instantiate(healthCrystalUI_Prefab) as GameObject;
-            } else if (item is DivineSphere) {
-                itemObj = Instantiate(divineSphereUI_Prefab) as GameObject;
-            } else {
-                itemObj = Instantiate(manaCrystalUI_Prefab) as GameObject;
-            }
-            //else if (item is DivineSphere) {
-            //    itemObj = Instantiate(divineSphereUI_Obj) as GameObject;
-            //} else { ... }
-            itemObj.transform.SetParent(canvasObj.transform, false);
-            itemObj.GetComponent<RectTransform>().anchoredPosition3D = nextPassiveItemPos;
-            this.nextPassiveItemPos += passiveItemOffset;
-            this.passiveItemObjects.Add(itemObj);
-        }   
+
+    public UI_ActiveItemsManager GetUI_ActiveItemsManager() {
+        return UI_activeItemsManager;
     }
-    */
+
+    public UI_ChestContentManager GetUI_ChestContentManager() {
+        return UI_chestContentManager;
+    }
+
 
     /*
-    private void DestroyPassiveItemObjects() {
-        this.nextPassiveItemPos = basePassiveItemPos;
-        foreach (GameObject obj in passiveItemObjects) {
-            Destroy(obj);
-        }
-        this.passiveItemObjects = new List<GameObject>();
-    }
-    */
-
-    public void UpdateActiveItems(ActiveItem[] items) {
-        DestroyActiveItemObjects();
-        for (int i = 0; i < 3; i++) {
-            if (items[i] != null) {
-                GameObject itemObj;
-                if (items[i] is HealthPotion) {
-                    itemObj = Instantiate(healthPotionUI_Prefab) as GameObject;
-                }
-                else {
-                    itemObj = Instantiate(manaPotionUI_Prefab) as GameObject;
-                }
-                itemObj.transform.SetParent(activeItemBoxes[i].transform, false);
-                this.activeItemObjects[i] = itemObj;
-            }
-        }
-    }
-
-    private void DestroyActiveItemObjects() {
-        for (int i = 0; i < 3; i++) {
-            Destroy(activeItemObjects[i]);
-            activeItemObjects[i] = null;
-        }
-    }
-
     public void ShowChestContent() {
         // TODO: make this prefab better suited for different types of screen sizes (currently it only looks good with 1920x1080 resolution)
         // TODO: this will need even more work when I start to replace the simple backgrounds with actual sprites (but it should mostly be
         // just figuring out the unity engine, not modifying code)
 
         // Create the background
-        this.chestContentBackground = Instantiate(chestContentBackgroundUI_Prefab) as GameObject;
+        this.chestContentBackground = Instantiate(UI_chestContentBackgroundPrefab) as GameObject;
         this.chestContentBackground.transform.SetParent(canvasObj.transform, false);
 
         // Create content slots
@@ -138,7 +77,7 @@ public class UI_Manager : MonoBehaviour
         // TODO: Create multiple UI sorting layers to differenciate between multiple overlapping UI elements (currently,
         // the order in which the overlapping UI elements are drawn is undefined, which could cause severe problems in the future,
         // despite working as intented currently)
-        this.chestContentSlot = Instantiate(chestContentSlotUI_Prefab) as GameObject;
+        this.chestContentSlot = Instantiate(UI_chestContentSlotPrefab) as GameObject;
         this.chestContentSlot.transform.SetParent(chestContentBackground.transform, false);
         chestContentSlot.GetComponent<RectTransform>().anchoredPosition3D = new Vector3(0f, -20f, 0f);
     }
@@ -150,4 +89,5 @@ public class UI_Manager : MonoBehaviour
         // I don't need to explicitely destroy chest content's slots because I'm destroying their parent and Unity will handle
         // destruction of the children
     }
+    */
 }
