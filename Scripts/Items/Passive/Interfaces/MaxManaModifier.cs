@@ -7,6 +7,6 @@ using Items;
 namespace Items {
     public interface MaxManaModifier
     {
-        float ManaModified(float health);
+        float ModifyMana(float health);
     }
 }

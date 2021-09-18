@@ -7,6 +7,6 @@ using Items;
 namespace Items {
     public interface PlayerHealthModifier
     {
-        float HealthModified(float health);
+        float ModifyHealth(float health);
     }
 }

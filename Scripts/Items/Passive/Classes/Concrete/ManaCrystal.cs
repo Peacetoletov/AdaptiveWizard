@@ -8,7 +8,7 @@ namespace Items {
         // Mana Crystal increases mana by 25 %
         private const float multiplier = 1.25f;
 
-        public float ManaModified(float mana) {
+        public float ModifyMana(float mana) {
             return mana * multiplier;
         }
     }

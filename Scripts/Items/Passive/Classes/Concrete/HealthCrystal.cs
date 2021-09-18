@@ -8,7 +8,7 @@ namespace Items {
         // Health Crystal increases player health by 20 %
         private const float multiplier = 1.2f;
 
-        public float HealthModified(float health) {
+        public float ModifyHealth(float health) {
             return health * multiplier;
         }
     }

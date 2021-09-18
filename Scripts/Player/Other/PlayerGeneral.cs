@@ -156,7 +156,7 @@ public class PlayerGeneral : AbstractPlayer
         float oldMaxHealth = maxHealth;
         float newMaxHealth = baseMaxHealth;
         foreach (PlayerHealthModifier item in Inventory.passiveItemsManager.playerHealthModifiers) {
-            newMaxHealth = item.HealthModified(newMaxHealth);
+            newMaxHealth = item.ModifyHealth(newMaxHealth);
         }
         this.maxHealth = newMaxHealth;
         float maxHealthDelta = newMaxHealth - oldMaxHealth;
@@ -185,7 +185,7 @@ public class PlayerGeneral : AbstractPlayer
         float oldMaxMana = maxMana;
         float newMaxmana = baseMaxMana;
         foreach (MaxManaModifier item in Inventory.passiveItemsManager.maxManaModifiers) {
-            newMaxmana = item.ManaModified(newMaxmana);
+            newMaxmana = item.ModifyMana(newMaxmana);
         }
         this.maxMana = newMaxmana;
         float maxManaDelta = newMaxmana - oldMaxMana;

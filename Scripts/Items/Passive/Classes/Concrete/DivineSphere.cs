@@ -7,7 +7,7 @@ namespace Items {
     {
         private const float multiplier = 1.35f;
         
-        public float GoldModified(float gold) {
+        public float ModifyGold(float gold) {
             return gold * multiplier;
         }
     }
