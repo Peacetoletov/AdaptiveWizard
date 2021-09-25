@@ -4,22 +4,27 @@ using UnityEngine;
 
 using Items;
 
-// TODO: delete this class, as I decided to move the functionality into ChestContentManager
-
-/*
-// Local (private) content of one given chest, accessible only from this chest
-public class ChestLocalContent : MonoBehaviour
+public class ChestLocalContent
 {
-    
-    
-    private int gold = 0;
+    private List<(ActiveItem, GameObject)> activeItems = new List<(ActiveItem, GameObject)>();
     private List<PassiveItem> passiveItems = new List<PassiveItem>();
-    private List<ActiveItem> activeItems = new List<ActiveItem>();
-    // skill orbs, spell orbs, spells, ...
-    
+    // spell, spellUpgrade, skillUpgrade, gold...
 
-    public Start() {
-
+    public ChestLocalContent() {
+        // initialize some content
+        this.activeItems.Add((new HealthPotion(), MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().healthPotionUI_Prefab));
+        this.activeItems.Add((new ManaPotion(), MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().manaPotionUI_Prefab));
+        this.activeItems.Add((new HealthPotion(), MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().healthPotionUI_Prefab));
     }
+
+
+    public int GetActiveItemsSize() {
+        return activeItems.Count;
+    }
+
+    public (ActiveItem, GameObject) GetActiveItem(int index) {
+        return activeItems[index];
+    }
+
+    // other methods for other reward types...
 }
-*/

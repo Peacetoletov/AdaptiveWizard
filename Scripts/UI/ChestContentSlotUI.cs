@@ -19,14 +19,14 @@ public class ChestContentSlotUI : MonoBehaviour
     // spell, spellUpgrade, skillUpgrade, gold...
 
 
-    public void Init(GameObject iconPrefab, ActiveItem activeItem) {
-        Init(iconPrefab);
+    public void Init(ActiveItem activeItem, GameObject iconPrefab) {
         this.activeItem = activeItem;
+        Init(iconPrefab);
     }
 
-    public void Init(GameObject iconPrefab, PassiveItem passiveItem) {
-        Init(iconPrefab);
+    public void Init(PassiveItem passiveItem, GameObject iconPrefab) {
         this.passiveItem = passiveItem;
+        Init(iconPrefab);
     }
 
     private void Init(GameObject iconPrefab) {
