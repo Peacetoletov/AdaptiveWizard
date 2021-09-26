@@ -12,11 +12,11 @@ public class Chest : MonoBehaviour
     private Vector2 CHEST_SIZE;
     private GameObject interactionPromptIcon = null;
     private bool currentlyOpen = false;
-    private ChestLocalContent content;
+    private ChestLocalContent localContent;
 
     private void Start() {
         this.CHEST_SIZE = Utility.SpriteSize("Sprites/Environment/chestClosedSpr");
-        this.content = new ChestLocalContent();
+        this.localContent = new ChestLocalContent();
     }
 
     private void Update() {
@@ -27,7 +27,7 @@ public class Chest : MonoBehaviour
             if (interactionPromptIcon != null && Input.GetKeyDown(KeyCode.F) && !currentlyOpen) {
                 // open the chest, set the game state as partially active, remove the interaction prompt
                 this.currentlyOpen = true;
-                MainGameManager.GetUI_Manager().GetUI_ChestContentManager().ShowChestContent(content);
+                MainGameManager.GetUI_Manager().GetUI_ChestContentManager().ShowChestContent(this);
                 MainGameManager.SetGameState(MainGameManager.GameState.PARTIALLY_ACTIVE);
                 RemoveInteractionPrompt();
             }
@@ -65,5 +65,9 @@ public class Chest : MonoBehaviour
 
         float overlapBoxSizeMinusChestSize = Mathf.Max(CHEST_SIZE.x * (promptDistance - 1), CHEST_SIZE.y * (promptDistance - 1));
         return new Vector2(CHEST_SIZE.x + overlapBoxSizeMinusChestSize, CHEST_SIZE.y + overlapBoxSizeMinusChestSize);
+    }
+
+    public ChestLocalContent GetLocalContent() {
+        return  localContent;
     }
 }

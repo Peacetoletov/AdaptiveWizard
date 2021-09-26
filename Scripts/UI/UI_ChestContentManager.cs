@@ -26,7 +26,7 @@ public class UI_ChestContentManager : MonoBehaviour
     }
 
 
-    public void ShowChestContent(ChestLocalContent content) {
+    public void ShowChestContent(Chest chest) {
         // TODO: make this prefab better suited for different types of screen sizes (currently it only looks good with 1920x1080 resolution)
         // TODO: this will need even more work when I start to replace the simple backgrounds with actual sprites (but it should mostly be
         // just figuring out the unity engine, not modifying code)
@@ -44,13 +44,29 @@ public class UI_ChestContentManager : MonoBehaviour
         // TODO: If player clicks on a non-bottom-most slot, make all slots below the one that was clicked move up
         this.chestContentSlots = new List<GameObject>();
 
-        for (int i = 0; i < content.GetActiveItemsSize(); i++) {
+        // BUG: When I open a chest and click on both active items from top to bottom, I will get an array index out of bounds exception.
+        // This happens because I remove an item with id 0, an item at index 0 gets removed from the array, reducing its size to 1. Then I attempt
+        // to remove an item at index 1, which doesn't exist anymore. Solution is to update the ids accordingly.
+        // Active items
+        for (int i = 0; i < chest.GetLocalContent().GetActiveItemsSize(); i++) {
             this.chestContentSlots.Add(Instantiate(UI_chestContentSlotPrefab) as GameObject);
             this.chestContentSlots[i].transform.SetParent(chestContentBackground.transform, false);
-            this.chestContentSlots[i].GetComponent<RectTransform>().anchoredPosition3D = new Vector3(0f, -20f - 110f * i, 0f);
-            (Items.ActiveItem, GameObject) activeItem = content.GetActiveItem(i);
-            this.chestContentSlots[i].GetComponent<ChestContentSlotUI>().Init(activeItem.Item1, activeItem.Item2);
+            this.chestContentSlots[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * i);
+            (Items.ActiveItem, GameObject) activeItem = chest.GetLocalContent().GetActiveItem(i);
+            this.chestContentSlots[i].GetComponent<ChestContentSlotUI>().Init(activeItem.Item1, activeItem.Item2, i, chest);
         }
+        
+        // Passive items
+        
+        for (int i = 0; i < chest.GetLocalContent().GetPassiveItemsSize(); i++) {
+            int index = i + chest.GetLocalContent().GetActiveItemsSize();
+            this.chestContentSlots.Add(Instantiate(UI_chestContentSlotPrefab) as GameObject);
+            this.chestContentSlots[index].transform.SetParent(chestContentBackground.transform, false);
+            this.chestContentSlots[index].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * index);
+            (Items.PassiveItem, GameObject) passiveItem = chest.GetLocalContent().GetPassiveItem(i);
+            this.chestContentSlots[index].GetComponent<ChestContentSlotUI>().Init(passiveItem.Item1, passiveItem.Item2, i, chest);
+        }
+        
         
     }
 
@@ -60,5 +76,11 @@ public class UI_ChestContentManager : MonoBehaviour
 
         // I don't need to explicitely destroy chest content's slots because I'm destroying their parent and Unity will handle
         // destruction of the children
+    }
+
+     public void UpdateContentSlots(Chest chest) {
+         // This is kind of inefficient but gets the job done and is easy to understand (just destroys everything and creates it again)
+        HideChestContent();
+        ShowChestContent(chest);
     }
 }
