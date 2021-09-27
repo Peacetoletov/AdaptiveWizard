@@ -7,7 +7,11 @@ using Items;
 
 public class ChestContentSlotUI : MonoBehaviour
 {
+    // Reference to the button that this script is attached to
     public Button button;
+
+    // GameObjects used for instantiates (though not all instantiates in this class, especially not instantiates of items)
+    public GameObject goldIconPrefab;
 
 
     // The chest that this content slot belongs to
@@ -21,11 +25,16 @@ public class ChestContentSlotUI : MonoBehaviour
     private int slotTypeID = 0;
 
 
-    // Only one of these will be non-null
+    // Only one of these will be non-null and non-zero
+    private int gold = 0;
     private ActiveItem activeItem = null;
     private PassiveItem passiveItem = null;
     // spell, spellUpgrade, skillUpgrade, gold...
 
+    public void Init(int gold, Chest chest) {
+        this.gold = gold;
+        Init(goldIconPrefab, 0, chest);
+    }
 
     public void Init(ActiveItem activeItem, GameObject iconPrefab, int slotTypeID, Chest chest) {
         this.activeItem = activeItem;
@@ -56,11 +65,15 @@ public class ChestContentSlotUI : MonoBehaviour
 		//Debug.Log("You have clicked the button!");
         Destroy(gameObject);
 
-        if (activeItem != null) {
+        if (gold != 0) {
+            InventoryNS.Inventory.AddGold(gold);
+            chest.GetLocalContent().RemoveGold();
+        }
+        else if (activeItem != null) {
             InventoryNS.Inventory.activeItemsManager.AddItem(activeItem);
             chest.GetLocalContent().RemoveActiveItem(slotTypeID);
         }
-        if (passiveItem != null) {
+        else if (passiveItem != null) {
             InventoryNS.Inventory.passiveItemsManager.AddItem(passiveItem);
             chest.GetLocalContent().RemovePassiveItem(slotTypeID);
         }

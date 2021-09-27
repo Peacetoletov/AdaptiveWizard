@@ -41,30 +41,39 @@ public class UI_ChestContentManager : MonoBehaviour
         // Update: Maybe Unity is smart enough to lay children on top of parents? Not sure, needs testing
 
         // Create content slots
-        // TODO: If player clicks on a non-bottom-most slot, make all slots below the one that was clicked move up
         this.chestContentSlots = new List<GameObject>();
+        int contentSlotCounter = 0;
 
-        // BUG: When I open a chest and click on both active items from top to bottom, I will get an array index out of bounds exception.
-        // This happens because I remove an item with id 0, an item at index 0 gets removed from the array, reducing its size to 1. Then I attempt
-        // to remove an item at index 1, which doesn't exist anymore. Solution is to update the ids accordingly.
+        
+        // Gold
+        int gold = chest.GetLocalContent().GetGold();
+        if (gold != 0) {
+            this.chestContentSlots.Add(Instantiate(UI_chestContentSlotPrefab) as GameObject);
+            this.chestContentSlots[contentSlotCounter].transform.SetParent(chestContentBackground.transform, false);
+            this.chestContentSlots[contentSlotCounter].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * contentSlotCounter);
+            this.chestContentSlots[contentSlotCounter].GetComponent<ChestContentSlotUI>().Init(gold, chest);
+            contentSlotCounter++;
+        }
+
         // Active items
         for (int i = 0; i < chest.GetLocalContent().GetActiveItemsSize(); i++) {
             this.chestContentSlots.Add(Instantiate(UI_chestContentSlotPrefab) as GameObject);
-            this.chestContentSlots[i].transform.SetParent(chestContentBackground.transform, false);
-            this.chestContentSlots[i].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * i);
+            this.chestContentSlots[contentSlotCounter].transform.SetParent(chestContentBackground.transform, false);
+            this.chestContentSlots[contentSlotCounter].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * contentSlotCounter);
             (Items.ActiveItem, GameObject) activeItem = chest.GetLocalContent().GetActiveItem(i);
-            this.chestContentSlots[i].GetComponent<ChestContentSlotUI>().Init(activeItem.Item1, activeItem.Item2, i, chest);
+            this.chestContentSlots[contentSlotCounter].GetComponent<ChestContentSlotUI>().Init(activeItem.Item1, activeItem.Item2, i, chest);
+            contentSlotCounter++;
         }
         
         // Passive items
         
         for (int i = 0; i < chest.GetLocalContent().GetPassiveItemsSize(); i++) {
-            int index = i + chest.GetLocalContent().GetActiveItemsSize();
             this.chestContentSlots.Add(Instantiate(UI_chestContentSlotPrefab) as GameObject);
-            this.chestContentSlots[index].transform.SetParent(chestContentBackground.transform, false);
-            this.chestContentSlots[index].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * index);
+            this.chestContentSlots[contentSlotCounter].transform.SetParent(chestContentBackground.transform, false);
+            this.chestContentSlots[contentSlotCounter].GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, -20f - 110f * contentSlotCounter);
             (Items.PassiveItem, GameObject) passiveItem = chest.GetLocalContent().GetPassiveItem(i);
-            this.chestContentSlots[index].GetComponent<ChestContentSlotUI>().Init(passiveItem.Item1, passiveItem.Item2, i, chest);
+            this.chestContentSlots[contentSlotCounter].GetComponent<ChestContentSlotUI>().Init(passiveItem.Item1, passiveItem.Item2, i, chest);
+            contentSlotCounter++;
         }
         
         
