@@ -13,7 +13,7 @@ public class ChestLocalContent
 
     public ChestLocalContent() {
         // initialize some content
-        this.gold = 15;
+        this.gold = 16;
         this.activeItems.Add((new HealthPotion(), MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().healthPotionUI_Prefab));
         this.activeItems.Add((new ManaPotion(), MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().manaPotionUI_Prefab));
         this.passiveItems.Add((new HealthCrystal(), MainGameManager.GetUI_Manager().GetUI_PassiveItemsManager().healthCrystalUI_Prefab));

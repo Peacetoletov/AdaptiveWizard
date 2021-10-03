@@ -34,6 +34,7 @@ public class ChestContentSlotUI : MonoBehaviour
     public void Init(int gold, Chest chest) {
         this.gold = gold;
         Init(goldIconPrefab, 0, chest);
+        rewardIcon.transform.GetChild(0).GetComponent<ChestGoldAmountText>().Init(gold);
     }
 
     public void Init(ActiveItem activeItem, GameObject iconPrefab, int slotTypeID, Chest chest) {

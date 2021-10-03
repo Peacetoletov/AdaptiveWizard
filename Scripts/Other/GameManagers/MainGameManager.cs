@@ -17,6 +17,13 @@ public class MainGameManager : MonoBehaviour
     public GameObject minigameManagerObj;
 
 
+    /* TODO: GameState will need to get reworked and changed to an int called UI_displayLayer. When the game is in normal state, it will be set to 0,
+    because no UI will be displayed, with the exception of basic overlay (hp, mana, gold, current items, spell and active item boxes etc.). When the
+    player pauses the game or opens a chest, UI_displayLayer will increment to 1. Here is the important part - if the player is interacting with UI
+    and causes another layer of UI to pop up (such as when looking at the content of a chest, clicking on a "spell orb / 2 random spell upgrades" reward
+    and then having to choose between two rewards in a separate UI from the chest's UI), UI_displayLayer will increment from 1 to 2, making it easy
+    to make the initial chest content UI buttons temporarily inactive, for example.
+    */
     public enum GameState {
         // Most common, player can freely move around
         ACTIVE,
