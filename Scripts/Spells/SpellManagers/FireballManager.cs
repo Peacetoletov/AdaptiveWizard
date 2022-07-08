@@ -22,5 +22,16 @@ public class FireballManager : AbstractSpellManager
         GameObject fireball = Object.Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
         Fireball fireballScript = fireball.GetComponent<Fireball>();
         fireballScript.Start(direction, (PlayerGeneral) player);
+
+        // testing - spawn this 99 more times
+        /*
+        for (int i = 1; i < 100; i++) {
+            offset += 0.001f * i;
+            spawnPos = (Vector2) player.transform.position + direction.normalized * offset;
+            fireball = Object.Instantiate(fireballObj, spawnPos, Quaternion.identity) as GameObject;
+            fireballScript = fireball.GetComponent<Fireball>();
+            fireballScript.Start(direction, (PlayerGeneral) player);
+        }
+        */
     }
 }
