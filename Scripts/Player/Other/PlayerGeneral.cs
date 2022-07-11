@@ -26,7 +26,7 @@ public class PlayerGeneral : AbstractPlayer
     }
 
     private void Start() {
-        UnityEngine.Assertions.Assert.IsTrue(IsInitialized());
+        //UnityEngine.Assertions.Assert.IsTrue(IsInitialized());
         /*
         if (!IsInitialized()) {
             Initialize();

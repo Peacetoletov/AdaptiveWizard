@@ -35,7 +35,7 @@ public class MainGameManager : MonoBehaviour
         INACTIVE
     }
     private static GameState gameState = GameState.ACTIVE;
-    private readonly Vector3 PLAYER_SPAWN_POS = new Vector3(-0.5f, 7.5f, 0.0f);
+    private static Vector3 player_spawn_pos;
     private static GameObject player;                   // reference to the player
                                                         // I decided to make it static because I don't plan on having multiplayer PvP or coop modes
 
@@ -45,10 +45,9 @@ public class MainGameManager : MonoBehaviour
 
     
     private void Start() {
-        CreateAndInitializePlayer();
+        InitializePlayer();
 
-        // MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
-        // ^ CURRENTLY COMMENTED OUT FOR TESTING PURPOSES
+        MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
 
         MainGameManager.UI_manager = (UI_Manager) FindObjectOfType(typeof(UI_Manager));
 
@@ -68,8 +67,18 @@ public class MainGameManager : MonoBehaviour
         }    
     }
 
-    private void CreateAndInitializePlayer() {
-        MainGameManager.player = Instantiate(playerObj, PLAYER_SPAWN_POS, Quaternion.identity) as GameObject;
+    private void InitializePlayer() {
+        GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
+        Debug.Assert(playerObjects.Length <= 1);
+        if (playerObjects.Length == 0) {
+            // Create a new player object and assign it to this manager
+            MainGameManager.player_spawn_pos = new Vector3(-0.5f, 7.5f, 0.0f);
+            MainGameManager.player = Instantiate(playerObj, player_spawn_pos, Quaternion.identity) as GameObject;
+        } else {
+            // Assign the existing player object to this manager
+            MainGameManager.player_spawn_pos = playerObjects[0].transform.position;
+            MainGameManager.player = playerObjects[0];
+        }
         player.GetComponent<PlayerGeneral>().Initialize();
     }
 
@@ -134,7 +143,7 @@ public class MainGameManager : MonoBehaviour
         }
 
         player.GetComponent<PlayerGeneral>().ResetPlayer();
-        MainGameManager.player.transform.position = PLAYER_SPAWN_POS;
+        MainGameManager.player.transform.position = player_spawn_pos;
         managerOfRoomManagers.Restart();
         if (minigame) {
             minigameManager.Restart();

@@ -106,21 +106,21 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "#............................#",
             "#............................#",
             "#............................#",
-            "#...........######...........#",
-            "#...........######...........#",
-            "#......c....######...........#",
-            "/...........######...........#",
-            "/...........######...........#",
-            "#...........######...........#",
+            "#............................#",
+            "#............................#",
+            "#............................#",
+            "#.............c..............#",
             "#............................#",
             "#............................#",
             "#............................#",
             "#............................#",
-            "#//###########################"
+            "#............................#",
+            "#............................#",
+            "##############################"
         };
-        roomManagers[0].Init(new Vector2(5, 1), roomVisual, RoomType.COMBAT);
+        this.roomManagers[0].Init(new Vector2(-10, 1), roomVisual, RoomType.COMBAT);
 
-
+        /*
         // Room 2
         newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
         this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
@@ -147,7 +147,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "########"
         };
         roomManagers[2].Init(new Vector2(-13, 4), roomVisual, RoomType.COMBAT);
-        
+        */
     }
 
     /*
