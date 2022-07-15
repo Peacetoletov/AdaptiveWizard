@@ -9,7 +9,6 @@ public class RoomManager : MonoBehaviour
     public GameObject wallObj;
     public GameObject floorObj;
     public GameObject doorObj;
-    public GameObject chestSpawnTileObj;
     public GameObject enemy1Obj;        // only for testing
     public GameObject enemy2Obj;        // only for testing
     public GameObject enemyGatlingObj;        // only for testing
@@ -33,18 +32,13 @@ public class RoomManager : MonoBehaviour
         this.roomVisual = roomVisual;
         this.type = type;
         System.Array.Reverse(roomVisual);       // I want the position [0, 0] to be in the bottom left corner, just like in world coordinates
-        Restart();
-    }
 
-    public void Restart() {
         if (type == RoomType.COMBAT) {
-            //this.combat = new Combat(this);
             this.combatManager = Instantiate(combatManagerObj, Vector3.zero, Quaternion.identity).GetComponent<CombatManager>();
-            combatManager.Init(this);
+            this.combatManager.Init(this);
         }
         GenerateRoom();
     }
-
     
     private void GenerateRoom() {
         // Environment
@@ -54,17 +48,12 @@ public class RoomManager : MonoBehaviour
                 char symbol = TileSymbolAtPosition(x, y);
                 if (symbol == '.') {
                     Instantiate(floorObj, coordinates, Quaternion.identity);
-                } else if (symbol == 'c') {
-                    Instantiate(chestSpawnTileObj, coordinates, Quaternion.identity);
                 } else if (symbol == '#') {
                     Instantiate(wallObj, coordinates, Quaternion.identity);
                 } else if (symbol == '/') {
                     // door
                     GameObject newDoor = Instantiate(doorObj, coordinates, Quaternion.identity) as GameObject;
                     this.doors.Add(newDoor.GetComponent<Door>());
-                    if (type != RoomType.COMBAT) {
-                        print("WARNING: Creating doors in a non-combat room. Did you intend this?");
-                    }
                 }
             }
         }
@@ -84,20 +73,16 @@ public class RoomManager : MonoBehaviour
 
     private void CreateRoomNodes() {
         this.roomNodes = new Pathfinding.Node[RoomWidth(), RoomHeight()];
-        for (int x = 0; x < RoomWidth(); x++) {
-            for (int y = 0; y < RoomHeight(); y++) {
+        for (int y = 0; y < RoomHeight(); y++) {
+            for (int x = 0; x < RoomWidth(); x++) {
                 // first, set null to each element
                 this.roomNodes[x, y] = null;
-                if (IsFloor(TileSymbolAtPosition(x, y))) {
+                if (TileSymbolAtPosition(x, y) == '.') {
                     // second, change null to a node if needed
                     this.roomNodes[x, y] = new Pathfinding.Node(new Vector2Int(x, y));
                 }
             }
         }
-    }
-
-    private bool IsFloor(char symbol) {
-        return symbol == '.' || symbol == 'c';
     }
 
     private void InitializeRoomNodes() {
@@ -156,13 +141,6 @@ public class RoomManager : MonoBehaviour
     public Pathfinding.Node WorldPositionToNode(Vector2 position) {
         int x = (int) Mathf.Round(position.x - posOffset.x);
         int y = (int) Mathf.Round(position.y - posOffset.y);
-        //print("object position = " + position + ". offset = " + posOffset + ". room width = " + RoomWidth() + ". room height = " + RoomHeight() + ". room position =" + new Vector2(x, y));
-        /*
-        if (x < 0 || x > RoomWidth() || y < 0 || y > RoomHeight()) {
-            print("Outside of array bounds!");
-            return roomNodes[0, 0];
-        }
-        */
         return roomNodes[x, y];
     }
     
@@ -193,36 +171,9 @@ public class RoomManager : MonoBehaviour
         return combatManager;
     }
 
-    public bool TryToCloseDoors(Vector2 playerPos) {
-        const float minDist = 2.1f;
-        foreach (Door door in doors) {
-            if (Vector2.Distance(playerPos, door.transform.position) < minDist) {
-                // player is too close to a door, cannot close
-                return false;
-            }
-        }
-        // player is far enough from each door, doors can close
-        foreach (Door door in doors) {
-            door.Close();
-        }
-        return true;
-    }
-
     public void OpenDoors() {
         foreach (Door door in doors) {
             door.Open();
         }
-    }
-
-    public Vector2 GetChestPosition() {
-        for (int x = 0; x < RoomWidth(); x++) {
-            for (int y = 0; y < RoomHeight(); y++) {
-                if (TileSymbolAtPosition(x, y) == 'c') {
-                    return PositionInRoomToPositionInWorld(new Vector2Int(x, y));
-                }
-            }
-        }
-        throw new System.Exception("Did not find a chest. Did you accidentally call GetChestPosition() on a non-combat room, " + 
-                                   "or perhaps forgot to add a chest to the visual room?");
     }
 }

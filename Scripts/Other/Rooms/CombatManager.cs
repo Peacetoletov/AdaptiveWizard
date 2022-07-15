@@ -12,55 +12,26 @@ public class CombatManager : MonoBehaviour
 
 
     private RoomManager rm;                       // reference to the room manager of this combat
-    private bool didCombatBegin = false;          // did enemies start spawning?
     private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
     private const int totalEnemies = 10;
     private int enemiesDead = 0;
 
-    private Vector2 CHEST_POS;                    // position where the chest will spawn, in world coordinates
-    private Vector2 CHEST_SIZE;                   // size of the chest sprite (width x height) (not in pixels, rather as a multiple of the base unit)
-    private bool chestSpawned = false;            // did a chest already spawn (as a reward for clearing the room)?
-    private Timer timeBetweenChestSpawnAttempts;
 
     public void Init(RoomManager rm) {
         this.rm = rm;
-
-        this.CHEST_POS = rm.GetChestPosition();
-        /*
-        Sprite chestSprite = Resources.Load<Sprite>("Sprites/Environment/chestClosedSpr");
-        this.CHEST_SIZE = new Vector2(chestSprite.rect.width, chestSprite.rect.height) / MainGameManager.PIXELS_PER_UNIT;
-        */
-        this.CHEST_SIZE = Utility.SpriteSize("Sprites/Environment/chestClosedSpr");
-        this.timeBetweenChestSpawnAttempts = new Timer(0f);
     }
 
     public void Update() {
+        /*
         if (MainGameManager.IsGameActive()) {
-            if (IsRoomCleared() && !chestSpawned && timeBetweenChestSpawnAttempts.UpdateAndCheck()) {
-                TryToSpawnChest();
-                // if a chest cannot be spawned, wait a short moment and try again
-                if (!chestSpawned) {
-                    const float chestSpawnAttemptCooldown = 0.5f;
-                    this.timeBetweenChestSpawnAttempts = new Timer(chestSpawnAttemptCooldown);
-                }
-            }
-        }
-    }
 
-    private void TryToSpawnChest() {
-        Collider2D collider = Physics2D.OverlapBox(CHEST_POS, CHEST_SIZE, 0, LayerMask.GetMask("Player"));
-        if (collider == null) {
-            // player wasn't hit, the spawn can chest
-            Instantiate(chestObj, CHEST_POS, Quaternion.identity).GetComponent<Chest>();
-            this.chestSpawned = true;
-            return;
         }
+        */
     }
 
     public void BeginCombat() {
         // begin combat, start spawning enemies
-        this.didCombatBegin = true;
         this.isCombatActive = true;
 
         // TODO: make enemy spawning more complex, implement spawn waves etc.
@@ -82,34 +53,10 @@ public class CombatManager : MonoBehaviour
     }
 
     private void SpawnChest() {
-        // TODO: rework the design of chest spawning. Currently, I have at least 2 position in each room where a chest can spawn, and immediately
-        // spawns at one of those positions when the room is cleared. The reworked design will only have 1 position (which can be graphically highlighted
-        // to show where the player should expect the chest) and the chest will only spawn once the position becomes unobstructed by the player.
-        /*
-        GameObject chest = Instantiate(chestObj, Vector2.zero, Quaternion.identity) as GameObject;
-        List<Vector2> possiblePositions = rm.PossibleChestWorldPositions();
-        foreach (Vector2 position in possiblePositions) {
-            // Move the chest to a possible position, and if it collides with the player, try another position.
-            // This feels super hacky but works
-            chest.transform.position = position;
-            BoxCollider2D chestCollider = chest.GetComponent<BoxCollider2D>();
-            RaycastHit2D hit = Physics2D.BoxCast(chest.transform.position, chestCollider.size, 0, Vector2.zero, 0, LayerMask.GetMask("Player"));
-            if (hit.collider == null) {
-                // not colliding with player, this position is ok
-                return;
-            }
-        }
-        throw new System.Exception("ERROR: No viable chest spawn position!");
-        */
+        // TODO: this
+        // Instantiate(chestObj, CHEST_POS, Quaternion.identity);
     }
 
-    private bool IsRoomCleared() {
-        return didCombatBegin && !isCombatActive;
-    }
-
-    public bool DidCombatBegin() {
-        return didCombatBegin;
-    }
 
     // TODO: fix a bug that causes enemies to sometimes spawn too close to a wall, getting themselves stuck
     // ^ UPDATE: An easy way to replicate this bug is to go into a very small room and spawn multiple enemies in there.
@@ -136,33 +83,8 @@ public class CombatManager : MonoBehaviour
             distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) MainGameManager.GetPlayer().transform.position).magnitude;
         } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
         
-        
-        /*
-        for (int i = 0; i < 1000; i++) {
-            // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
-            //float xPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomWidth() - 1));
-            //float yPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomHeight() - 1));
-            float xPosInRoomCoordinates = 1.77902f;
-            float yPosInRoomCoordinates = 1.005072f;
-            // ^ these coordinates are problematic - the spawn position is valid, but enemy gets stuck.
-
-            //float xPosInRoomCoordinates = 2.5f;
-            //float yPosInRoomCoordinates = 2.5f;
-
-            spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
-            spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + rm.GetPosOffset().x), (spawnPosInRoomCoordinates.y + rm.GetPosOffset().y));
-            distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) MainGameManager.GetPlayer().transform.position).magnitude;
-
-            
-            if (IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer)) {
-                break;
-            }
-        }
-        */
-        
 
         return spawnPosInWorldCoordinates;
-        //return Vector2.zero;
     }
 
     private bool IsSpawnPosValid(Vector2 spawnPosInRoomCoordinates, float enemySize, float distanceFromPlayer) {

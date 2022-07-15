@@ -7,7 +7,7 @@ public class Door : MonoBehaviour
     public Sprite openSpr;
     public Sprite closedSpr;
 
-    private bool isOpen = true;
+    private bool isOpen = false;
 
     private void Start() {
         UpdateState();
@@ -31,17 +31,12 @@ public class Door : MonoBehaviour
         UpdateState();
     }
 
-    public void Close() {
-        this.isOpen = false;
-        UpdateState();
-    }
-
     private void UpdateState() {
         // update sprite
         gameObject.GetComponent<SpriteRenderer>().sprite = isOpen ? openSpr : closedSpr;
 
         // update layer (affects collision checking)
-        int newLayer = isOpen ? LayerMask.NameToLayer("Default") : LayerMask.NameToLayer("Wall");
+        int newLayer = LayerMask.NameToLayer(isOpen ? "Default" : "Wall");
         gameObject.layer = newLayer;
     }
 }

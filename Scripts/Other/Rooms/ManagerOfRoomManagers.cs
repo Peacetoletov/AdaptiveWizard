@@ -33,6 +33,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
     // player position on map
     private int playerCurRoomID;
     private int playerLastRoomID;
+    // TODO: replace this ^ by curActiveRoomID
 
 
     private void Start() {
