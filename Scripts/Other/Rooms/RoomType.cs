@@ -6,5 +6,5 @@ public enum RoomType
 {
     COMBAT,
     EVENT,
-    CORRIDOR
+    SHOP,
 }

@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 
-// TODO: tidy this class up
+// TODO: 
 public class RoomManager : MonoBehaviour
 {
     // public GameObjects used for instantiating
@@ -19,7 +20,7 @@ public class RoomManager : MonoBehaviour
     private Pathfinding.Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
     private Vector2 posOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
-    private RoomType type;                // type of this room (combat, event, corridor)
+    private RoomType type;                // type of this room (combat, event, shop)
 
     private List<Door> doors = new List<Door>();        // list of doors in this room
 
@@ -32,6 +33,7 @@ public class RoomManager : MonoBehaviour
         this.roomVisual = roomVisual;
         this.type = type;
         System.Array.Reverse(roomVisual);       // I want the position [0, 0] to be in the bottom left corner, just like in world coordinates
+        AssertRowsLength();
 
         if (type == RoomType.COMBAT) {
             this.combatManager = Instantiate(combatManagerObj, Vector3.zero, Quaternion.identity).GetComponent<CombatManager>();
@@ -39,11 +41,37 @@ public class RoomManager : MonoBehaviour
         }
         GenerateRoom();
     }
+
+    public void Update() {
+        if (MainGameManager.IsGameActive()) {
+            ManagerOfRoomManagers morm = MainGameManager.GetManagerOfRoomManagers();
+            // if player is in the same room as this combat manager
+            if (morm.GetRoomManager(morm.GetCurActiveRoomIndex()) == this) {
+                // If player is fully outside the bounding box of this room, teleport player to another room.
+                // This room is determined by the doors closest to the player. 
+                // Note that this way of room transitioning only works if all doors are at the edges of rooms.
+                RaycastHit2D raycast = Physics2D.BoxCast(posOffset + new Vector2(RoomWidth() / 2 - 0.5f, RoomHeight() / 2 - 0.5f), new Vector2(RoomWidth(), RoomHeight()), 0, Vector2.zero, 0, LayerMask.GetMask("Player"));
+                if (raycast.collider == null) {
+                    print("outside!" + "            " + System.DateTimeOffset.Now.ToUnixTimeMilliseconds());
+                } else {
+                    print("inside! collider hit at x, y:" + raycast.point.x + ", " + raycast.point.y + "            " + System.DateTimeOffset.Now.ToUnixTimeMilliseconds());
+                }
+            }
+            
+        }
+    }
+
+    private void AssertRowsLength() {
+        // Confirms that all rows have the same length
+        foreach (string row in roomVisual) {
+            Assert.IsTrue(row.Length == roomVisual[0].Length);
+        }
+    }
     
     private void GenerateRoom() {
         // Environment
-        for (int x = 0; x < RoomWidth(); x++) {
-            for (int y = 0; y < RoomHeight(); y++) {
+        for (int y = 0; y < RoomHeight(); y++) {
+            for (int x = 0; x < roomVisual[y].Length; x++) {
                 Vector3 coordinates = (Vector3) PositionInRoomToPositionInWorld(new Vector2Int(x, y));
                 char symbol = TileSymbolAtPosition(x, y);
                 if (symbol == '.') {
@@ -54,6 +82,8 @@ public class RoomManager : MonoBehaviour
                     // door
                     GameObject newDoor = Instantiate(doorObj, coordinates, Quaternion.identity) as GameObject;
                     this.doors.Add(newDoor.GetComponent<Door>());
+                } else {
+                    // void space, generate nothing here (symbol == '-')
                 }
             }
         }
@@ -74,7 +104,7 @@ public class RoomManager : MonoBehaviour
     private void CreateRoomNodes() {
         this.roomNodes = new Pathfinding.Node[RoomWidth(), RoomHeight()];
         for (int y = 0; y < RoomHeight(); y++) {
-            for (int x = 0; x < RoomWidth(); x++) {
+            for (int x = 0; x < roomVisual[y].Length; x++) {
                 // first, set null to each element
                 this.roomNodes[x, y] = null;
                 if (TileSymbolAtPosition(x, y) == '.') {
@@ -86,8 +116,8 @@ public class RoomManager : MonoBehaviour
     }
 
     private void InitializeRoomNodes() {
-        for (int x = 0; x < RoomWidth(); x++) {
-            for (int y = 0; y < RoomHeight(); y++) {
+        for (int y = 0; y < RoomHeight(); y++) {
+            for (int x = 0; x < roomVisual[y].Length; x++) {
                 if (TileSymbolAtPosition(x, y) != '.') {
                     continue;
                 }
@@ -150,7 +180,6 @@ public class RoomManager : MonoBehaviour
         return worldPos;
     }
 
-    
     public int RoomWidth() {
         return roomVisual[0].Length;
     }

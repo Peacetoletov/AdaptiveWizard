@@ -53,7 +53,7 @@ public abstract class MovingEnemy : AbstractEnemy
         this.speed = speed;
         this.generalMovement = new GeneralMovement();
         this.path = new Path();
-        this.roomIndex = MainGameManager.GetManagerOfRoomManagers().RoomIDOfObject(gameObject);
+        this.roomIndex = MainGameManager.GetManagerOfRoomManagers().GetCurActiveRoomIndex();
     }
     
     protected virtual void FixedUpdate() {

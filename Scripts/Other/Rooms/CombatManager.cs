@@ -14,7 +14,7 @@ public class CombatManager : MonoBehaviour
     private RoomManager rm;                       // reference to the room manager of this combat
     private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-    private const int totalEnemies = 10;
+    private const int totalEnemies = 1;
     private int enemiesDead = 0;
 
 
@@ -23,11 +23,17 @@ public class CombatManager : MonoBehaviour
     }
 
     public void Update() {
-        /*
+        // TEMPORARY, INEFFICIENT SOLUTION
         if (MainGameManager.IsGameActive()) {
-
+            ManagerOfRoomManagers morm = MainGameManager.GetManagerOfRoomManagers();
+            // if player is in the same room as this combat manager
+            if (morm.GetRoomManager(morm.GetCurActiveRoomIndex()) == rm) {
+                if (!isCombatActive && totalEnemies != enemiesDead) {
+                    BeginCombat();
+                }
+            }
         }
-        */
+        
     }
 
     public void BeginCombat() {
