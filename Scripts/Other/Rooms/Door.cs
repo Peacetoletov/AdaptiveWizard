@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Other.Rooms;
 
 public class Door : MonoBehaviour
 {
@@ -8,6 +9,13 @@ public class Door : MonoBehaviour
     public Sprite closedSpr;
 
     private bool isOpen = false;
+
+    /*
+    Whenever player leaves the bounding box of a room, nearest door is found and the player is teleported.
+    The distance is determined by the 'teleportDistance' variable.
+    */
+    private Teleporter teleporter;
+    
 
     private void Start() {
         UpdateState();
@@ -26,6 +34,7 @@ public class Door : MonoBehaviour
     }
     */
 
+
     public void Open() {
         this.isOpen = true;
         UpdateState();
@@ -39,4 +48,14 @@ public class Door : MonoBehaviour
         int newLayer = LayerMask.NameToLayer(isOpen ? "Default" : "Wall");
         gameObject.layer = newLayer;
     }
+
+    
+    public void SetTeleporter(Teleporter teleporter) {
+        this.teleporter = teleporter;
+    }
+    
+    public Teleporter GetTeleporter() {
+        return teleporter;
+    }
+
 }

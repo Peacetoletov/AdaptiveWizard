@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-
-// TODO: 
+using AdaptiveWizard.Assets.Scripts.Other.Rooms;
+ 
+ 
 public class RoomManager : MonoBehaviour
 {
     // public GameObjects used for instantiating
@@ -25,10 +26,24 @@ public class RoomManager : MonoBehaviour
     private List<Door> doors = new List<Door>();        // list of doors in this room
 
     private CombatManager combatManager;                  // combat related variables (only applies to combat rooms)
+
+
+    private bool varForTestingOnly = true;      // remove this later
     
 
+    /*
+    Initializes room variables, must be called immediately after creating the room manager.
 
-    public void Init(Vector2 posOffset, string[] roomVisual, RoomType type) {
+    Parameters:
+    posOffset - specifies the relative position of this room from position [0, 0] in world coordinates
+    roomVisual - visual representation of tiles in the room
+    type - type of the room
+    doorTeleportDistances - list of teleport distances, one for each door. The order of elements in this list determines
+                            which door will be associated with the given teleport distance. The room is searched left
+                            to right, top to bottom, and whenever a door is encountered, it is given the next teleport 
+                            distance from the list.
+    */
+    public void Init(Vector2 posOffset, string[] roomVisual, RoomType type, List<Teleporter> teleporters) {
         this.posOffset = posOffset;
         this.roomVisual = roomVisual;
         this.type = type;
@@ -40,6 +55,7 @@ public class RoomManager : MonoBehaviour
             this.combatManager.Init(this);
         }
         GenerateRoom();
+        SetTeleportersToDoors(teleporters);
     }
 
     public void Update() {
@@ -50,15 +66,22 @@ public class RoomManager : MonoBehaviour
                 // If player is fully outside the bounding box of this room, teleport player to another room.
                 // This room is determined by the doors closest to the player. 
                 // Note that this way of room transitioning only works if all doors are at the edges of rooms.
-                RaycastHit2D raycast = Physics2D.BoxCast(posOffset + new Vector2(RoomWidth() / 2 - 0.5f, RoomHeight() / 2 - 0.5f), new Vector2(RoomWidth(), RoomHeight()), 0, Vector2.zero, 0, LayerMask.GetMask("Player"));
-                if (raycast.collider == null) {
-                    print("outside!" + "            " + System.DateTimeOffset.Now.ToUnixTimeMilliseconds());
-                } else {
-                    print("inside! collider hit at x, y:" + raycast.point.x + ", " + raycast.point.y + "            " + System.DateTimeOffset.Now.ToUnixTimeMilliseconds());
+                if (IsPlayerOutsideBoundingBox()) {
+                    TeleportPlayerToAnotherRoom();
                 }
             }
-            
         }
+    }
+
+    private bool IsPlayerOutsideBoundingBox() {
+        Vector2 playerSize = MainGameManager.GetPlayer().GetComponent<BoxCollider2D>().bounds.size;
+        Vector2 playerPos = MainGameManager.GetPlayer().transform.position;
+
+        // Return true if player is crossing at least one boundary of the bounding box
+        return playerPos.x < posOffset.x - playerSize.x || 
+                playerPos.x > posOffset.x + RoomWidth() ||
+                playerPos.y < posOffset.y - playerSize.y ||
+                playerPos.y > posOffset.y + RoomHeight();
     }
 
     private void AssertRowsLength() {
@@ -162,6 +185,36 @@ public class RoomManager : MonoBehaviour
         int upperY = lowerY + 1;
         return (TileSymbolAtPosition(lowerX, lowerY) == '.' && TileSymbolAtPosition(lowerX, upperY) == '.' &&
                 TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
+    }
+
+    private void SetTeleportersToDoors(List<Teleporter> teleporters) {
+        Assert.IsTrue(doors.Count == teleporters.Count);
+        for (int i = 0; i < doors.Count; i++) {
+            doors[i].SetTeleporter(teleporters[i]);
+        }
+    }
+
+    private void TeleportPlayerToAnotherRoom() {
+        // Find the nearest door 
+        Vector2 playerPos = MainGameManager.GetPlayer().transform.position;
+        float minDist = Vector2.Distance(playerPos, doors[0].transform.position);
+        Door doorWithMinDist = doors[0];
+        foreach (Door door in doors) {
+            float curDist = Vector2.Distance(playerPos, door.transform.position);
+            if (curDist < minDist) {
+                minDist = curDist;
+                doorWithMinDist = door;
+            }
+        }
+
+        // Get the teleporter of the nearest door
+        Teleporter teleporter = doorWithMinDist.GetTeleporter();
+
+        // Teleport player using the teleport distance of the nearest door
+        MainGameManager.GetPlayer().transform.Translate(teleporter.GetTeleportDist());
+        
+        // Change the current active room ID
+        MainGameManager.GetManagerOfRoomManagers().SetCurActiveRoomIndex(teleporter.GetAssocaitedRoomIndex());
     }
 
     public Pathfinding.Node WorldPositionToNode(GameObject obj) {

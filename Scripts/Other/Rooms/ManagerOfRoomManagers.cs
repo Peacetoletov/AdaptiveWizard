@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Other.Rooms;
 
 /* TODO: - add a "void" tile to the visual representation of a room DONE 
          - add a distant room DONE
@@ -37,7 +38,7 @@ public class ManagerOfRoomManagers : MonoBehaviour
 
     private void InitPlayerRoomID() {
         // temporary (?) solution
-        this.curActiveRoomIndex = 0;
+        this.curActiveRoomIndex = 0;        // temporarily changed from 0
     }
 
     private void Update() {
@@ -66,10 +67,20 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "----#..............#--",
             "-----######//######---"
         };
-        this.roomManagers[0].Init(new Vector2(-10, 1), roomVisual, RoomType.COMBAT);
+        List<Teleporter> teleporters = new List<Teleporter> {
+            new Teleporter(new Vector2(0, -5), 666),
+            new Teleporter(new Vector2(0, -5), 666),
+            new Teleporter(new Vector2(14, 0), 1),
+            new Teleporter(new Vector2(14, 0), 1),
+            new Teleporter(new Vector2(0, 5), 420),
+            new Teleporter(new Vector2(0, 5), 420)
+        };
+        this.roomManagers[0].Init(new Vector2(-10, 1), roomVisual, RoomType.COMBAT, teleporters);
+        
 
         
         //Room 2
+        
         newRoomManager = Instantiate(roomManagerObj, Vector3.zero, Quaternion.identity) as GameObject;
         this.roomManagers.Add(newRoomManager.GetComponent<RoomManager>());
         roomVisual = new string[] {
@@ -82,7 +93,11 @@ public class ManagerOfRoomManagers : MonoBehaviour
             "-#.......#-",
             "--#######--"
         };
-        roomManagers[1].Init(new Vector2(24, 2), roomVisual, RoomType.COMBAT);
+        teleporters = new List<Teleporter> {
+            new Teleporter(new Vector2(-14, 0), 0),
+            new Teleporter(new Vector2(-14, 0), 0),
+        };
+        roomManagers[1].Init(new Vector2(24, 2), roomVisual, RoomType.COMBAT, teleporters);
         
     }
 
@@ -92,5 +107,9 @@ public class ManagerOfRoomManagers : MonoBehaviour
 
     public int GetCurActiveRoomIndex() {
         return curActiveRoomIndex;
+    }
+
+    public void SetCurActiveRoomIndex(int curActiveRoomIndex) {
+        this.curActiveRoomIndex = curActiveRoomIndex;
     }
 }
