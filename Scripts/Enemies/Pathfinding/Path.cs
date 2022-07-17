@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
-namespace Pathfinding {
+
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+{
     // The Path class defines how an enemy should move after performing an A* search
     public class Path
     {

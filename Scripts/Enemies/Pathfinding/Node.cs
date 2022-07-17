@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace Pathfinding {
+
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+{
     /*
     A node represents a floor block. Floor is the only block that can be freely walked on.
     This class represents all values necessary to find the (shortest) path between two nodes

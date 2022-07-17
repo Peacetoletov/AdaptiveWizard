@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Items.Passive.Classes.Abstract;
+using AdaptiveWizard.Assets.Scripts.Items.Passive.Interfaces;
 
-namespace Items {
+namespace AdaptiveWizard.Assets.Scripts.Items.Passive.Classes.Concrete
+{
     public class ManaCrystal : PassiveItem, MaxManaModifier
     {
         // Mana Crystal increases mana by 25 %

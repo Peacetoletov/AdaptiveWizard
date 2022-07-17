@@ -2,9 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum RoomType
+
+namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
-    COMBAT,
-    EVENT,
-    SHOP,
+    public enum RoomType
+    {
+        COMBAT,
+        EVENT,
+        SHOP,
+    }
 }

@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Other.Other;
+
 
 /*
 Struct for keeping path related variables together.
 */
-namespace Movement {
+namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
+{
     public class Path
     {
         // Local struct for keeping together variables related to going to the first node on a path

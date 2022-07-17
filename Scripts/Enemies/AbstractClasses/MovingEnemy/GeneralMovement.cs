@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Movement {
+
+namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
+{
     /*
     Struct for keeping movement and anti-wiggling related variables together.
     */

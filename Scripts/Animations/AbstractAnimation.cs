@@ -1,21 +1,26 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
-public abstract class AbstractAnimation : MonoBehaviour
+
+namespace AdaptiveWizard.Assets.Scripts.Animations
 {
-    private Animator animator;
-    
-    protected virtual void Start() {
-        this.animator = gameObject.GetComponent<Animator>();
-    }
+    public abstract class AbstractAnimation : MonoBehaviour
+    {
+        private Animator animator;
+        
+        protected virtual void Start() {
+            this.animator = gameObject.GetComponent<Animator>();
+        }
 
-    protected virtual void Update() {
-        // pause the animation if the game is paused
-        this.animator.speed = MainGameManager.IsGameActive() ? 1f : 0f;
-    }
+        protected virtual void Update() {
+            // pause the animation if the game is paused
+            this.animator.speed = MainGameManager.IsGameActive() ? 1f : 0f;
+        }
 
-    public Animator GetAnimator() {
-        return animator;
+        public Animator GetAnimator() {
+            return animator;
+        }
     }
 }

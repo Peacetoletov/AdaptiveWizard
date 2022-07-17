@@ -1,10 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Items.Active.Classes.Abstract;
+using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
-using Items;
 
-namespace InventoryNS {
+namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
+{
     public class ActiveItemsManager
     {
         private ActiveItem[] items = {null, null, null};

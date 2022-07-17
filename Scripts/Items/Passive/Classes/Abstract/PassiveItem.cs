@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Items {
+namespace AdaptiveWizard.Assets.Scripts.Items.Passive.Classes.Abstract
+{
     public abstract class PassiveItem
     {
         private static int staticID = 0;

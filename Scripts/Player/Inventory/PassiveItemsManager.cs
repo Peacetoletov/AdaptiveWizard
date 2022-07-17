@@ -1,10 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AdaptiveWizard.Assets.Scripts.Items.Passive.Classes.Abstract;
+using AdaptiveWizard.Assets.Scripts.Items.Passive.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Player.Other;
+using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
-using Items;
 
-namespace InventoryNS {
+namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
+{
     public class PassiveItemsManager
     {
         public List<PassiveItem> allItems = new List<PassiveItem>();

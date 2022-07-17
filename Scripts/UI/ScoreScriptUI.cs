@@ -8,24 +8,28 @@ Score is a temporary feature that will not be in that final game. However, it in
 by a lot and is easy to implement, so that's why I decided to implement it.
 */
 
-public class ScoreScriptUI : MonoBehaviour
+
+namespace AdaptiveWizard.Assets.Scripts.UI 
 {
-    private static int score = 0;
-    private Text scoreText;
+    public class ScoreScriptUI : MonoBehaviour
+    {
+        private static int score = 0;
+        private Text scoreText;
 
-    private void Start() {
-        this.scoreText = gameObject.GetComponent<Text>();
-    }
+        private void Start() {
+            this.scoreText = gameObject.GetComponent<Text>();
+        }
 
-    private void Update() {
-        this.scoreText.text = "Score: " + score;
-    }
+        private void Update() {
+            this.scoreText.text = "Score: " + score;
+        }
 
-    public static void IncreaseScore(int amount) {
-        ScoreScriptUI.score += amount;
-    }
+        public static void IncreaseScore(int amount) {
+            ScoreScriptUI.score += amount;
+        }
 
-    public static void ResetScore() {
-        ScoreScriptUI.score = 0;
+        public static void ResetScore() {
+            ScoreScriptUI.score = 0;
+        }
     }
 }

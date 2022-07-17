@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Items;
 
-namespace Items {
+namespace AdaptiveWizard.Assets.Scripts.Items.Passive.Interfaces
+{
     public interface GoldModifier
     {
         float ModifyGold(float gold);

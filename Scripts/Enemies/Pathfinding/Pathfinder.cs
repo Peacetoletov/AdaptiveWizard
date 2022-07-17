@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace Pathfinding 
+
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
 {
     public static class Pathfinder
     {

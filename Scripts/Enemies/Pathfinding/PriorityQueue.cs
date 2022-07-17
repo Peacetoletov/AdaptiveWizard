@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+
 // http://www.java2s.com/Code/CSharp/Collections-Data-Structure/PriorityQueue2.htm
 
-namespace Pathfinding {
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+{
     
     /// <summary>
     /// Represents a strongly typed priority queue of objects. 

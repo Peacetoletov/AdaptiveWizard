@@ -2,19 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using AdaptiveWizard.Assets.Scripts.Player.Inventory;
 
-using InventoryNS;
 
-public class GoldScriptUI : MonoBehaviour
+namespace AdaptiveWizard.Assets.Scripts.UI
 {
-    private Text goldText;
+    public class GoldScriptUI : MonoBehaviour
+    {
+        private Text goldText;
 
 
-    private void Start() {
-        this.goldText = gameObject.GetComponent<Text>();
-    }
+        private void Start() {
+            this.goldText = gameObject.GetComponent<Text>();
+        }
 
-    private void Update() {        
-        this.goldText.text = "Gold: " + Inventory.GetGold();
+        private void Update() {        
+            this.goldText.text = "Gold: " + InventoryManager.GetGold();
+        }
     }
 }
