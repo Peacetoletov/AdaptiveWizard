@@ -77,7 +77,7 @@ namespace AdaptiveWizard.Assets.Scripts.UI
                 chest.GetLocalContent().RemoveGold();
             }
             else if (activeItem != null) {
-                InventoryManager.activeItemsManager.AddItem(activeItem);
+                InventoryManager.activeItemManager.AddItem(activeItem);
                 chest.GetLocalContent().RemoveActiveItem(slotTypeID);
             }
             else if (passiveItem != null) {

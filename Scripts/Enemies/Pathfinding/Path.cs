@@ -57,7 +57,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         public Vector2 StartNodePositionInWorldCoordinates() {
             //return RoomManager.PositionInRoomToPositionInWorld(startNodePosition);
 
-            return MainGameManager.GetManagerOfRoomManagers().GetRoomManager(roomIndex).PositionInRoomToPositionInWorld(startNodePosition);
+            return MainGameManager.GetRoomManager().GetRoom(roomIndex).PositionInRoomToPositionInWorld(startNodePosition);
             
             //ManagerOfRoomManagers managerOfRoomManagers = MainGameManager.GetManagerOfRoomManagers();
             //RoomManager roomManager = managerOfRoomManagers.GetRoomManager(roomIndex);

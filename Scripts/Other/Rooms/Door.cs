@@ -4,6 +4,7 @@ using UnityEngine;
 using AdaptiveWizard.Assets.Scripts.Other.Rooms;
 
 
+// TODO: doors probably shouldn't have an Open state, rather they should just disappear when opened (after some animation)
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
     public class Door : MonoBehaviour
@@ -23,20 +24,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private void Start() {
             UpdateState();
         }
-
-        /*
-        private void Update() {
-            // JUST A TEST, REMOVE THIS FUNCTION LATER!
-            if (Input.GetMouseButtonDown(0)) {
-                if (isOpen) {
-                    Close();
-                } else {
-                    Open();
-                }
-            }
-        }
-        */
-
+        
 
         public void Open() {
             this.isOpen = true;
@@ -50,6 +38,14 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             // update layer (affects collision checking)
             int newLayer = LayerMask.NameToLayer(isOpen ? "Default" : "Wall");
             gameObject.layer = newLayer;
+
+            // this might need to get changed in the future but works for now
+            // (it works fine if doors start locked and disappear when opened)
+            if (isOpen) {
+                for (var i = gameObject.transform.childCount - 1; i >= 0; i--) {
+                    Object.Destroy(gameObject.transform.GetChild(i).gameObject);
+                }
+            }
         }
 
         

@@ -7,6 +7,43 @@ using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
 namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
 {
+    public class ActiveItemManager
+    {
+        private ActiveItem item = null;
+
+        public ActiveItemManager() {
+            //Debug.Log("active item manager created");
+        }
+
+        public bool AddItem(ActiveItem newItem) {
+            // return true if an item was successfully added, false if inventory is full
+            if (this.item != null) {
+                // inventory is full
+                return false;
+            }
+
+            this.item = newItem;
+            //Debug.Log("item added");
+            MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().UpdateActiveItem(newItem);
+            return true;
+        }
+
+        public void UseItem() {
+            if (item != null) {
+                item.Use();
+                item = null;
+                MainGameManager.GetUI_Manager().GetUI_ActiveItemsManager().UpdateActiveItem(item);
+            }
+        }
+    }
+
+
+    /*
+    DEPRECATED - In the first versions of the game, there were 3 slots for active items.
+    However, I decided to change it to only 1 slot because it makes controls a lot easier.
+    */
+
+    /*
     public class ActiveItemsManager
     {
         private ActiveItem[] items = {null, null, null};
@@ -44,4 +81,5 @@ namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
             }
         }
     }
+    */
 }

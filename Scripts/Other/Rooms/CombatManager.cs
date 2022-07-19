@@ -16,23 +16,23 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         public GameObject chestObj;
 
 
-        private RoomManager rm;                       // reference to the room manager of this combat
+        private Room room;                       // reference to the room manager of this combat
         private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-        private const int totalEnemies = 1;
+        private const int totalEnemies = 5;
         private int enemiesDead = 0;
 
 
-        public void Init(RoomManager rm) {
-            this.rm = rm;
+        public void Init(Room room) {
+            this.room = room;
         }
 
         public void Update() {
             // TEMPORARY, INEFFICIENT SOLUTION
             if (MainGameManager.IsGameActive()) {
-                ManagerOfRoomManagers morm = MainGameManager.GetManagerOfRoomManagers();
+                RoomManager rm = MainGameManager.GetRoomManager();
                 // if player is in the same room as this combat manager
-                if (morm.GetRoomManager(morm.GetCurActiveRoomIndex()) == rm) {
+                if (rm.GetRoom(rm.GetCurActiveRoomIndex()) == room) {
                     if (!isCombatActive && totalEnemies != enemiesDead) {
                         BeginCombat();
                     }
@@ -59,7 +59,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             if (enemiesDead == totalEnemies) {
                 this.isCombatActive = false;
                 SpawnChest();
-                rm.OpenDoors();
+                room.OpenDoors();
             }
         }
 
@@ -84,13 +84,13 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             
             do {
                 // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
-                float xPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomWidth() - 1));
-                float yPosInRoomCoordinates = (float) (Random.Range(0f, rm.RoomHeight() - 1));
+                float xPosInRoomCoordinates = (float) (Random.Range(0f, room.RoomWidth() - 1));
+                float yPosInRoomCoordinates = (float) (Random.Range(0f, room.RoomHeight() - 1));
                 //float xPosInRoomCoordinates = 1.77902ff;
                 //float yPosInRoomCoordinates = 1.005072f;
 
                 spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
-                spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + rm.GetPosOffset().x), (spawnPosInRoomCoordinates.y + rm.GetPosOffset().y));
+                spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + room.GetPosOffset().x), (spawnPosInRoomCoordinates.y + room.GetPosOffset().y));
                 distanceFromPlayer = (spawnPosInWorldCoordinates - (Vector2) MainGameManager.GetPlayer().transform.position).magnitude;
             } while (!IsSpawnPosValid(spawnPosInRoomCoordinates, enemySize, distanceFromPlayer));
             
@@ -107,8 +107,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             Vector2 spawnPos = spawnPosInRoomCoordinates;
             float enemyDiameter = enemySize / 2f;
-            if (spawnPos.x - enemyDiameter < 0 || spawnPos.x + enemyDiameter > rm.RoomWidth() ||
-                    spawnPos.y - enemyDiameter < 0 || spawnPos.y + enemyDiameter > rm.RoomHeight()) {
+            if (spawnPos.x - enemyDiameter < 0 || spawnPos.x + enemyDiameter > room.RoomWidth() ||
+                    spawnPos.y - enemyDiameter < 0 || spawnPos.y + enemyDiameter > room.RoomHeight()) {
                 //print("SpawnPos is not valid. Outside of valid bounds");
                 return false;
             }
@@ -120,7 +120,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             for (int x = leftBound; x <= rightBound; x++) {
                 for (int y = upperBound; y <= lowerBound; y++) {
-                    if (rm.TileSymbolAtPosition(x, y) != '.') {
+                    if (room.TileSymbolAtPosition(x, y) != '.') {
                         //print("SpawnPos is not valid. Position is colliding with a non-floor block.");
                         //print("spawnPos.x = " + spawnPos.x + ". spawnPos.y = " + spawnPos.y + ". leftBound = " + leftBound + ". rightBound = " + rightBound + ". upperBound = " + upperBound + ". lowerBound = " + lowerBound);
                         return false;

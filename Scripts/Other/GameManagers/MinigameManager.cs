@@ -25,11 +25,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
         private float spawnPeriod = INITIAL_SPAWN_PERIOD;
 
         // Syntactic sugar
-        private ManagerOfRoomManagers managerOfRoomManagers;
+        private RoomManager roomManager;
 
 
         private void Start() {
-            this.managerOfRoomManagers = MainGameManager.GetManagerOfRoomManagers();
+            this.roomManager = MainGameManager.GetRoomManager();
             Restart();
         }
 

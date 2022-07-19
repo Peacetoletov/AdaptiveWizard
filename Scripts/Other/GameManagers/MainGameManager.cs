@@ -20,7 +20,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
 
         // public GameObjects used for instantiating
         public GameObject playerObj;
-        public GameObject managerOfRoomManagersObj;
+        public GameObject roomManagerObj;
         public GameObject minigameManagerObj;
 
 
@@ -48,13 +48,13 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
 
         private static UI_Manager UI_manager;
         private static MinigameManager minigameManager;
-        private static ManagerOfRoomManagers managerOfRoomManagers;
+        private static RoomManager roomManager;
 
         
         private void Start() {
             InitializePlayer();
 
-            MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
+            MainGameManager.roomManager = Instantiate(roomManagerObj, Vector2.zero, Quaternion.identity).GetComponent<RoomManager>();
 
             MainGameManager.UI_manager = (UI_Manager) FindObjectOfType(typeof(UI_Manager));
 
@@ -104,13 +104,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
 
                 // using active items
                 if (Input.GetKeyDown(KeyCode.Alpha1)) {
-                    InventoryManager.activeItemsManager.UseItem(0);
-                }
-                if (Input.GetKeyDown(KeyCode.Alpha2)) {
-                    InventoryManager.activeItemsManager.UseItem(1);
-                }
-                if (Input.GetKeyDown(KeyCode.Alpha3)) {
-                    InventoryManager.activeItemsManager.UseItem(2);
+                    InventoryManager.activeItemManager.UseItem();
                 }
 
                 
@@ -151,7 +145,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
 
             player.GetComponent<PlayerGeneral>().ResetPlayer();
             MainGameManager.player.transform.position = player_spawn_pos;
-            managerOfRoomManagers.Restart();
+            roomManager.Restart();
             if (minigame) {
                 minigameManager.Restart();
             }
@@ -181,8 +175,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
             return player;
         }
 
-        public static ManagerOfRoomManagers GetManagerOfRoomManagers() {
-            return managerOfRoomManagers;
+        public static RoomManager GetRoomManager() {
+            return roomManager;
         }
     }
 }

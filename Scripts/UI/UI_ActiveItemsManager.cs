@@ -15,34 +15,28 @@ namespace AdaptiveWizard.Assets.Scripts.UI
 
 
         // UI elements from scene
-        public GameObject[] activeItemBoxes;
+        public GameObject activeItemBox;
+        private GameObject activeItemObject;
 
 
-        private GameObject[] activeItemObjects = new GameObject[3];
-
-
-        public void UpdateActiveItems(ActiveItem[] items) {
-            DestroyActiveItemObjects();
-            for (int i = 0; i < 3; i++) {
-                if (items[i] != null) {
-                    GameObject itemObj;
-                    if (items[i] is HealthPotion) {
-                        itemObj = Instantiate(healthPotionUI_Prefab) as GameObject;
-                    }
-                    else {
-                        itemObj = Instantiate(manaPotionUI_Prefab) as GameObject;
-                    }
-                    itemObj.transform.SetParent(activeItemBoxes[i].transform, false);
-                    this.activeItemObjects[i] = itemObj;
+        public void UpdateActiveItem(ActiveItem item) {
+            DestroyActiveItemObject();
+            if (item != null) {
+                GameObject itemObj;
+                if (item is HealthPotion) {
+                    itemObj = Instantiate(healthPotionUI_Prefab) as GameObject;
                 }
+                else {
+                    itemObj = Instantiate(manaPotionUI_Prefab) as GameObject;
+                }
+                itemObj.transform.SetParent(activeItemBox.transform, false);
+                this.activeItemObject = itemObj;
             }
         }
 
-        private void DestroyActiveItemObjects() {
-            for (int i = 0; i < 3; i++) {
-                Destroy(activeItemObjects[i]);
-                activeItemObjects[i] = null;
-            }
+        private void DestroyActiveItemObject() {
+            Destroy(activeItemObject);
+            activeItemObject = null;
         }
     }
 }

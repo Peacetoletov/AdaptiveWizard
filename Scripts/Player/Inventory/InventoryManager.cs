@@ -31,7 +31,7 @@ namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
 
         // Item managers
         public static PassiveItemsManager passiveItemsManager;
-        public static ActiveItemsManager activeItemsManager;
+        public static ActiveItemManager activeItemManager;
 
 
         // Potentially create a distint class for gold management. Currently it's unnecessary.
@@ -40,7 +40,7 @@ namespace AdaptiveWizard.Assets.Scripts.Player.Inventory
         
         public static void Initialize() {
             InventoryManager.passiveItemsManager = new PassiveItemsManager();
-            InventoryManager.activeItemsManager = new ActiveItemsManager();
+            InventoryManager.activeItemManager = new ActiveItemManager();
         }
 
         public static void AddGold(int amount) {
