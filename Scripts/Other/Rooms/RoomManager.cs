@@ -60,6 +60,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             this.rooms.Add(newRoom.GetComponent<Room>());
             // Note: every wall needs to border with a floor (diagonals count too)
             //  This fact could be useful when determining which wall to select.
+            
             string[] roomVisual = new string[] {
                 "-----------------------------",
                 "------################-------",
@@ -81,6 +82,21 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 "#.....##......#....#########-",
                 "####################---------"
             };
+            
+            /*
+            string[] roomVisual = new string[] {
+                "----#######//#######--",
+                "---##.....#..#.....##-",
+                "--##................##",
+                "###..................#",
+                "#.....#............../",
+                "#....#.............../",
+                "###..................#",
+                "--##................##",
+                "---##..............##-",
+                "----#######//#######--"
+            };
+            */
             /*
             string[] roomVisual = new string[] {
                 "-----######--######---",

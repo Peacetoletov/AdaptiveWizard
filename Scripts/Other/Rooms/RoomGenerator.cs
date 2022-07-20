@@ -33,6 +33,9 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         // list of doors in this room
         private List<Door> doors = new List<Door>();    
 
+        // TODO: document how flags are used
+        List<(GameObject, List<List<int>>)> listOfWallsWithListsOfFlags;
+
 
         /* 
         ##################################################
@@ -173,13 +176,16 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         */
 
         public void Generate(Room room, string[] roomVisual) {
+            
+            InitWallFlags();
+
             for (int y = 0; y < room.RoomHeight(); y++) {
                 for (int x = 0; x < roomVisual[y].Length; x++) {
                     Vector3 coordinates = (Vector3) room.PositionInRoomToPositionInWorld(new Vector2Int(x, y));
                     char symbol = room.TileSymbolAtPosition(x, y);
                     if (symbol == '.') {
                         if (IsWall(x, y - 1, roomVisual)) {
-                            Instantiate(SelectCosmeticWall(x, y, roomVisual), coordinates, Quaternion.identity);
+                            Instantiate(SelectWall(x, y, roomVisual), coordinates, Quaternion.identity);
                         } else {
                             Instantiate(ChooseRandomFloor(), coordinates, Quaternion.identity);
                         }
@@ -192,7 +198,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     } else if (symbol == '-') {
                         // void
                         if (IsWall(x, y - 1, roomVisual)) {
-                            Instantiate(SelectCosmeticWall(x, y, roomVisual), coordinates, Quaternion.identity);
+                            Instantiate(SelectWall(x, y, roomVisual), coordinates, Quaternion.identity);
                         }
                     } else {
                         // this branch should never execute
@@ -247,249 +253,135 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             throw new Exception("An error occured while choosing a random object in RoomGenerator!");
         }
 
-        private GameObject SelectCosmeticWall(int x, int y, string[] roomVisual) {
-            // Current tile is actually floor/void but will look like a wall to create an illusion of depth.
-            
+        private void InitWallFlags() {
+            // Returns a list with lists of flags for each type of wall
             /*
-            I know that the current tile is non-wall and the tile below the current one is a wall.
-            Which wall tile to select depends on the left, right and bottom neighbours of the wall below the
-            current tile.
+            TODO: write a better description, both here and to the method that selects a wall
             */
 
             /*
-            Order of operations in 'if' branches:
-            Left > Right > Below
-            Floor > Wall > Void
+            This could be made slightly more efficient if it was initialized once per game, not once per room, but this 
+            optimization can wait for now. (possibly put this into RoomManager)
             */
 
-            // Floor current
-            if (IsFloor(x, y, roomVisual)) {
-                // Wall bottom left
-                if (IsWall(x - 1, y - 1, roomVisual)) {
-                    // Wall bottom right
-                    if (IsWall(x + 1, y - 1, roomVisual)) {
-                        // Floor bottom bottom
-                        if (IsFloor(x, y - 2, roomVisual)) {
-                            return twoConnectorBlue15Obj;
-                        }
-                        // Non-floor bottom bottom
-                        else {
-                            return edgeBlue03Obj;
-                        }
-                    }
-                    // Non-wall bottom right
-                    else {
-                        // Floor bottom bottom
-                        if (IsFloor(x, y - 2, roomVisual)) {
-                            return threeConnectorBlue16Obj;
-                        }
-                        // Non-floor bottom bottom
-                        else {
-                            // Floor bottom bottom left
-                            if (IsFloor(x - 1, y - 2, roomVisual)) {
-                                return threeConnectorBlue01Obj;
-                            }
-                            // Non-floor bottom bottom left
-                            else {
-                                return twoConnectorBlue02Obj;
-                            }
-                        }
-                    }
-                }
-                // Non-wall bottom left
-                else {
-                    // Wall bottom right
-                    if (IsWall(x + 1, y - 1, roomVisual)) {
-                        // Floor bottom bottom
-                        if (IsFloor(x, y - 2, roomVisual)) {
-                            return threeConnectorBlue15Obj;
-                        }
-                        // Non-floor bottom bottom
-                        else {
-                            // Floor bottom bottom right
-                            if (IsFloor(x + 1, y - 2, roomVisual)) {
-                                return threeConnectorBlue02Obj;
-                            }
-                            // Non-floor bottom bottom right
-                            else {
-                                return twoConnectorBlue01Obj;
-                            }
-                        }
-                    }
-                    // Non-wall bottom right
-                    else {
-                        // Floor bottom bottom
-                        if (IsFloor(x, y - 2, roomVisual)) {
-                            return fourConnectorBlue02Obj;
-                        }
-                        // Non-floor bottom bottom
-                        else {
-                            return threeConnectorBlue14Obj;
-                        }
-                    }
-                }
-            }
-            // Void current
-            else {
-                // Wall bottom left
-                if (IsWall(x - 1, y - 1, roomVisual)) {
-                    // Wall bottom right
-                    if (IsWall(x + 1, y - 1, roomVisual)) {
-                        return edgeBlue04Obj;
-                    }
-                    // Void bottom right
-                    if (IsVoid(x + 1, y - 1, roomVisual)) {
-                        return halfEdgeBlue02Obj;
-                    }
-                }
-                // Void bottom left
-                else if (IsVoid(x - 1, y - 1, roomVisual)) {
-                    return halfEdgeBlue01Obj;
-                }
-            }
-            
+
+            /*
+            Each flag is made of 3 bits, each corresponds to one tile type. If the bit is 1, that tile type is allowed.
+            Order of tile types: Wall, Floor, Void
+            */
 
 
-            // remove later, replace by an exception
-            Assert.IsTrue(false);
-            return lakeCornerBlue01Obj;
+            // TODO: this shouldn't be recreated every time this method is called, this should be cached in this class
+
+            this.listOfWallsWithListsOfFlags = new List<(GameObject, List<List<int>>)> {
+                (edgeBlue01Obj, new List<List<int>> {
+                    new List<int> {
+                        0b111, 0b100, 0b110,
+                        0b101, 0b100, 0b010,
+                        0b101, 0b100, 0b011,
+                        0b111, 0b111, 0b111
+                    },
+                    new List<int> {
+                        0b111, 0b111, 0b111,
+                        0b101, 0b100, 0b100,
+                        0b101, 0b100, 0b010,
+                        0b111, 0b111, 0b111
+                    }
+                }),
+                
+                (edgeBlue02Obj, new List<List<int>> {
+                    new List<int> {
+                        0b110, 0b100, 0b111,
+                        0b010, 0b100, 0b101,
+                        0b011, 0b111, 0b101,
+                        0b111, 0b111, 0b111
+                    },
+                    new List<int> {
+                        0b111, 0b111, 0b111,
+                        0b100, 0b100, 0b101,
+                        0b010, 0b100, 0b101,
+                        0b111, 0b111, 0b111
+                    }
+                }),
+                
+                // just for testing, this will match anything
+                
+                (fourConnectorBlue02Obj, new List<List<int>> {
+                    new List<int> {
+                        0b111, 0b111, 0b111,
+                        0b111, 0b111, 0b111,
+                        0b111, 0b111, 0b111,
+                        0b111, 0b111, 0b111
+                    },
+                })
+                
+            };
         }
 
         private GameObject SelectWall(int x, int y, string[] roomVisual) {
-            /*
-            This function selects a wall object to be instantiated at x, y. It looks at neighbouring tiles to
-            determine which object to select. If there are multiple options, one is chosen randomly based on
-            predefined priorities.
-            */
 
-            /*
-            Order of operations in 'if' branches:
-            Above > Left > Right > Below
-            Floor > Wall > Void
-            */
+            List<int> neighbourhood = GetRelevantNeighbourhood(x, y, roomVisual);
+            
 
-            /*
-            EMERGENCY MEETING:
-            I didn't realize how depth worked in this tileset. Turns out that some tiles are actually floors/voids
-            despite having the sprite of a wall. This is the case every time there is a back wall - above it is
-            a floor/void but has a wall sprite. This fact ruins all my previous work and I need to find a new solution,
-            both to room representation (where do I put '#' symbols?) and to room generation. It also means additional
-            work with colliders and possibly having the wall become semi-transparent when the player or enemies are
-            behind it.
+            if (x == 0 && y == 0) {
+                // testing
+                print("Tile types in the neighbourhood of tile at x == 0 and y == 0");
+                foreach (int tileType in neighbourhood) {
+                    print(tileType);
+                }
+            }
+            
 
-            Maybe I will look at the current tile and:
-                - if it's void or floor, look at the 3 tiles below it (straight below, below and left, below and right). If any
-                  of these are walls, place a "cosmetic" wall on the current tile. To determine which wall to select, I will also
-                  need to look at tiles above and to the left and right.
-                    - UPDATE: this doesn't work but maybe it can be fixed if I look at the left, right and bottom neighbours of the
-                              wall below the current tile.
-                - if it's wall, look at the tile straight below. If it's void, do nothing (the wall has already been placed by the
-                  tile above). If it's wall, place a wall. Select it by looking at tiles to the left and right (maybe also above?).
-                  Here, I'm looking for floor tiles. The number and position of neighbouring floor tiles determines the current wall.
-
-            // Note: every wall needs to border with a floor (diagonals count too)
-            //  This fact could be useful when determining which wall to select.
-            */
-
-
-
-
-
-            /*
-            // Floor above
-            if (IsFloor(x, y + 1, roomVisual)) {
-                // Floor left
-                if (IsFloor(x - 1, y, roomVisual)) {
-                    // Wall right
-                    if (IsWall(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y - 1, roomVisual)) {
-                            return twoConnectorBlue01Obj;
+            foreach ((GameObject wall, List<List<int>> listOfFlags) in listOfWallsWithListsOfFlags) {
+                foreach (List<int> flags in listOfFlags) {
+                    bool allMatching = true;
+                    for (int i = 0; i < 12; i++) {
+                        if ((neighbourhood[i] & flags[i]) == 0) {
+                            allMatching = false;
+                            break;
                         }
+                    }
+                    if (allMatching) {
+                        return wall;
                     }
                 }
-                // Wall left
-                else if (IsWall(x - 1, y, roomVisual)) {
-                    // Floor right
-                    if (IsFloor(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y - 1, roomVisual)) {
-                            return twoConnectorBlue02Obj;
-                        }
-                    }
-                    // Wall right
-                    else if (IsWall(x + 1, y, roomVisual)) {
-                        // Void below
-                        if (IsVoid(x, y + 1, roomVisual)) {
-                            return edgeBlue03Obj;
+            }
+
+            throw new Exception("Error in RoomGenerator: Could not find any wall to select!");
+        }
+
+        private List<int> GetRelevantNeighbourhood(int x, int y, string[] roomVisual) {
+            /* Returns a list with values of all 12 relevant neighbouring tile types, as shown in this image:
+                    .  .  .
+                    .  _  .
+                    .  .  .
+                    .  .  .
+            
+            Symbol _ represents the current tile. If a tile is out of the room's bounds, it is viewed as void.
+            0b100 represents Wall, 0b010 represents Floor, 0b001 represents Void.
+            */
+
+            List<int> neighbourhood = new List<int>();
+
+            for (int yy = 1; yy >= -2; yy--) {
+                for (int xx = -1; xx <= 1; xx++) {
+                    if (!IsWithinRoomBounds(x + xx, y + yy, roomVisual)) {
+                        neighbourhood.Add(0b001);
+                    } else {
+                        if (roomVisual[y + yy][x + xx] == '#') {
+                            neighbourhood.Add(0b100);
+                        } else if (roomVisual[y + yy][x + xx] == '.') {
+                            neighbourhood.Add(0b010);
+                        } else if (roomVisual[y + yy][x + xx] == '-') {
+                            neighbourhood.Add(0b001);
+                        } else {
+                            throw new Exception("Encountered unknown symbol in roomVisual when generating a room!");
                         }
                     }
                 }
             }
-            // Wall above
-            else if (IsWall(x, y + 1, roomVisual)) {
-                // Floor left
-                if (IsFloor(x - 1, y, roomVisual)) {
-                    // Void right
-                    if (IsVoid(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y + 1, roomVisual)) {
-                            return edgeBlue02Obj;
-                        }
-                    }
-                }
-                // Void left
-                else if (IsVoid(x - 1, y, roomVisual)) {
-                    // Wall below
-                    if (IsWall(x, y - 1, roomVisual)) {
-                        // Floor right
-                        if (IsFloor(x + 1, y, roomVisual)) {
-                            return edgeBlue01Obj;
-                        }
-                    }
-                }
 
-                // Left and right irrelevant, floor below
-                if (IsFloor(x, y - 1, roomVisual)) {
-                    return ChooseRandomBackWall();
-                }
-            }
-            // Void above
-            else if (IsVoid(x, y + 1, roomVisual)) {
-                // Wall left
-                if (IsWall(x - 1, y, roomVisual)) {
-                    // Wall right
-                    if (IsWall(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y - 1, roomVisual)) {
-                            return edgeBlue04Obj;
-                        }
-                    }
-                    // Void right
-                    if (IsVoid(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y - 1, roomVisual)) {
-                            return halfEdgeBlue02Obj;
-                        }
-                    }
-                }
-                // Void left
-                else if (IsVoid(x - 1, y, roomVisual)) {
-                    // Wall right
-                    if (IsWall(x + 1, y, roomVisual)) {
-                        // Wall below
-                        if (IsWall(x, y - 1, roomVisual)) {
-                            return halfEdgeBlue01Obj;
-                        }
-                    }
-                }
-            }
-            */
-           
-
-
-            // remove later, replace by an exception
-            return fourConnectorBlue02Obj;
+            return neighbourhood;
         }
 
         private bool IsWall(int x, int y, string[] roomVisual) {
