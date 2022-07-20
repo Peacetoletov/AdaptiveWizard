@@ -19,7 +19,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private Room room;                       // reference to the room manager of this combat
         private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-        private const int totalEnemies = 5;
+        private const int totalEnemies = 0;     // was 5, temporarily changed to 0
         private int enemiesDead = 0;
 
 
@@ -51,7 +51,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
                 enemy.SetCombatManager(this);
             }
-            
         }
 
         public void OnEnemyDeath() {
