@@ -20,6 +20,17 @@ Check if all back walls are truly equivalent. I have a feeling that some are sup
 on the left/right, based on a darker vertical line at the side, possibly to create a bigger contrast between the wall
 and floor. These vertical lines also look kind of weird when in the middle of a long back wall.
 */
+
+/*
+ALTERNATIVE SOLUTION:
+If automated wall selection turns out to be too difficult, I can simply come up with 50 or so hand-crafted rooms and write
+their exact configuration into a file. That should be more than enough variety. Right now I'm very much inclined to this
+solution because given that I've been struggling an entire day with just 2 walls and still haven't figured it out,
+I can't imagine doing this with all 60 walls. 
+
+Even with hand-crafted rooms, I can still use some randomization (which sprites to use for equivalent tiles) to make them
+a little different each time.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
     public class RoomGenerator : MonoBehaviour
@@ -34,7 +45,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private List<Door> doors = new List<Door>();    
 
         // TODO: document how flags are used
+        // NEWER TODO: remov ethis
         List<(GameObject, List<List<int>>)> listOfWallsWithListsOfFlags;
+
+        // Table mapping GameObject scene names to IDs 
+        private static Dictionary<string, int> objectNameToID_Table;
 
 
         /* 
@@ -177,6 +192,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
         public void Generate(Room room, string[] roomVisual) {
             
+            /*
             InitWallFlags();
 
             for (int y = 0; y < room.RoomHeight(); y++) {
@@ -205,6 +221,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     }
                 }
             }
+            */
         }
 
         private GameObject ChooseRandomFloor() {
@@ -252,6 +269,202 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             throw new Exception("An error occured while choosing a random object in RoomGenerator!");
         }
+
+        public List<Door> GetDoors() {
+            return doors;
+        }
+
+        public static void SaveHandcraftedRoom() {
+            /* Saves a hand-crafted room into a file. 
+            
+            This room must be located near world coordinates [0, 0] and all tiles of the room must have
+            x and y coordinates between -100 and 100 (room radius == 100). No tile from another room can
+            be in this range of coordinates.
+            */
+
+            print("Calling SaveHandcraftedRoom()");
+
+            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom();
+            print("Origin = " + origin + ", dimensions = " + dimensions);
+
+            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
+            foreach(GameObject go in allObjects) {
+                if (go.activeInHierarchy) {
+                    string firstWordInName = go.name.Split(' ')[0];
+
+                    int id = ObjectNameToID(firstWordInName);
+                    if (id != -1) {
+                        print(firstWordInName + " has id " + id) ;
+                    }
+                    
+                }
+            
+            }
+                
+        }
+
+        private static (Vector2Int, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius=100) {
+            /*
+            Returns the position of the left-most, bottom-most object of a handcrafted room around world position [0, 0],
+            along with the dimensions of this room.
+            */
+
+            int topMost = -int.MaxValue;
+            int leftMost = int.MaxValue;
+            int rightMost = -int.MaxValue;
+            int bottomMost = int.MaxValue;
+
+            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
+            foreach(GameObject go in allObjects) {
+                if (go.activeInHierarchy) {
+                    string firstWordInName = go.name.Split(' ')[0];
+                    int id = ObjectNameToID(firstWordInName);
+                    if (id != -1) {
+                        Vector2Int pos = Vector2Int.RoundToInt(go.transform.position);
+                        if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
+                            topMost = pos.y > topMost ? pos.y : topMost;
+                            leftMost = pos.x < leftMost ? pos.x : leftMost;
+                            rightMost = pos.x > rightMost ? pos.x : rightMost;
+                            bottomMost = pos.y < bottomMost ? pos.y : bottomMost; 
+                        }
+                    }
+                }
+            }
+
+            if (topMost == -int.MaxValue) {
+                throw new Exception("Handcrafted room is empty!");
+            }
+
+            return (new Vector2Int(leftMost, bottomMost), new Vector2Int(rightMost - leftMost + 1, topMost - bottomMost + 1));
+        }
+
+        private static int ObjectNameToID(string objectName) {
+            if (objectNameToID_Table == null) {
+                RoomGenerator.objectNameToID_Table = new Dictionary<string, int> {
+                    { "BonesBlue01", 1 },
+                    { "CobwebBlue01", 2 },
+                    { "CobwebBlue02", 3 },
+                    { "CobwebBlue03", 4 },
+                    { "CobwebBlue04", 5 },
+                    { "RocksBlue01", 6 },
+                    { "SkullBlue01", 7 },                
+                    { "SkullBlue02", 8 },
+                    { "DoorBlue02", 9 },
+                    { "DoorBlue04", 10 },
+                    { "DoorBlue05", 11 },              
+                    { "DoorBlue06", 12 },
+                    { "DoorBlue07", 13 },
+                    { "DoorBlue08", 14 },
+                    { "DoorBlue09", 15 },
+                    { "DoorBlue10", 16 },
+                    { "FloorBlue01", 17 },
+                    { "FloorBlue02", 18 },
+                    { "FloorBlue03", 19 },
+                    { "FloorBlue04", 20 },
+                    { "FloorBlue05", 21 },
+                    { "FloorBlue06", 22 },
+                    { "FloorBlue07", 23 },
+                    { "LakeCornerBlue01", 24 },
+                    { "LakeCornerBlue02", 25 },
+                    { "LakeCornerBlue03", 26},
+                    { "LakeCornerBlue04", 27},
+                    { "LakeDoubleEdgeBlue01", 28 },
+                    { "LakeEdgeBlue01", 29 },
+                    { "LakeEdgeBlue02", 30 },
+                    { "LakeEdgeBlue03", 31 },
+                    { "LakeEdgeBlue04", 32 },
+                    { "LakeMiddleBlue01", 33 },
+                    { "LakeSmallBlue01", 34 },
+                    { "LakeUBlue01", 35 },
+                    { "LakeUBlue02", 36 },
+                    { "StairsBlue01", 37 },
+                    { "StairsBlue02", 38 },
+                    { "StairsBlue03", 39 },
+                    { "StairsBlue04", 40 },
+                    { "WallBlue01", 41 },
+                    { "WallBlue02", 42 },
+                    { "WallBlue03", 43 },
+                    { "WallBlue04", 44 },
+                    { "WallBlue05", 45 },
+                    { "WallBlue06", 46 },
+                    { "WallBlue07", 47 },
+                    { "WallBlue08", 48 },
+                    { "WallBlue09", 49 },
+                    { "WallBlue10", 50 },
+                    { "WallBlue11", 51 },
+                    { "TwoConnectorBlue01", 52 },
+                    { "TwoConnectorBlue02", 53 },
+                    { "TwoConnectorBlue03", 54 },
+                    { "TwoConnectorBlue04", 55 },
+                    { "TwoConnectorBlue05", 56 },
+                    { "TwoConnectorBlue06", 57 },
+                    { "TwoConnectorBlue07", 58 },
+                    { "TwoConnectorBlue08", 59 },
+                    { "TwoConnectorBlue09", 60 },
+                    { "TwoConnectorBlue10", 61 },
+                    { "TwoConnectorBlue11", 62 },                    
+                    { "TwoConnectorBlue12", 63 },
+                    { "TwoConnectorBlue13", 64 },
+                    { "TwoConnectorBlue14", 65 },
+                    { "TwoConnectorBlue15", 66 },
+                    { "TwoConnectorBlue16", 67 },
+                    { "TwoConnectorBlue17", 68 },
+                    { "TwoConnectorBlue18", 69 },
+                    { "TwoConnectorBlue19", 70 },
+                    { "TwoConnectorBlue20", 71 },
+                    { "ThreeConnectorBlue01", 72 },
+                    { "ThreeConnectorBlue02", 73 },
+                    { "ThreeConnectorBlue03", 74 },                  
+                    { "ThreeConnectorBlue04", 75 },
+                    { "ThreeConnectorBlue05", 76 },
+                    { "ThreeConnectorBlue06", 77 },
+                    { "ThreeConnectorBlue07", 78 },
+                    { "ThreeConnectorBlue08", 79 },
+                    { "ThreeConnectorBlue09", 80 },
+                    { "ThreeConnectorBlue10", 81 },
+                    { "ThreeConnectorBlue11", 82 },
+                    { "ThreeConnectorBlue12", 83 },
+                    { "ThreeConnectorBlue13", 84 },
+                    { "ThreeConnectorBlue14", 85 },
+                    { "ThreeConnectorBlue15", 86 },
+                    { "ThreeConnectorBlue16", 87 },
+                    { "ThreeConnectorBlue17", 88 },
+                    { "FourConnectorBlue01", 89 },
+                    { "FourConnectorBlue02", 90 },
+                    { "ArchBlue01", 91 },
+                    { "ArchBlue02", 92 },
+                    { "EdgeBlue01", 93 },
+                    { "EdgeBlue02", 94 },
+                    { "EdgeBlue03", 95 },
+                    { "EdgeBlue04", 96 },
+                    { "EdgeWithArchBlue01", 97 },
+                    { "EdgeWithArchBlue02", 98 },
+                    { "HalfEdgeBlue01", 99 },
+                    { "HalfEdgeBlue02", 100 },
+                    { "QuarterEdgeBlue01", 101 },
+                    { "QuarterEdgeBlue02", 102 },
+                    { "VoidBlue01", 103 }
+                };
+            }
+
+            int value;
+            bool hasValue = RoomGenerator.objectNameToID_Table.TryGetValue(objectName, out value);
+
+            if (hasValue) {
+                return value;
+            }
+
+            return -1;
+        }
+
+
+        
+
+        /* 
+        ###############################################################
+        ######  METHODS BELOW ARE DEPRECATED, DELETE THEM LATER  ######
+        ###############################################################
+        */
 
         private void InitWallFlags() {
             // Returns a list with lists of flags for each type of wall
@@ -384,6 +597,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return neighbourhood;
         }
 
+        
         private bool IsWall(int x, int y, string[] roomVisual) {
             if (IsWithinRoomBounds(x, y, roomVisual)) {
                 return roomVisual[y][x] == '#';
@@ -407,10 +621,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
         private bool IsWithinRoomBounds(int x, int y, string[] roomVisual) {
             return x >= 0 && y >= 0 && y < roomVisual.Count() && x < roomVisual[0].Count();
-        }
-
-        public List<Door> GetDoors() {
-            return doors;
         }
     }
 }

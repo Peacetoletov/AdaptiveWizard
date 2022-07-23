@@ -107,6 +107,10 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
                     InventoryManager.activeItemManager.UseItem();
                 }
 
+                // Saving a hand-crafted room
+                if (Input.GetKeyDown(KeyCode.H)) {
+                    RoomGenerator.SaveHandcraftedRoom();
+                }
                 
                 // test
                 /*
