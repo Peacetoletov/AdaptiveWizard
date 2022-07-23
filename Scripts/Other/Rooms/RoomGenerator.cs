@@ -9,27 +9,20 @@ using UnityEngine.Assertions;
 RoomGenerator chooses and instantiates prefabs in a room.
 */
 
-/* TODO:
-    - randomized floor
-    - randomized back walls
-    - all other kinds of walls (chosen based on neighbouring tiles)
-    - doors
+/* CURRENT TODO: 
+Save handcrafted rooms into a file. Create a new folder (named Room1, Room2 etc.) and create 2 files here.
+The first file will contain two rows: first row will contain dimensions of the room, second row will contain
+pairs of object coordinates and object id.
+The second file will contain visual representation of the room, which will be used for enemy pathfinding.
+I can probably remove doors from the visual representation of the room, because they are not relevant to enemies
+(they serve the same function as walls to enemies). I should add lakes to the visual representation, because they
+might be relevant to enemies with ranged attacks. This can however wait.  
 */
+
 /* ADDITIONAL TODO:
 Check if all back walls are truly equivalent. I have a feeling that some are supposed to be used when there is floor
 on the left/right, based on a darker vertical line at the side, possibly to create a bigger contrast between the wall
 and floor. These vertical lines also look kind of weird when in the middle of a long back wall.
-*/
-
-/*
-ALTERNATIVE SOLUTION:
-If automated wall selection turns out to be too difficult, I can simply come up with 50 or so hand-crafted rooms and write
-their exact configuration into a file. That should be more than enough variety. Right now I'm very much inclined to this
-solution because given that I've been struggling an entire day with just 2 walls and still haven't figured it out,
-I can't imagine doing this with all 60 walls. 
-
-Even with hand-crafted rooms, I can still use some randomization (which sprites to use for equivalent tiles) to make them
-a little different each time.
 */
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
@@ -45,11 +38,15 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private List<Door> doors = new List<Door>();    
 
         // TODO: document how flags are used
-        // NEWER TODO: remov ethis
+        // NEWER TODO: remove this
         List<(GameObject, List<List<int>>)> listOfWallsWithListsOfFlags;
 
-        // Table mapping GameObject scene names to IDs 
-        private static Dictionary<string, int> objectNameToID_Table;
+        // Caching
+        private static Dictionary<string, int> objectNameToID_Table;        // Table mapping GameObject scene names to IDs 
+        private static HashSet<int> solidWallIDs;
+        private static HashSet<int> cosmeticWallIDs;                        // Cosmetic walls act as floors on position x,y and as solid walls on position x,y+1 
+        private static HashSet<int> floorIDs;
+        private static HashSet<int> lakeIDs;
 
 
         /* 
@@ -274,7 +271,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return doors;
         }
 
-        public static void SaveHandcraftedRoom() {
+        public static void SaveHandcraftedRoom(int roomRadius=100) {
             /* Saves a hand-crafted room into a file. 
             
             This room must be located near world coordinates [0, 0] and all tiles of the room must have
@@ -284,26 +281,162 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             print("Calling SaveHandcraftedRoom()");
 
-            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom();
+            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
             print("Origin = " + origin + ", dimensions = " + dimensions);
 
-            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
-            foreach(GameObject go in allObjects) {
-                if (go.activeInHierarchy) {
-                    string firstWordInName = go.name.Split(' ')[0];
+            int[,] roomObjectIDs = new int[dimensions.y, dimensions.x];
+            char[,] roomVisual = new char[dimensions.y + 1, dimensions.x];      // Adding 1 to height is needed because cosmetic walls take up 2 spaces
+            Fill2DArray(roomObjectIDs, -1);
+            Fill2DArray(roomVisual, '-');
 
-                    int id = ObjectNameToID(firstWordInName);
-                    if (id != -1) {
-                        print(firstWordInName + " has id " + id) ;
+            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
+            foreach (GameObject go in allObjects) {
+                int id = ObjectNameToID(go.name.Split(' ')[0]);
+                if (go.activeInHierarchy && id != -1) {
+                    Vector2Int pos = Vector2Int.RoundToInt(go.transform.position) - origin;
+                    if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
+                        roomObjectIDs[pos.y, pos.x] = id;
+                        if (IsSolidWall(id)) {
+                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '#';
+                        } else if (IsCosmeticWall(id)) {
+                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                            roomVisual[roomVisual.GetLength(0) - pos.y - 1, pos.x] = '#';
+                        } else if (IsFloor(id)) {
+                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                        } else if (IsLake(id)) {
+                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = 'o';
+                        }
                     }
-                    
                 }
-            
             }
-                
+
+            for (int y = 0; y < roomVisual.GetLength(0); y++) {
+                string line = "";
+                for (int x = 0; x < roomVisual.GetLength(1); x++) {
+                    line += roomVisual[y, x];
+                }
+                print($"Line {y}: {line}");
+            }
+            // TODO: write this ^ and IDs into files
         }
 
-        private static (Vector2Int, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius=100) {
+        private static void Fill2DArray<T> (T[,] array, T value) {
+            for (int y = 0; y < array.GetLength(0); y++) {
+                for (int x = 0; x < array.GetLength(1); x++) {
+                    array[y, x] = value;
+                }
+            }
+        }
+
+        private static bool IsSolidWall(int id) {
+            if (RoomGenerator.solidWallIDs == null) {
+                RoomGenerator.solidWallIDs = new HashSet<int> {
+                    ObjectNameToID("DoorBlue02"),
+                    ObjectNameToID("DoorBlue04"),
+                    ObjectNameToID("DoorBlue05"),
+                    ObjectNameToID("DoorBlue06"),
+                    ObjectNameToID("DoorBlue07"),
+                    ObjectNameToID("DoorBlue08"),
+                    ObjectNameToID("DoorBlue09"),
+                    ObjectNameToID("DoorBlue10"),
+                    ObjectNameToID("WallBlue01"),
+                    ObjectNameToID("WallBlue02"),
+                    ObjectNameToID("WallBlue03"),
+                    ObjectNameToID("WallBlue04"),
+                    ObjectNameToID("WallBlue05"),
+                    ObjectNameToID("WallBlue06"),
+                    ObjectNameToID("WallBlue07"),
+                    ObjectNameToID("WallBlue08"),
+                    ObjectNameToID("WallBlue09"),
+                    ObjectNameToID("WallBlue10"),
+                    ObjectNameToID("WallBlue11"),
+                    ObjectNameToID("TwoConnectorBlue03"),
+                    ObjectNameToID("TwoConnectorBlue04"),
+                    ObjectNameToID("TwoConnectorBlue07"),
+                    ObjectNameToID("TwoConnectorBlue08"),
+                    ObjectNameToID("TwoConnectorBlue09"),
+                    ObjectNameToID("TwoConnectorBlue10"),
+                    ObjectNameToID("TwoConnectorBlue11"),
+                    ObjectNameToID("TwoConnectorBlue12"),
+                    ObjectNameToID("TwoConnectorBlue13"),
+                    ObjectNameToID("TwoConnectorBlue14"),
+                    ObjectNameToID("TwoConnectorBlue16"),
+                    ObjectNameToID("TwoConnectorBlue17"),
+                    ObjectNameToID("TwoConnectorBlue18"),
+                    ObjectNameToID("TwoConnectorBlue19"),
+                    ObjectNameToID("TwoConnectorBlue20"),
+                    ObjectNameToID("ThreeConnectorBlue03"),
+                    ObjectNameToID("ThreeConnectorBlue04"),
+                    ObjectNameToID("ThreeConnectorBlue06"),
+                    ObjectNameToID("ThreeConnectorBlue07"),
+                    ObjectNameToID("ThreeConnectorBlue08"),
+                    ObjectNameToID("ThreeConnectorBlue09"),
+                    ObjectNameToID("ThreeConnectorBlue10"),
+                    ObjectNameToID("ThreeConnectorBlue11"),
+                    ObjectNameToID("ThreeConnectorBlue12"),
+                    ObjectNameToID("ThreeConnectorBlue13"),
+                    ObjectNameToID("ThreeConnectorBlue17"),
+                    ObjectNameToID("FourConnectorBlue01"),
+                    ObjectNameToID("ArchBlue01"),
+                    ObjectNameToID("ArchBlue02"),
+                    ObjectNameToID("EdgeBlue01"),
+                    ObjectNameToID("EdgeBlue02"),
+                    ObjectNameToID("EdgeBlue04"),
+                    ObjectNameToID("EdgeWithArchBlue01"),
+                    ObjectNameToID("EdgeWithArchBlue02"),
+                    ObjectNameToID("HalfEdgeBlue01"),
+                    ObjectNameToID("HalfEdgeBlue02"),
+                    ObjectNameToID("QuarterEdgeBlue01"),
+                    ObjectNameToID("QuarterEdgeBlue02")
+                };
+            }
+
+            return RoomGenerator.solidWallIDs.Contains(id);
+        }
+
+        private static bool IsCosmeticWall(int id) {
+            if (RoomGenerator.cosmeticWallIDs == null) {
+                RoomGenerator.cosmeticWallIDs = new HashSet<int> {
+                    ObjectNameToID("TwoConnectorBlue01"),
+                    ObjectNameToID("TwoConnectorBlue02"),
+                    ObjectNameToID("TwoConnectorBlue05"),
+                    ObjectNameToID("TwoConnectorBlue06"),
+                    ObjectNameToID("TwoConnectorBlue15"),
+                    ObjectNameToID("ThreeConnectorBlue01"),
+                    ObjectNameToID("ThreeConnectorBlue02"),
+                    ObjectNameToID("ThreeConnectorBlue05"),
+                    ObjectNameToID("ThreeConnectorBlue14"),
+                    ObjectNameToID("ThreeConnectorBlue15"),
+                    ObjectNameToID("ThreeConnectorBlue16"),
+                    ObjectNameToID("FourConnectorBlue02"),
+                    ObjectNameToID("EdgeBlue03")
+                };
+            }
+
+            return RoomGenerator.cosmeticWallIDs.Contains(id);
+        }
+
+        private static bool IsFloor(int id) {
+            if (RoomGenerator.floorIDs == null) {
+                RoomGenerator.floorIDs = new HashSet<int> {
+                    ObjectNameToID("FloorBlue01"),
+                    ObjectNameToID("FloorBlue02"),
+                    ObjectNameToID("FloorBlue03"),
+                    ObjectNameToID("FloorBlue04"),
+                    ObjectNameToID("FloorBlue05"),
+                    ObjectNameToID("FloorBlue06"),
+                    ObjectNameToID("FloorBlue07"),                    
+                };
+            }
+
+            return RoomGenerator.floorIDs.Contains(id);
+        }
+
+        private static bool IsLake(int id) {
+            return false;
+        }
+
+        private static (Vector2Int, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius) {
             /*
             Returns the position of the left-most, bottom-most object of a handcrafted room around world position [0, 0],
             along with the dimensions of this room.
@@ -315,18 +448,14 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             int bottomMost = int.MaxValue;
 
             GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
-            foreach(GameObject go in allObjects) {
-                if (go.activeInHierarchy) {
-                    string firstWordInName = go.name.Split(' ')[0];
-                    int id = ObjectNameToID(firstWordInName);
-                    if (id != -1) {
-                        Vector2Int pos = Vector2Int.RoundToInt(go.transform.position);
-                        if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
-                            topMost = pos.y > topMost ? pos.y : topMost;
-                            leftMost = pos.x < leftMost ? pos.x : leftMost;
-                            rightMost = pos.x > rightMost ? pos.x : rightMost;
-                            bottomMost = pos.y < bottomMost ? pos.y : bottomMost; 
-                        }
+            foreach (GameObject go in allObjects) {
+                if (go.activeInHierarchy && ObjectNameToID(go.name.Split(' ')[0]) != -1) {
+                    Vector2Int worldPos = Vector2Int.RoundToInt(go.transform.position);
+                    if (worldPos.x >= -roomRadius && worldPos.x <= roomRadius && worldPos.y >= -roomRadius && worldPos.y <= roomRadius) {
+                        topMost = worldPos.y > topMost ? worldPos.y : topMost;
+                        leftMost = worldPos.x < leftMost ? worldPos.x : leftMost;
+                        rightMost = worldPos.x > rightMost ? worldPos.x : rightMost;
+                        bottomMost = worldPos.y < bottomMost ? worldPos.y : bottomMost; 
                     }
                 }
             }
@@ -339,7 +468,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         private static int ObjectNameToID(string objectName) {
-            if (objectNameToID_Table == null) {
+            if (RoomGenerator.objectNameToID_Table == null) {
                 RoomGenerator.objectNameToID_Table = new Dictionary<string, int> {
                     { "BonesBlue01", 1 },
                     { "CobwebBlue01", 2 },
