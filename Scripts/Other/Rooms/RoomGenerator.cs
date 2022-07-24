@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -11,8 +12,7 @@ RoomGenerator chooses and instantiates prefabs in a room.
 
 /* CURRENT TODO: 
 Save handcrafted rooms into a file. Create a new folder (named Room1, Room2 etc.) and create 2 files here.
-The first file will contain two rows: first row will contain dimensions of the room, second row will contain
-pairs of object coordinates and object id.
+The first file will contain the id of each object in the room, with values -1 in spaces with no object. 
 The second file will contain visual representation of the room, which will be used for enemy pathfinding.
 I can probably remove doors from the visual representation of the room, because they are not relevant to enemies
 (they serve the same function as walls to enemies). I should add lakes to the visual representation, because they
@@ -281,9 +281,12 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             print("Calling SaveHandcraftedRoom()");
 
-            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
-            print("Origin = " + origin + ", dimensions = " + dimensions);
+            (int[,] roomObjectIDs, char[,] roomVisual) = GatherObjectsInRoom(roomRadius);
+            CreateFiles(roomObjectIDs, roomVisual);
+        }
 
+        private static (int[,], char[,]) GatherObjectsInRoom(int roomRadius) {
+            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
             int[,] roomObjectIDs = new int[dimensions.y, dimensions.x];
             char[,] roomVisual = new char[dimensions.y + 1, dimensions.x];      // Adding 1 to height is needed because cosmetic walls take up 2 spaces
             Fill2DArray(roomObjectIDs, -1);
@@ -295,29 +298,68 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 if (go.activeInHierarchy && id != -1) {
                     Vector2Int pos = Vector2Int.RoundToInt(go.transform.position) - origin;
                     if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
-                        roomObjectIDs[pos.y, pos.x] = id;
-                        if (IsSolidWall(id)) {
-                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '#';
-                        } else if (IsCosmeticWall(id)) {
-                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
-                            roomVisual[roomVisual.GetLength(0) - pos.y - 1, pos.x] = '#';
-                        } else if (IsFloor(id)) {
-                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
-                        } else if (IsLake(id)) {
-                            roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = 'o';
-                        }
-                    }
+                        AddObjectToRoomArrays(pos, id, roomObjectIDs, roomVisual);
+                    }                        
                 }
             }
 
-            for (int y = 0; y < roomVisual.GetLength(0); y++) {
-                string line = "";
-                for (int x = 0; x < roomVisual.GetLength(1); x++) {
-                    line += roomVisual[y, x];
-                }
-                print($"Line {y}: {line}");
+            return (roomObjectIDs, roomVisual);
+        }
+
+        private static void AddObjectToRoomArrays(Vector2Int pos, int id, int[,] roomObjectIDs, char[,] roomVisual) {
+            roomObjectIDs[roomObjectIDs.GetLength(0) - pos.y - 1, pos.x] = id;
+            if (IsSolidWall(id)) {
+                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '#';
+            } else if (IsCosmeticWall(id)) {
+                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                roomVisual[roomVisual.GetLength(0) - pos.y - 1, pos.x] = '#';
+            } else if (IsFloor(id)) {
+                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+            } else if (IsLake(id)) {
+                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = 'o';
             }
-            // TODO: write this ^ and IDs into files
+        }
+
+        private static void CreateFiles(int[,] roomObjectIDs, char[,] roomVisual) {
+            string dirPath = CreateRoomDirectory();
+            CreateFileWithObjectIDs(dirPath, roomObjectIDs);
+            CreateFileWithRoomVisual(dirPath, roomVisual);
+        }
+
+        private static string CreateRoomDirectory() {
+            const string basePath = @"Assets/Resources/Saved files/Rooms/Room";
+            int roomNumber = 1;
+            while (Directory.Exists(basePath + roomNumber)) {
+                roomNumber++;
+            }
+            string dirPath = basePath + roomNumber;
+            Directory.CreateDirectory(dirPath);
+            return dirPath;
+        }
+
+        private static void CreateFileWithObjectIDs(string dirPath, int[,] roomObjectIDs) {
+            using (StreamWriter writer = new StreamWriter(dirPath + @"/objects.csv")) {  
+                for (int y = 0; y < roomObjectIDs.GetLength(0); y++) {
+                    string line = "";
+                    for (int x = 0; x < roomObjectIDs.GetLength(1) - 1; x++) {
+                        line += roomObjectIDs[y, x] + ",";
+                    }
+                    line += roomObjectIDs[y, roomObjectIDs.GetLength(1) - 1];
+                    writer.WriteLine(line);    
+                } 
+            }
+        }
+
+        private static void CreateFileWithRoomVisual(string dirPath, char[,] roomVisual) {
+            using (StreamWriter writer = new StreamWriter(dirPath + @"/visual.txt")) {  
+                for (int y = 0; y < roomVisual.GetLength(0); y++) {
+                    string line = "";
+                    for (int x = 0; x < roomVisual.GetLength(1); x++) {
+                        line += roomVisual[y, x];
+                    }
+                    writer.WriteLine(line);    
+                } 
+            }
         }
 
         private static void Fill2DArray<T> (T[,] array, T value) {
