@@ -41,10 +41,35 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         // NEWER TODO: remove this
         List<(GameObject, List<List<int>>)> listOfWallsWithListsOfFlags;
 
+        // Class containing all information that needs to be stored in a file to recreate a room
+        private class RoomObjectData 
+        {
+            private readonly int id;
+            private readonly Vector2 pos;
+            private readonly Quaternion rotation;
+            
+            public int Id { 
+                get { return id; } 
+            }
+            public Vector2 Pos {
+                get { return pos; }
+            }
+            public Quaternion Rotation { 
+                get { return rotation; }
+            }
+
+            public RoomObjectData(int id, Vector2 pos, Quaternion rotation) {
+                this.id = id;
+                this.pos = pos;
+                this.rotation = rotation;
+            }
+        }
+
         // Caching
         private static Dictionary<string, int> objectNameToID_Table;        // Table mapping GameObject scene names to IDs 
         private static HashSet<int> solidWallIDs;
-        private static HashSet<int> cosmeticWallIDs;                        // Cosmetic walls act as floors on position x,y and as solid walls on position x,y+1 
+        private static HashSet<int> cosmeticWallIDs;                        // Cosmetic walls act as floors on position x,y and as solid walls on position x,y-1 (1 space below)
+        private static HashSet<int> verticalDoorIDs;                        // Vertical doors act as walls on position x,y-1        // remove later
         private static HashSet<int> floorIDs;
         private static HashSet<int> lakeIDs;
 
@@ -279,51 +304,59 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             be in this range of coordinates.
             */
 
-            print("Calling SaveHandcraftedRoom()");
+            print("Saving a handcrafted room.");
 
-            (int[,] roomObjectIDs, char[,] roomVisual) = GatherObjectsInRoom(roomRadius);
-            CreateFiles(roomObjectIDs, roomVisual);
+            (char[,] roomVisual, List<RoomObjectData> roomObjectsData) = GatherObjectsInRoom(roomRadius);
+            CreateFiles(roomVisual, roomObjectsData);
         }
 
-        private static (int[,], char[,]) GatherObjectsInRoom(int roomRadius) {
-            (Vector2Int origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
-            int[,] roomObjectIDs = new int[dimensions.y, dimensions.x];
+        private static (char[,], List<RoomObjectData>) GatherObjectsInRoom(int roomRadius) {
+            (Vector2 origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
             char[,] roomVisual = new char[dimensions.y + 1, dimensions.x];      // Adding 1 to height is needed because cosmetic walls take up 2 spaces
-            Fill2DArray(roomObjectIDs, -1);
             Fill2DArray(roomVisual, '-');
+            List<RoomObjectData> roomObjectsData = new List<RoomObjectData>();
 
             GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
             foreach (GameObject go in allObjects) {
                 int id = ObjectNameToID(go.name.Split(' ')[0]);
                 if (go.activeInHierarchy && id != -1) {
-                    Vector2Int pos = Vector2Int.RoundToInt(go.transform.position) - origin;
+                    Vector2 pos = ((Vector2) go.transform.position) - origin;
                     if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
-                        AddObjectToRoomArrays(pos, id, roomObjectIDs, roomVisual);
+                        AddObjectToRoomVisual(id, Vector2Int.RoundToInt(pos), roomVisual);
+                        roomObjectsData.Add(new RoomObjectData(id, pos, go.transform.rotation));
                     }                        
                 }
             }
 
-            return (roomObjectIDs, roomVisual);
+            return (roomVisual, roomObjectsData);
         }
 
-        private static void AddObjectToRoomArrays(Vector2Int pos, int id, int[,] roomObjectIDs, char[,] roomVisual) {
-            roomObjectIDs[roomObjectIDs.GetLength(0) - pos.y - 1, pos.x] = id;
+        private static void AddObjectToRoomVisual(int id, Vector2Int pos, char[,] roomVisual) {
             if (IsSolidWall(id)) {
                 roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '#';
             } else if (IsCosmeticWall(id)) {
-                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                if (roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] != '#') {
+                    // Floor must not overwrite doors
+                    roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                }
+                roomVisual[roomVisual.GetLength(0) - pos.y - 1, pos.x] = '#';
+            } else if (IsVerticalDoor(id)) {
+                // TODO: remove this later when I introduce dynamic creation of door sections 
                 roomVisual[roomVisual.GetLength(0) - pos.y - 1, pos.x] = '#';
             } else if (IsFloor(id)) {
-                roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                if (roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] != '#') {
+                    // Floor must not overwrite doors
+                    roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '.';
+                }
             } else if (IsLake(id)) {
                 roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = 'o';
             }
         }
 
-        private static void CreateFiles(int[,] roomObjectIDs, char[,] roomVisual) {
+        private static void CreateFiles(char[,] roomVisual, List<RoomObjectData> roomObjectsData) {
             string dirPath = CreateRoomDirectory();
-            CreateFileWithObjectIDs(dirPath, roomObjectIDs);
             CreateFileWithRoomVisual(dirPath, roomVisual);
+            CreateFileWithObjectIDs(dirPath, roomObjectsData);
         }
 
         private static string CreateRoomDirectory() {
@@ -337,16 +370,21 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return dirPath;
         }
 
-        private static void CreateFileWithObjectIDs(string dirPath, int[,] roomObjectIDs) {
+        private static void CreateFileWithObjectIDs(string dirPath, List<RoomObjectData> roomObjectsData) {
+            System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("en-US");
+            // ^ enforces dot as a separator of floats, instead of a comma
+
             using (StreamWriter writer = new StreamWriter(dirPath + @"/objects.csv")) {  
-                for (int y = 0; y < roomObjectIDs.GetLength(0); y++) {
-                    string line = "";
-                    for (int x = 0; x < roomObjectIDs.GetLength(1) - 1; x++) {
-                        line += roomObjectIDs[y, x] + ",";
-                    }
-                    line += roomObjectIDs[y, roomObjectIDs.GetLength(1) - 1];
-                    writer.WriteLine(line);    
-                } 
+                writer.WriteLine("ID,Position X,Position Y,Rotation X,Rotation Y,Rotation Z");
+                foreach (RoomObjectData objData in roomObjectsData) {
+                    string line = Convert.ToString(objData.Id, cultureInfo) + "," + 
+                                    Convert.ToString(objData.Pos.x, cultureInfo) + "," + 
+                                    Convert.ToString(objData.Pos.y, cultureInfo) + "," + 
+                                    Convert.ToString(objData.Rotation.x, cultureInfo) + "," + 
+                                    Convert.ToString(objData.Rotation.y, cultureInfo) + "," +
+                                    Convert.ToString(objData.Rotation.z, cultureInfo);
+                    writer.WriteLine(line);
+                }
             }
         }
 
@@ -373,14 +411,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private static bool IsSolidWall(int id) {
             if (RoomGenerator.solidWallIDs == null) {
                 RoomGenerator.solidWallIDs = new HashSet<int> {
-                    ObjectNameToID("DoorBlue02"),
-                    ObjectNameToID("DoorBlue04"),
-                    ObjectNameToID("DoorBlue05"),
-                    ObjectNameToID("DoorBlue06"),
                     ObjectNameToID("DoorBlue07"),
-                    ObjectNameToID("DoorBlue08"),
                     ObjectNameToID("DoorBlue09"),
-                    ObjectNameToID("DoorBlue10"),
                     ObjectNameToID("WallBlue01"),
                     ObjectNameToID("WallBlue02"),
                     ObjectNameToID("WallBlue03"),
@@ -436,6 +468,21 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return RoomGenerator.solidWallIDs.Contains(id);
         }
 
+        private static bool IsVerticalDoor(int id) {
+            if (RoomGenerator.verticalDoorIDs == null) {
+                RoomGenerator.verticalDoorIDs = new HashSet<int> {
+                    ObjectNameToID("DoorBlue02"),
+                    ObjectNameToID("DoorBlue04"),
+                    ObjectNameToID("DoorBlue05"),
+                    ObjectNameToID("DoorBlue06"),
+                    ObjectNameToID("DoorBlue08"),
+                    ObjectNameToID("DoorBlue10"),
+                };
+            }
+
+            return RoomGenerator.verticalDoorIDs.Contains(id);
+        }
+
         private static bool IsCosmeticWall(int id) {
             if (RoomGenerator.cosmeticWallIDs == null) {
                 RoomGenerator.cosmeticWallIDs = new HashSet<int> {
@@ -478,16 +525,16 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return false;
         }
 
-        private static (Vector2Int, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius) {
+        private static (Vector2, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius) {
             /*
             Returns the position of the left-most, bottom-most object of a handcrafted room around world position [0, 0],
             along with the dimensions of this room.
             */
 
-            int topMost = -int.MaxValue;
-            int leftMost = int.MaxValue;
-            int rightMost = -int.MaxValue;
-            int bottomMost = int.MaxValue;
+            float topMost = float.NegativeInfinity;
+            float leftMost = float.PositiveInfinity;
+            float rightMost = float.NegativeInfinity;
+            float bottomMost = float.PositiveInfinity;
 
             GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
             foreach (GameObject go in allObjects) {
@@ -502,11 +549,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 }
             }
 
-            if (topMost == -int.MaxValue) {
+            if (float.IsInfinity(topMost)) {
                 throw new Exception("Handcrafted room is empty!");
             }
 
-            return (new Vector2Int(leftMost, bottomMost), new Vector2Int(rightMost - leftMost + 1, topMost - bottomMost + 1));
+            return (new Vector2(leftMost, bottomMost), new Vector2Int((int) Math.Round(rightMost - leftMost + 1), (int) Math.Round(topMost - bottomMost + 1)));
         }
 
         private static int ObjectNameToID(string objectName) {
