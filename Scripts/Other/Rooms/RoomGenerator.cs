@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Globalization;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -23,6 +24,7 @@ might be relevant to enemies with ranged attacks. This can however wait.
 Check if all back walls are truly equivalent. I have a feeling that some are supposed to be used when there is floor
 on the left/right, based on a darker vertical line at the side, possibly to create a bigger contrast between the wall
 and floor. These vertical lines also look kind of weird when in the middle of a long back wall.
+    TODO: *correctly* randomize back walls
 */
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
@@ -33,6 +35,12 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         ##################  Variables  ###################
         ##################################################
         */
+
+        // Path to saved rooms
+        const string baseRoomsPath = @"Assets/Resources/Saved files/Rooms";
+
+        // Specifies culture to enforce dot as a float separator (as opposed to comma)
+        private static readonly System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("en-US");
 
         // list of doors in this room
         private List<Door> doors = new List<Door>();    
@@ -65,13 +73,44 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             }
         }
 
+        // Class which for each side determines whether there should be doors or walls on that side of the room
+        public class RoomDoorFlags
+        {
+            private readonly bool top;
+            private readonly bool left;
+            private readonly bool right;
+            private readonly bool bottom;
+
+            public bool Top {
+                get { return top; }
+            }
+            public bool Left {
+                get { return left; }
+            }
+            public bool Right {
+                get { return right; }
+            }
+            public bool Bottom {
+                get { return bottom; }
+            }
+
+            public RoomDoorFlags(bool top, bool left, bool right, bool bottom) {
+                this.top = top;
+                this.left = left;
+                this.right = right;
+                this.bottom = bottom;
+            }
+        }
+
         // Caching
-        private static Dictionary<string, int> objectNameToID_Table;        // Table mapping GameObject scene names to IDs 
+        private static Dictionary<string, int> objectNameToIDTable;         // Table mapping GameObject scene names to IDs 
+        private static Dictionary<int, GameObject> objectIDToPrefabTable;   // Table mapping object IDs to GameObject prefabs
         private static HashSet<int> solidWallIDs;
         private static HashSet<int> cosmeticWallIDs;                        // Cosmetic walls act as floors on position x,y and as solid walls on position x,y-1 (1 space below)
         private static HashSet<int> verticalDoorIDs;                        // Vertical doors act as walls on position x,y-1        // remove later
         private static HashSet<int> floorIDs;
         private static HashSet<int> lakeIDs;
+        private static HashSet<int> controlIDs;                             // control objects aren't real tiles, instead they represent sets of tiles which can be dynamically chosen 
 
 
         /* 
@@ -306,11 +345,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             print("Saving a handcrafted room.");
 
-            (char[,] roomVisual, List<RoomObjectData> roomObjectsData) = GatherObjectsInRoom(roomRadius);
-            CreateFiles(roomVisual, roomObjectsData);
+            List<RoomObjectData> roomObjectsData = GatherObjectsInRoom(roomRadius);
+            CreateFiles(roomObjectsData);
         }
 
-        private static (char[,], List<RoomObjectData>) GatherObjectsInRoom(int roomRadius) {
+        private static List<RoomObjectData> GatherObjectsInRoom(int roomRadius) {
             (Vector2 origin, Vector2Int dimensions) = GetOriginAndDimensionsOfHandcraftedRoom(roomRadius);
             char[,] roomVisual = new char[dimensions.y + 1, dimensions.x];      // Adding 1 to height is needed because cosmetic walls take up 2 spaces
             Fill2DArray(roomVisual, '-');
@@ -322,16 +361,22 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 if (go.activeInHierarchy && id != -1) {
                     Vector2 pos = ((Vector2) go.transform.position) - origin;
                     if (pos.x >= -roomRadius && pos.x <= roomRadius && pos.y >= -roomRadius && pos.y <= roomRadius) {
-                        AddObjectToRoomVisual(id, Vector2Int.RoundToInt(pos), roomVisual);
+                        // AddObjectToRoomVisual(id, Vector2Int.RoundToInt(pos), roomVisual);
                         roomObjectsData.Add(new RoomObjectData(id, pos, go.transform.rotation));
                     }                        
                 }
             }
 
-            return (roomVisual, roomObjectsData);
+            return roomObjectsData;
         }
 
         private static void AddObjectToRoomVisual(int id, Vector2Int pos, char[,] roomVisual) {
+            /*
+            TODO: change when roomVisual is created. Currently, I create it when saving the room and write it into a file alongside
+            room objects. Instead, I should only write a file with objects. When loading the room and reading objects from a file,
+            create roomVisual based on the objects read. This probably slightly increases computational time but also removes the
+            need to open another file so the impact on performance should be minimal.
+            */
             if (IsSolidWall(id)) {
                 roomVisual[roomVisual.GetLength(0) - pos.y - 2, pos.x] = '#';
             } else if (IsCosmeticWall(id)) {
@@ -353,36 +398,31 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             }
         }
 
-        private static void CreateFiles(char[,] roomVisual, List<RoomObjectData> roomObjectsData) {
+        private static void CreateFiles(List<RoomObjectData> roomObjectsData) {
             string dirPath = CreateRoomDirectory();
-            CreateFileWithRoomVisual(dirPath, roomVisual);
             CreateFileWithObjectIDs(dirPath, roomObjectsData);
         }
 
         private static string CreateRoomDirectory() {
-            const string basePath = @"Assets/Resources/Saved files/Rooms/Room";
-            int roomNumber = 1;
-            while (Directory.Exists(basePath + roomNumber)) {
-                roomNumber++;
+            int roomID = 1;
+            string dirPath;
+            while (Directory.Exists(dirPath = baseRoomsPath + @"/Room" + roomID)) {
+                roomID++;
             }
-            string dirPath = basePath + roomNumber;
             Directory.CreateDirectory(dirPath);
             return dirPath;
         }
 
         private static void CreateFileWithObjectIDs(string dirPath, List<RoomObjectData> roomObjectsData) {
-            System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("en-US");
-            // ^ enforces dot as a separator of floats, instead of a comma
-
             using (StreamWriter writer = new StreamWriter(dirPath + @"/objects.csv")) {  
                 writer.WriteLine("ID,Position X,Position Y,Rotation X,Rotation Y,Rotation Z");
                 foreach (RoomObjectData objData in roomObjectsData) {
-                    string line = Convert.ToString(objData.Id, cultureInfo) + "," + 
-                                    Convert.ToString(objData.Pos.x, cultureInfo) + "," + 
-                                    Convert.ToString(objData.Pos.y, cultureInfo) + "," + 
-                                    Convert.ToString(objData.Rotation.x, cultureInfo) + "," + 
-                                    Convert.ToString(objData.Rotation.y, cultureInfo) + "," +
-                                    Convert.ToString(objData.Rotation.z, cultureInfo);
+                    string line = Convert.ToString(objData.Id, RoomGenerator.cultureInfo) + "," + 
+                                    Convert.ToString(objData.Pos.x, RoomGenerator.cultureInfo) + "," + 
+                                    Convert.ToString(objData.Pos.y, RoomGenerator.cultureInfo) + "," + 
+                                    Convert.ToString(objData.Rotation.x, RoomGenerator.cultureInfo) + "," + 
+                                    Convert.ToString(objData.Rotation.y, RoomGenerator.cultureInfo) + "," +
+                                    Convert.ToString(objData.Rotation.z, RoomGenerator.cultureInfo);
                     writer.WriteLine(line);
                 }
             }
@@ -522,7 +562,38 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         private static bool IsLake(int id) {
-            return false;
+            if (RoomGenerator.lakeIDs == null) {
+                RoomGenerator.lakeIDs = new HashSet<int> {
+                    ObjectNameToID("LakeCornerBlue01"),
+                    ObjectNameToID("LakeCornerBlue02"),
+                    ObjectNameToID("LakeCornerBlue03"),
+                    ObjectNameToID("LakeCornerBlue04"),
+                    ObjectNameToID("LakeDoubleEdgeBlue01"),
+                    ObjectNameToID("LakeEdgeBlue01"),
+                    ObjectNameToID("LakeEdgeBlue02"),
+                    ObjectNameToID("LakeEdgeBlue03"),
+                    ObjectNameToID("LakeEdgeBlue04"),
+                    ObjectNameToID("LakeMiddleBlue01"),
+                    ObjectNameToID("LakeSmallBlue01"),
+                    ObjectNameToID("LakeUBlue01"),
+                    ObjectNameToID("LakeUBlue02")
+                };
+            }
+
+            return RoomGenerator.lakeIDs.Contains(id);
+        }
+
+        private static bool IsControl(int id) {
+            if (RoomGenerator.controlIDs == null) {
+                RoomGenerator.controlIDs = new HashSet<int> {
+                    ObjectNameToID("DoorSectionTop"),
+                    ObjectNameToID("DoorSectionLeft"),
+                    ObjectNameToID("DoorSectionRight"),
+                    ObjectNameToID("DoorSectionBottom")
+                };
+            }
+
+            return RoomGenerator.controlIDs.Contains(id);
         }
 
         private static (Vector2, Vector2Int) GetOriginAndDimensionsOfHandcraftedRoom(int roomRadius) {
@@ -556,9 +627,285 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             return (new Vector2(leftMost, bottomMost), new Vector2Int((int) Math.Round(rightMost - leftMost + 1), (int) Math.Round(topMost - bottomMost + 1)));
         }
 
+        public void LoadRoom(int roomID, Vector3 origin, RoomDoorFlags doorFlags) {
+            print($"Loading room {roomID}");
+            string path = baseRoomsPath + @"/Room" + roomID + @"/objects.csv";
+            try {
+                string[] lines = System.IO.File.ReadAllLines(path);
+                for (int i = 1; i < lines.Length; i++) {
+                    LoadObject(lines[i], origin, doorFlags);
+                }
+            } 
+            catch (Exception e) {
+                Debug.Log($"An error occured when trying to read file at {path}. Exception message: {e.Message}");
+                throw e;
+            }
+        }
+
+        private void LoadObject(string csvObjectData, Vector3 origin, RoomDoorFlags doorFlags) {
+            // CSV data format: ID,Position X,Position Y,Rotation X,Rotation Y,Rotation Z
+            
+            string[] data = csvObjectData.Split(',');
+            try {
+                int id = int.Parse(data[0], NumberStyles.Any, RoomGenerator.cultureInfo);
+                Vector3 pos = origin + new Vector3(float.Parse(data[1], NumberStyles.Any, RoomGenerator.cultureInfo), 
+                                                   float.Parse(data[2], NumberStyles.Any, RoomGenerator.cultureInfo));
+                if (IsControl(id)) {
+                    ProcessControlObject(id, pos, doorFlags);
+                } else {
+                    Vector3 rotation = new Vector3(float.Parse(data[3], NumberStyles.Any, RoomGenerator.cultureInfo), 
+                                                   float.Parse(data[4], NumberStyles.Any, RoomGenerator.cultureInfo), 
+                                                   float.Parse(data[5], NumberStyles.Any, RoomGenerator.cultureInfo));
+                    Instantiate(ObjectIDToPrefab(id), pos, Quaternion.Euler(rotation.x, rotation.y, rotation.z));
+                }
+                
+            }
+            catch (FormatException) {
+                Debug.Log($"Unable to parse '{data}'");
+            }
+            
+        }
+
+        private void ProcessControlObject(int id, Vector3 pos, RoomDoorFlags doorFlags) {
+            if (id == ObjectNameToID("DoorSectionTop")) {
+                InstantiateDoorSectionTop(pos, doorFlags.Top);
+            } else if (id == ObjectNameToID("DoorSectionLeft")) {
+                InstantiateDoorSectionLeft(pos, doorFlags.Left);
+            } else if (id == ObjectNameToID("DoorSectionRight")) {
+                InstantiateDoorSectionRight(pos, doorFlags.Right);
+            } else if (id == ObjectNameToID("DoorSectionBottom")) {
+                InstantiateDoorSectionBottom(pos, doorFlags.Bottom);
+            }
+            
+        }
+
+        private void InstantiateDoorSectionTop(Vector3 pos, bool door) {
+            if (door) {
+                Instantiate(edgeBlue01Obj, pos + new Vector3(-1, 2, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, 2, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, 2, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(2, 2, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue04Obj, pos + new Vector3(-1, 1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, 1, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue03Obj, pos + new Vector3(2, 1, 0), Quaternion.identity);
+                Instantiate(wallBlue11Obj, pos + new Vector3(-1, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(doorBlue07Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, 0, 0), Quaternion.identity);
+                Instantiate(doorBlue07Obj, pos + new Vector3(1, 0, 0), Quaternion.Euler(0, 180, 0));
+                Instantiate(wallBlue02Obj, pos + new Vector3(2, 0, 0), Quaternion.identity);
+            } else {
+                Instantiate(edgeBlue04Obj, pos + new Vector3(-1, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(1, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(2, 1, 0), Quaternion.identity);
+                Instantiate(wallBlue08Obj, pos + new Vector3(-1, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue09Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue04Obj, pos + new Vector3(1, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue03Obj, pos + new Vector3(2, 0, 0), Quaternion.identity);
+            }      
+        }
+
+        private void InstantiateDoorSectionLeft(Vector3 pos, bool door) {
+            if (door) {
+                Instantiate(edgeBlue04Obj, pos + new Vector3(-2, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(-1, 1, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue04Obj, pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(wallBlue07Obj, pos + new Vector3(-2, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue10Obj, pos + new Vector3(-1, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue11Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(doorBlue05Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(-2, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(-1, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(doorBlue05Obj, pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(-2, -2, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(-1, -2, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue02Obj, pos + new Vector3(0, -2, 0), Quaternion.identity);
+            } else {
+                Instantiate(edgeBlue01Obj, pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(0, -2, 0), Quaternion.identity);
+            }            
+        }
+
+        private void InstantiateDoorSectionRight(Vector3 pos, bool door) {
+            if (door) {
+                Instantiate(twoConnectorBlue03Obj, pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(1, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue04Obj, pos + new Vector3(2, 1, 0), Quaternion.identity);
+                Instantiate(wallBlue02Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(doorBlue05Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue07Obj, pos + new Vector3(1, 0, 0), Quaternion.identity);
+                Instantiate(wallBlue09Obj, pos + new Vector3(2, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(doorBlue05Obj, pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(2, -1, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue01Obj, pos + new Vector3(0, -2, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(1, -2, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(2, -2, 0), Quaternion.identity);
+            } else {
+                Instantiate(edgeBlue02Obj, pos + new Vector3(0, 1, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(0, -2, 0), Quaternion.identity);
+            }  
+        }
+
+        private void InstantiateDoorSectionBottom(Vector3 pos, bool door) {
+            if (door) {
+                Instantiate(twoConnectorBlue02Obj, pos + new Vector3(-1, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, 0, 0), Quaternion.identity);
+                Instantiate(twoConnectorBlue01Obj, pos + new Vector3(2, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(-1, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(doorBlue07Obj, pos + new Vector3(0, -1, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, -1, 0), Quaternion.identity);
+                Instantiate(doorBlue07Obj, pos + new Vector3(1, -1, 0), Quaternion.Euler(0, 180, 0));
+                Instantiate(edgeBlue02Obj, pos + new Vector3(2, -1, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(-1, -2, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, -2, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, -2, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(2, -2, 0), Quaternion.identity);
+                Instantiate(edgeBlue01Obj, pos + new Vector3(-1, -3, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(0, -3, 0), Quaternion.identity);
+                Instantiate(ChooseRandomFloor(), pos + new Vector3(1, -3, 0), Quaternion.identity);
+                Instantiate(edgeBlue02Obj, pos + new Vector3(2, -3, 0), Quaternion.identity);
+            } else {
+                Instantiate(edgeBlue03Obj, pos + new Vector3(-1, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(0, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(1, 0, 0), Quaternion.identity);
+                Instantiate(edgeBlue03Obj, pos + new Vector3(2, 0, 0), Quaternion.identity);
+            } 
+        }
+
+        private GameObject ObjectIDToPrefab(int id) {
+            if (RoomGenerator.objectIDToPrefabTable == null) {
+                RoomGenerator.objectIDToPrefabTable = new Dictionary<int, GameObject> {
+                    { ObjectNameToID("BonesBlue01"), bonesBlue01Obj },
+                    { ObjectNameToID("CobwebBlue01"), cobwebBlue01Obj },
+                    { ObjectNameToID("CobwebBlue02"), cobwebBlue02Obj },
+                    { ObjectNameToID("CobwebBlue03"), cobwebBlue03Obj },
+                    { ObjectNameToID("CobwebBlue04"), cobwebBlue04Obj },                    
+                    { ObjectNameToID("RocksBlue01"), rocksBlue01Obj },
+                    { ObjectNameToID("SkullBlue01"), skullBlue01Obj },
+                    { ObjectNameToID("SkullBlue02"), skullBlue02Obj },
+                    { ObjectNameToID("DoorBlue02"), doorBlue02Obj },
+                    { ObjectNameToID("DoorBlue04"), doorBlue04Obj },
+                    { ObjectNameToID("DoorBlue05"), doorBlue05Obj },
+                    { ObjectNameToID("DoorBlue06"), doorBlue06Obj },
+                    { ObjectNameToID("DoorBlue07"), doorBlue07Obj },
+                    { ObjectNameToID("DoorBlue08"), doorBlue08Obj },
+                    { ObjectNameToID("DoorBlue09"), doorBlue09Obj },
+                    { ObjectNameToID("DoorBlue10"), doorBlue10Obj },
+                    { ObjectNameToID("FloorBlue01"), floorBlue01Obj },
+                    { ObjectNameToID("FloorBlue02"), floorBlue02Obj },
+                    { ObjectNameToID("FloorBlue03"), floorBlue03Obj },
+                    { ObjectNameToID("FloorBlue04"), floorBlue04Obj },
+                    { ObjectNameToID("FloorBlue05"), floorBlue05Obj },
+                    { ObjectNameToID("FloorBlue06"), floorBlue06Obj },
+                    { ObjectNameToID("FloorBlue07"), floorBlue07Obj },
+                    { ObjectNameToID("LakeCornerBlue01"), lakeCornerBlue01Obj },
+                    { ObjectNameToID("LakeCornerBlue02"), lakeCornerBlue02Obj },
+                    { ObjectNameToID("LakeCornerBlue03"), lakeCornerBlue03Obj },
+                    { ObjectNameToID("LakeCornerBlue04"), lakeCornerBlue04Obj },
+                    { ObjectNameToID("LakeDoubleEdgeBlue01"), lakeDoubleEdgeBlue01Obj },
+                    { ObjectNameToID("LakeEdgeBlue01"), lakeEdgeBlue01Obj },
+                    { ObjectNameToID("LakeEdgeBlue02"), lakeEdgeBlue02Obj },
+                    { ObjectNameToID("LakeEdgeBlue03"), lakeEdgeBlue03Obj },
+                    { ObjectNameToID("LakeEdgeBlue04"), lakeEdgeBlue04Obj },
+                    { ObjectNameToID("LakeMiddleBlue01"), lakeMiddleBlue01Obj },
+                    { ObjectNameToID("LakeSmallBlue01"), lakeSmallBlue01Obj },
+                    { ObjectNameToID("LakeUBlue01"), lakeUBlue01Obj },
+                    { ObjectNameToID("LakeUBlue02"), lakeUBlue02Obj },
+                    { ObjectNameToID("StairsBlue01"), stairsBlue01Obj },
+                    { ObjectNameToID("StairsBlue02"), stairsBlue02Obj },
+                    { ObjectNameToID("StairsBlue03"), stairsBlue03Obj },
+                    { ObjectNameToID("StairsBlue04"), stairsBlue04Obj },
+                    { ObjectNameToID("WallBlue01"), wallBlue01Obj },
+                    { ObjectNameToID("WallBlue02"), wallBlue02Obj },
+                    { ObjectNameToID("WallBlue03"), wallBlue03Obj },
+                    { ObjectNameToID("WallBlue04"), wallBlue04Obj },
+                    { ObjectNameToID("WallBlue05"), wallBlue05Obj },
+                    { ObjectNameToID("WallBlue06"), wallBlue06Obj },
+                    { ObjectNameToID("WallBlue07"), wallBlue07Obj },
+                    { ObjectNameToID("WallBlue08"), wallBlue08Obj },
+                    { ObjectNameToID("WallBlue09"), wallBlue09Obj },
+                    { ObjectNameToID("WallBlue10"), wallBlue10Obj },
+                    { ObjectNameToID("WallBlue11"), wallBlue11Obj },
+                    { ObjectNameToID("TwoConnectorBlue01"), twoConnectorBlue01Obj },
+                    { ObjectNameToID("TwoConnectorBlue02"), twoConnectorBlue02Obj },
+                    { ObjectNameToID("TwoConnectorBlue03"), twoConnectorBlue03Obj },
+                    { ObjectNameToID("TwoConnectorBlue04"), twoConnectorBlue04Obj },
+                    { ObjectNameToID("TwoConnectorBlue05"), twoConnectorBlue05Obj },
+                    { ObjectNameToID("TwoConnectorBlue06"), twoConnectorBlue06Obj },
+                    { ObjectNameToID("TwoConnectorBlue07"), twoConnectorBlue07Obj },
+                    { ObjectNameToID("TwoConnectorBlue08"), twoConnectorBlue08Obj },
+                    { ObjectNameToID("TwoConnectorBlue09"), twoConnectorBlue09Obj },
+                    { ObjectNameToID("TwoConnectorBlue10"), twoConnectorBlue10Obj },
+                    { ObjectNameToID("TwoConnectorBlue11"), twoConnectorBlue11Obj },
+                    { ObjectNameToID("TwoConnectorBlue12"), twoConnectorBlue12Obj },
+                    { ObjectNameToID("TwoConnectorBlue13"), twoConnectorBlue13Obj },
+                    { ObjectNameToID("TwoConnectorBlue14"), twoConnectorBlue14Obj },
+                    { ObjectNameToID("TwoConnectorBlue15"), twoConnectorBlue15Obj },
+                    { ObjectNameToID("TwoConnectorBlue16"), twoConnectorBlue16Obj },
+                    { ObjectNameToID("TwoConnectorBlue17"), twoConnectorBlue17Obj },
+                    { ObjectNameToID("TwoConnectorBlue18"), twoConnectorBlue18Obj },
+                    { ObjectNameToID("TwoConnectorBlue19"), twoConnectorBlue19Obj },
+                    { ObjectNameToID("TwoConnectorBlue20"), twoConnectorBlue20Obj },
+                    { ObjectNameToID("ThreeConnectorBlue01"), threeConnectorBlue01Obj },
+                    { ObjectNameToID("ThreeConnectorBlue02"), threeConnectorBlue02Obj },
+                    { ObjectNameToID("ThreeConnectorBlue03"), threeConnectorBlue03Obj },
+                    { ObjectNameToID("ThreeConnectorBlue04"), threeConnectorBlue04Obj },
+                    { ObjectNameToID("ThreeConnectorBlue05"), threeConnectorBlue05Obj },
+                    { ObjectNameToID("ThreeConnectorBlue06"), threeConnectorBlue06Obj },
+                    { ObjectNameToID("ThreeConnectorBlue07"), threeConnectorBlue07Obj },
+                    { ObjectNameToID("ThreeConnectorBlue08"), threeConnectorBlue08Obj },
+                    { ObjectNameToID("ThreeConnectorBlue09"), threeConnectorBlue09Obj },
+                    { ObjectNameToID("ThreeConnectorBlue10"), threeConnectorBlue10Obj },
+                    { ObjectNameToID("ThreeConnectorBlue11"), threeConnectorBlue11Obj },
+                    { ObjectNameToID("ThreeConnectorBlue12"), threeConnectorBlue12Obj },
+                    { ObjectNameToID("ThreeConnectorBlue13"), threeConnectorBlue13Obj },
+                    { ObjectNameToID("ThreeConnectorBlue14"), threeConnectorBlue14Obj },
+                    { ObjectNameToID("ThreeConnectorBlue15"), threeConnectorBlue15Obj },
+                    { ObjectNameToID("ThreeConnectorBlue16"), threeConnectorBlue16Obj },
+                    { ObjectNameToID("ThreeConnectorBlue17"), threeConnectorBlue17Obj },
+                    { ObjectNameToID("FourConnectorBlue01"), fourConnectorBlue01Obj },
+                    { ObjectNameToID("FourConnectorBlue02"), fourConnectorBlue02Obj },
+                    { ObjectNameToID("ArchBlue01"), archBlue01Obj },
+                    { ObjectNameToID("ArchBlue02"), archBlue02Obj },
+                    { ObjectNameToID("EdgeBlue01"), edgeBlue01Obj },
+                    { ObjectNameToID("EdgeBlue02"), edgeBlue02Obj },
+                    { ObjectNameToID("EdgeBlue03"), edgeBlue03Obj },
+                    { ObjectNameToID("EdgeBlue04"), edgeBlue04Obj },
+                    { ObjectNameToID("EdgeWithArchBlue01"), edgeWithArchBlue01Obj },
+                    { ObjectNameToID("EdgeWithArchBlue02"), edgeWithArchBlue02Obj },
+                    { ObjectNameToID("HalfEdgeBlue01"), halfEdgeBlue01Obj },
+                    { ObjectNameToID("HalfEdgeBlue02"), halfEdgeBlue02Obj },
+                    { ObjectNameToID("QuarterEdgeBlue01"), quarterEdgeBlue01Obj },
+                    { ObjectNameToID("QuarterEdgeBlue02"), quarterEdgeBlue02Obj },
+                    { ObjectNameToID("VoidBlue01"), voidBlue01Obj }
+                };
+            }
+
+            GameObject value;
+            bool hasValue = RoomGenerator.objectIDToPrefabTable.TryGetValue(id, out value);
+
+            if (hasValue) {
+                return value;
+            }
+
+            Debug.Log($"Could not map object ID {id} to a prefab - such key is missing!");
+            throw new ArgumentException($"Could not map object ID {id} to a prefab - such key is missing!");            
+        }
+
         private static int ObjectNameToID(string objectName) {
-            if (RoomGenerator.objectNameToID_Table == null) {
-                RoomGenerator.objectNameToID_Table = new Dictionary<string, int> {
+            if (RoomGenerator.objectNameToIDTable == null) {
+                RoomGenerator.objectNameToIDTable = new Dictionary<string, int> {
                     { "BonesBlue01", 1 },
                     { "CobwebBlue01", 2 },
                     { "CobwebBlue02", 3 },
@@ -661,12 +1008,16 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     { "HalfEdgeBlue02", 100 },
                     { "QuarterEdgeBlue01", 101 },
                     { "QuarterEdgeBlue02", 102 },
-                    { "VoidBlue01", 103 }
+                    { "VoidBlue01", 103 },
+                    { "DoorSectionTop", 104 },
+                    { "DoorSectionLeft", 105 },
+                    { "DoorSectionRight", 106 },
+                    { "DoorSectionBottom", 107 }
                 };
             }
 
             int value;
-            bool hasValue = RoomGenerator.objectNameToID_Table.TryGetValue(objectName, out value);
+            bool hasValue = RoomGenerator.objectNameToIDTable.TryGetValue(objectName, out value);
 
             if (hasValue) {
                 return value;
