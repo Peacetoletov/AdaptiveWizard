@@ -24,7 +24,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
         public GameObject minigameManagerObj;
 
         // testing, remove later
-        public GameObject roomGeneratorObj;
+        public GameObject RoomIO_Obj;
 
 
         /* TODO: GameState will need to get reworked and changed to an int called UI_displayLayer. When the game is in normal state, it will be set to 0,
@@ -112,15 +112,15 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
 
                 // Saving a hand-crafted room
                 if (Input.GetKeyDown(KeyCode.H)) {
-                    RoomGenerator.SaveHandcraftedRoom();
+                    RoomIO.SaveHandcraftedRoom();
                 }
                 
                 // Loading a room (just testing for now)
                 if (Input.GetKeyDown(KeyCode.L)) {
-                    //RoomGenerator rg = new RoomGenerator();
-                    RoomGenerator rg = Instantiate(roomGeneratorObj, Vector3.zero, Quaternion.identity).GetComponent<RoomGenerator>();
-                    rg.LoadRoom(4, new Vector2(200, -30), new RoomGenerator.RoomDoorFlags(true, true, false, false));
-                    //rg.LoadRoom(4, new Vector2(200, -30), new RoomGenerator.RoomDoorFlags(false, false, false, false));
+                    //RoomIO rg = new RoomIO();
+                    RoomIO rg = Instantiate(RoomIO_Obj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
+                    rg.LoadRoom(5, new Vector2(150, -30), new RoomIO.RoomDoorFlags(true, true, false, false));
+                    //rg.LoadRoom(4, new Vector2(200, -30), new RoomIO.RoomDoorFlags(false, false, false, false));
                 }
                 
                 // test

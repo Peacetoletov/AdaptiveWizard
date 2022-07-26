@@ -53,7 +53,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 this.combatManager.Init(this);
             }
             GenerateRoom();
-            SetTeleportersToDoors(teleporters);
+            //SetTeleportersToDoors(teleporters);       // TEMPORARILY COMMENTED OUT
         }
 
         public void Update() {
@@ -90,41 +90,13 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
         
         private void GenerateRoom() {
-            RoomGenerator roomGenerator = Instantiate(roomGeneratorObj, Vector3.zero, Quaternion.identity).GetComponent<RoomGenerator>();
-            roomGenerator.Generate(this, roomVisual);
-            this.doors = roomGenerator.GetDoors();
-
-            CreateRoomNodes();
-            InitializeRoomNodes();
-
-
-            // DEPRECATED
             /*
-            // Environment
-            for (int y = 0; y < RoomHeight(); y++) {
-                for (int x = 0; x < roomVisual[y].Length; x++) {
-                    Vector3 coordinates = (Vector3) PositionInRoomToPositionInWorld(new Vector2Int(x, y));
-                    char symbol = TileSymbolAtPosition(x, y);
-                    if (symbol == '.') {
-                        Instantiate(floorObj, coordinates, Quaternion.identity);
-                    } else if (symbol == '#') {
-                        Instantiate(wallObj, coordinates, Quaternion.identity);
-                    } else if (symbol == '/') {
-                        // door
-                        GameObject newDoor = Instantiate(doorObj, coordinates, Quaternion.identity) as GameObject;
-                        this.doors.Add(newDoor.GetComponent<Door>());
-                    } else {
-                        // void space, generate nothing here (symbol == '-')
-                    }
-                }
-            }
+            RoomIO roomIO = Instantiate(roomGeneratorObj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
+            roomIO.Generate(this, roomVisual);
+            this.doors = roomIO.GetDoors();
+
             CreateRoomNodes();
             InitializeRoomNodes();
-
-            // Whatever needs to be tested here
-            if (!MainGameManager.minigame) {
-                //Instantiate(enemyGatlingObj, new Vector3(12f, 0f, 0f), Quaternion.identity);
-            }
             */
         }
         
