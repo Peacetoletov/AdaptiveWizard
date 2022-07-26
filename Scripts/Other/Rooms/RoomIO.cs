@@ -393,6 +393,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>() ;
             foreach (GameObject go in allObjects) {
+                //print(go.name);
                 if (go.activeInHierarchy && ObjectNameToID(go.name.Split(' ')[0]) != -1) {
                     Vector2 worldPos = go.transform.position;
                     if (worldPos.x >= -roomRadius && worldPos.x <= roomRadius && worldPos.y >= -roomRadius && worldPos.y <= roomRadius) {
@@ -402,7 +403,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 }
             }
 
-            if (float.IsInfinity(float.PositiveInfinity)) {
+            if (float.IsInfinity(leftMost)) {
                 throw new Exception("Handcrafted room is empty!");
             }
 

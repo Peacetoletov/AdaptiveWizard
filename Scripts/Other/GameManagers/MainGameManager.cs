@@ -119,7 +119,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
                 if (Input.GetKeyDown(KeyCode.L)) {
                     //RoomIO rg = new RoomIO();
                     RoomIO rg = Instantiate(RoomIO_Obj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
-                    rg.LoadRoom(5, new Vector2(150, -30), new RoomIO.RoomDoorFlags(true, true, false, false));
+                    rg.LoadRoom(6, new Vector2(150, -30), new RoomIO.RoomDoorFlags(true, true, false, false));
                     //rg.LoadRoom(4, new Vector2(200, -30), new RoomIO.RoomDoorFlags(false, false, false, false));
                 }
                 
