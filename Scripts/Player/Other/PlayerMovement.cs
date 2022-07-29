@@ -130,7 +130,7 @@ namespace AdaptiveWizard.Assets.Scripts.Player.Other
             RaycastHit2D hit;
             for (int i = 0; i < precision; i++) {
                 hit = Physics2D.BoxCast(transform.position, boxCollider.size, 0, axisVector, 
-                                        Mathf.Abs((higherBound + lowerBound) / 2) + extraBoxDistance, LayerMask.GetMask("Wall"));
+                                        Mathf.Abs((higherBound + lowerBound) / 2) + extraBoxDistance, LayerMask.GetMask("Wall", "Lake"));
                 if (hit.collider == null) {
                     HighestNonCollidingDelta = (higherBound + lowerBound) / 2;
                     lowerBound = HighestNonCollidingDelta;

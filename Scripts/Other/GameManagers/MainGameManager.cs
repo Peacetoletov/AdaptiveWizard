@@ -21,10 +21,10 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
         // public GameObjects used for instantiating
         public GameObject playerObj;
         public GameObject roomManagerObj;
-        public GameObject minigameManagerObj;
+        //public GameObject minigameManagerObj;
 
         // testing, remove later
-        public GameObject RoomIO_Obj;
+        public GameObject roomIO_Obj;
 
 
         /* TODO: GameState will need to get reworked and changed to an int called UI_displayLayer. When the game is in normal state, it will be set to 0,
@@ -72,9 +72,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
             */
 
             //MainGameManager.managerOfRoomManagers = Instantiate(managerOfRoomManagersObj, Vector2.zero, Quaternion.identity).GetComponent<ManagerOfRoomManagers>();
+            /*
             if (minigame) {
                 MainGameManager.minigameManager = Instantiate(minigameManagerObj, Vector2.zero, Quaternion.identity).GetComponent<MinigameManager>();
-            }    
+            }
+            */    
         }
 
         private void InitializePlayer() {
@@ -101,9 +103,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
                     SpawnEnemyRandomlyInComplexRoom();       
                 }
                 */
+                /*
                 if (minigame) {
                     //minigameManager.Update();
                 }
+                */
 
                 // using active items
                 if (Input.GetKeyDown(KeyCode.Alpha1)) {
@@ -116,12 +120,14 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
                 }
                 
                 // Loading a room (just testing for now)
+                /*
                 if (Input.GetKeyDown(KeyCode.L)) {
                     //RoomIO rg = new RoomIO();
                     RoomIO rg = Instantiate(RoomIO_Obj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
-                    rg.LoadRoom(6, new Vector2(150, -30), new RoomIO.RoomDoorFlags(true, true, false, false));
+                    rg.LoadRoom(10, new Vector2(150, -30), new RoomIO.RoomDoorFlags(true, true, true, true));
                     //rg.LoadRoom(4, new Vector2(200, -30), new RoomIO.RoomDoorFlags(false, false, false, false));
                 }
+                */
                 
                 // test
                 /*
@@ -161,9 +167,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
             player.GetComponent<PlayerGeneral>().ResetPlayer();
             MainGameManager.player.transform.position = player_spawn_pos;
             roomManager.Restart();
+            /*
             if (minigame) {
                 minigameManager.Restart();
             }
+            */
         }
 
         public static void SetGameState(GameState state) {

@@ -22,6 +22,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
         // public GameObjects used for instantiating
         public GameObject roomObj;
+        public GameObject roomIO_Obj;
 
 
         private List<Room> rooms;
@@ -61,102 +62,16 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             // Note: every wall needs to border with a floor (diagonals count too)
             //  This fact could be useful when determining which wall to select.
             
-            string[] roomVisual = new string[] {
-                "-----------------------------",
-                "------################-------",
-                "#######..............#-------",
-                "#.....#..............#-------",
-                "#.....#..............########",
-                "#.###.#..#####.......##.....#",
-                "#.....#....#................#",
-                "#..........#................#",
-                "#####.#....#.........##.....#",
-                "#...#.#....#.........###.####",
-                "#...#.#....#.........#-#.#---",
-                "#...#.###########.####-#.#---",
-                "#...#.##......###.######.###-",
-                "#...#.##......#....##......#-",
-                "##.##....#....#....##......#-",
-                "#...........#......##......#-",
-                "#.....##......#....##......#-",
-                "#.....##......#....#########-",
-                "####################---------"
-            };
-            
-            /*
-            string[] roomVisual = new string[] {
-                "----#######//#######--",
-                "---##.....#..#.....##-",
-                "--##................##",
-                "###..................#",
-                "#.....#............../",
-                "#....#.............../",
-                "###..................#",
-                "--##................##",
-                "---##..............##-",
-                "----#######//#######--"
-            };
-            */
-            /*
-            string[] roomVisual = new string[] {
-                "-----######--######---",
-                "----#######//#######--",
-                "---##.....#..#.....##-",
-                "--##................##",
-                "###..................#",
-                "#..................../",
-                "#..................../",
-                "###..................#",
-                "--##................##",
-                "---##..............##-",
-                "----#######//#######--"
-            };
-            */
-            /*
-            string[] roomVisual = new string[] {
-                "-----######//######---",
-                "----#.....#..#.....#--",
-                "---#................#-",
-                "###..................#",
-                "#..................../",
-                "#..................../",
-                "###..................#",
-                "---#................#-",
-                "----#..............#--",
-                "-----######//######---"
-            };
-            */
             List<Teleporter> teleporters = new List<Teleporter> {
                 new Teleporter(new Vector2(0, -5), 666),
-                new Teleporter(new Vector2(0, -5), 666),
-                new Teleporter(new Vector2(14, 0), 1),
+                new Teleporter(new Vector2(-5, 0), 69),
                 new Teleporter(new Vector2(14, 0), 1),
                 new Teleporter(new Vector2(0, 5), 420),
-                new Teleporter(new Vector2(0, 5), 420)
             };
-            this.rooms[0].Init(new Vector2(-10, 1), roomVisual, RoomType.COMBAT, teleporters);
-            
-
-            
-            //Room 2
-            
-            newRoom = Instantiate(roomObj, Vector3.zero, Quaternion.identity) as GameObject;
-            this.rooms.Add(newRoom.GetComponent<Room>());
-            roomVisual = new string[] {
-                "--#######--",
-                "-#.......#-",
-                "#.........#",
-                "/.........#",
-                "/.........#",
-                "#.........#",
-                "-#.......#-",
-                "--#######--"
-            };
-            teleporters = new List<Teleporter> {
-                new Teleporter(new Vector2(-14, 0), 0),
-                new Teleporter(new Vector2(-14, 0), 0),
-            };
-            rooms[1].Init(new Vector2(24, 2), roomVisual, RoomType.COMBAT, teleporters);
+            RoomIO rio = Instantiate(roomIO_Obj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
+            Vector2 posOffset = new Vector2(0, 0);
+            char[,] baseRoomVisual = rio.LoadRoom(10, posOffset, new RoomIO.RoomDoorFlags(true, true, true, true));
+            this.rooms[0].Init(posOffset, baseRoomVisual, RoomType.COMBAT, teleporters);
             
         }
 

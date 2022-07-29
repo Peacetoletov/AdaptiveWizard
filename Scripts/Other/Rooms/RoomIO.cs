@@ -31,7 +31,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private static readonly System.Globalization.CultureInfo cultureInfo = new System.Globalization.CultureInfo("en-US");
 
         // list of doors in this room
-        private List<Door> doors = new List<Door>();    
+        private List<(Door, Door)> doorPairs = new List<(Door, Door)>();    
 
 
         // Class containing all information that needs to be stored in a file to recreate a room
@@ -239,7 +239,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             List<(GameObject, float)> objectsWithPriorities = new List<(GameObject, float)> {
                 (floorBlue01Obj, 1.5f),
                 (floorBlue02Obj, 2),
-                (floorBlue03Obj, 5),
+                (floorBlue03Obj, 8),
                 (floorBlue04Obj, 2),
                 (floorBlue05Obj, 0.5f),
                 (floorBlue06Obj, 0.33f),
@@ -288,8 +288,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             throw new Exception("An error occured while choosing a random object in RoomIO!");
         }
 
-        public List<Door> GetDoors() {
-            return doors;
+        public List<(Door, Door)> GetDoorPairs() {
+            return doorPairs;
         }
 
         public static void SaveHandcraftedRoom(int roomRadius=100) {

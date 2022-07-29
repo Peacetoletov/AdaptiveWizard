@@ -56,7 +56,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         public void Reset() {
             this.distance = 1000000;
             this.heuristic = 1000000;
-            // ^ these values are for all practical intents and purposes equal to infinity and won't cause an overflow if they're added together
+            // ^ these values are for all practical intends and purposes equal to infinity and won't cause an overflow if they're added together
             this.open = false;
             this.closed = false;
             this.parent = null;

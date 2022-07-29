@@ -248,7 +248,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             }
 
             RaycastHit2D hit = Physics2D.BoxCast(transform.position, terrainCollider.size, 0, axisVector, Mathf.Abs(delta) + 
-                                                AbstractEnemy.extraDistanceFromWall, LayerMask.GetMask("Wall"));
+                                                AbstractEnemy.extraDistanceFromWall, LayerMask.GetMask("Wall", "Lake"));
             if (hit.collider != null) {
                 // wall ahead; cannot move on this axis
                 canMove = false;

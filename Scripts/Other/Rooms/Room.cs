@@ -18,7 +18,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         public GameObject combatManagerObj;
 
         
-        private string[] roomVisual;        // visual representation of the room
+        private char[,] baseRoomVisual;        // visual representation of the base room (doors are viewed as walls)
         private Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
         private Vector2 posOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
@@ -41,12 +41,10 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                                 to right, top to bottom, and whenever a door is encountered, it is given the next teleport 
                                 distance from the list.
         */
-        public void Init(Vector2 posOffset, string[] roomVisual, RoomType type, List<Teleporter> teleporters) {
+        public void Init(Vector2 posOffset, char[,] baseRoomVisual, RoomType type, List<Teleporter> teleporters) {
             this.posOffset = posOffset;
-            this.roomVisual = roomVisual;
+            this.baseRoomVisual = baseRoomVisual;
             this.type = type;
-            System.Array.Reverse(roomVisual);       // I want the position [0, 0] to be in the bottom left corner, just like in world coordinates
-            AssertRowsLength();
 
             if (type == RoomType.COMBAT) {
                 this.combatManager = Instantiate(combatManagerObj, Vector3.zero, Quaternion.identity).GetComponent<CombatManager>();
@@ -57,6 +55,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         public void Update() {
+            /*
             if (MainGameManager.IsGameActive()) {
                 RoomManager rm = MainGameManager.GetRoomManager();
                 // if player is in the same room as this combat manager
@@ -69,6 +68,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     }
                 }
             }
+            */
         }
 
         private bool IsPlayerOutsideBoundingBox() {
@@ -80,13 +80,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     playerPos.x > posOffset.x + RoomWidth() ||
                     playerPos.y < posOffset.y - playerSize.y ||
                     playerPos.y > posOffset.y + RoomHeight();
-        }
-
-        private void AssertRowsLength() {
-            // Confirms that all rows have the same length
-            foreach (string row in roomVisual) {
-                Assert.IsTrue(row.Length == roomVisual[0].Length);
-            }
         }
         
         private void GenerateRoom() {
@@ -102,13 +95,13 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         
 
         public char TileSymbolAtPosition(int x, int y) {
-            return roomVisual[y][x];
+            return baseRoomVisual[y, x];
         }
 
         private void CreateRoomNodes() {
             this.roomNodes = new Node[RoomWidth(), RoomHeight()];
             for (int y = 0; y < RoomHeight(); y++) {
-                for (int x = 0; x < roomVisual[y].Length; x++) {
+                for (int x = 0; x < RoomWidth(); x++) {
                     // first, set null to each element
                     this.roomNodes[x, y] = null;
                     if (TileSymbolAtPosition(x, y) == '.') {
@@ -121,7 +114,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
         private void InitializeRoomNodes() {
             for (int y = 0; y < RoomHeight(); y++) {
-                for (int x = 0; x < roomVisual[y].Length; x++) {
+                for (int x = 0; x < RoomWidth(); x++) {
                     if (TileSymbolAtPosition(x, y) != '.') {
                         continue;
                     }
@@ -215,11 +208,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         public int RoomWidth() {
-            return roomVisual[0].Length;
+            return baseRoomVisual.GetLength(1);
         }
 
         public int RoomHeight() {
-            return roomVisual.Length;
+            return baseRoomVisual.GetLength(0);
         }
 
         public Vector2 GetPosOffset() {
