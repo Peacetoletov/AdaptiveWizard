@@ -303,31 +303,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 finalRepulsionVector += repulsionVector;
             }
             return finalRepulsionVector;
-            
-
-            // OLD VERSION
-            /*
-            Vector2 finalRepulsionVector = Vector2.zero;
-            const float repulsionConstant = 0.5f;       
-            AbstractEnemy[] enemies = FindObjectsOfType<AbstractEnemy>();
-            foreach (AbstractEnemy enemy in enemies) {
-                // Each enemy influences the final repulsion vector
-                if (enemy.GetID() == GetID()) {
-                    // Ignore itself
-                    continue;
-                }
-                Vector2 repulsionDirection = (transform.position - enemy.transform.position).normalized;
-                float distance = (transform.position - enemy.transform.position).magnitude;
-                float force = repulsionConstant / (distance * distance);
-                Vector2 repulsionVector = new Vector2(repulsionDirection.x * force, repulsionDirection.y * force);
-                if (distance == 0) {
-                    // Special case when two enemies are in the exact same position and (therefore) normal approach doesn't work
-                    repulsionVector = new Vector2(Random.Range(-1f, 1f), Random.Range(-1f, 1f));
-                }
-                finalRepulsionVector += repulsionVector;
-            }
-            return finalRepulsionVector;
-            */
         }
 
         protected Vector2 GetLastMovementVector() {

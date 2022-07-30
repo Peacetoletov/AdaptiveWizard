@@ -16,13 +16,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         private Timer timer;
 
 
-        public IdleState(Animator animator) {
-            this.animator = animator;
+        public IdleState(WalkingEyeball walkingEyeball) {
+            this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
             animator.SetTrigger("TrIdle");
-            this.timer = new Timer(3f);
+            this.timer = new Timer(2.5f);
             return 0;
         }
 

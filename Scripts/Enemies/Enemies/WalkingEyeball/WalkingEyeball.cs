@@ -9,6 +9,11 @@ using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
 
+/* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
+   the distance, the higher chance of entering the Idle state).
+   Additionally, if the distance is short, enemy should never enter Idle state. If enemy is in Idle state and the distance
+   becomes short, it enters Walk state.
+*/
 // TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
 // TODO: possibly remove MovingEnemy as the superclass and instead have it tied to the WalkState
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
@@ -24,7 +29,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         protected void Start() {
             base.Init(100f, 2f);
             this.spriteRenderer = GetComponent<SpriteRenderer>();
-            CreateStates(GetComponent<Animator>());
+            CreateStates();
             EnterState(idleState);
         }
 
@@ -40,9 +45,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             }
         }
 
-        private void CreateStates(Animator animator) {
-            this.idleState = new IdleState(animator);
-            this.walkState = new WalkState(animator);
+        public void OnTakeDamage() {
+            // TODO: probably make this protected override, and move some functionality into a higher class
+        }
+
+        private void CreateStates() {
+            this.idleState = new IdleState(this);
+            this.walkState = new WalkState(this);
         }
 
         private void UpdateState() {
@@ -51,6 +60,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
                 curState.OnLeave();
                 if (curState is IdleState) {
                     EnterState(walkState);
+                }
+                else if (curState is WalkState) {
+                    if (returnCode == 1) {
+                        EnterState(idleState);
+                    }
                 }
             }
         }
