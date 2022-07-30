@@ -24,7 +24,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
         // floating point errors).
         public const float extraDistanceFromWall = 0.01f;
 
-        protected virtual void Start(float maxHealth) {
+        protected virtual void Init(float maxHealth) {
             // set ID and increment ID counter
             this.ID = AbstractEnemy.ID_Counter++;
 

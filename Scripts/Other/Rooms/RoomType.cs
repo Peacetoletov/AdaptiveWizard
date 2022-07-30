@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
+/*
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
     public enum RoomType
@@ -12,3 +13,4 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         SHOP,
     }
 }
+*/

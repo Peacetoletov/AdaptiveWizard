@@ -23,9 +23,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
         public GameObject roomManagerObj;
         //public GameObject minigameManagerObj;
 
-        // testing, remove later
-        public GameObject roomIO_Obj;
-
 
         /* TODO: GameState will need to get reworked and changed to an int called UI_displayLayer. When the game is in normal state, it will be set to 0,
         because no UI will be displayed, with the exception of basic overlay (hp, mana, gold, current items, spell and active item boxes etc.). When the

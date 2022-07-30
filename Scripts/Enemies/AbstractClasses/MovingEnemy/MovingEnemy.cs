@@ -41,7 +41,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
         // Current speed of the enemy. Possibly divide this into curSpeed and baseSpeed in future.
         private float speed;
 
-        // Struct with variables related to general movement
+        // Class with variables related to general movement
         private GeneralMovement generalMovement;
 
         // Struct with variables related following a path
@@ -51,9 +51,9 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
         private int roomIndex;
 
 
-        protected virtual void Start(float maxHealth, float speed) {
+        protected virtual void Init(float maxHealth, float speed) {
             // Initialize variables
-            base.Start(maxHealth);
+            base.Init(maxHealth);
             this.speed = speed;
             this.generalMovement = new GeneralMovement();
             this.path = new Path();
@@ -328,6 +328,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             }
             return finalRepulsionVector;
             */
+        }
+
+        protected Vector2 GetLastMovementVector() {
+            return generalMovement.lastMovementVector;
         }
     }
 }

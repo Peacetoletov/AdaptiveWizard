@@ -21,11 +21,12 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
     {
 
         // public GameObjects used for instantiating
-        public GameObject roomObj;
+        //public GameObject roomObj;
+        public GameObject combatRoomObj;
         public GameObject roomIO_Obj;
 
 
-        private List<Room> rooms;
+        private List<AbstractRoom> rooms;
 
         // Index of the room that the player is currently in
         private int curActiveRoomIndex;
@@ -54,14 +55,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         private void GenerateRooms() {
-            this.rooms = new List<Room>();
+            this.rooms = new List<AbstractRoom>();
 
             // Room 1
-            GameObject newRoom = Instantiate(roomObj, Vector3.zero, Quaternion.identity) as GameObject;
-            this.rooms.Add(newRoom.GetComponent<Room>());
-            // Note: every wall needs to border with a floor (diagonals count too)
-            //  This fact could be useful when determining which wall to select.
-            
+            GameObject newRoom = Instantiate(combatRoomObj, Vector3.zero, Quaternion.identity) as GameObject;
+            this.rooms.Add(newRoom.GetComponent<AbstractRoom>());
             List<Teleporter> teleporters = new List<Teleporter> {
                 new Teleporter(new Vector2(0, -5), 666),
                 new Teleporter(new Vector2(-5, 0), 69),
@@ -70,12 +68,12 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             };
             RoomIO rio = Instantiate(roomIO_Obj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
             Vector2 posOffset = new Vector2(0, 0);
-            char[,] baseRoomVisual = rio.LoadRoom(10, posOffset, new RoomIO.RoomDoorFlags(true, true, true, true));
-            this.rooms[0].Init(posOffset, baseRoomVisual, RoomType.COMBAT, teleporters);
+            char[,] baseRoomVisual = rio.LoadRoom(2, posOffset, new RoomIO.RoomDoorFlags(true, true, true, true));
+            this.rooms[0].Init(posOffset, baseRoomVisual, teleporters);
             
         }
 
-        public Room GetRoom(int roomIndex) {
+        public AbstractRoom GetRoom(int roomIndex) {
             return rooms[roomIndex];
         }
 

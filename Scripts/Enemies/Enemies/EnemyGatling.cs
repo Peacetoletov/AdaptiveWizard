@@ -15,7 +15,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies
 
         private void Start() {
             // initialize
-            base.Start(200f, 0.9f);
+            base.Init(200f, 0.9f);
             
             float projectileSpawnPeriod = 0.33f;
             this.projectileSpawnTimer = new Timer(projectileSpawnPeriod);

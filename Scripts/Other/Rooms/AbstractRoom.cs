@@ -5,28 +5,22 @@ using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
  
- 
+ // TODO: refactor this class
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
-    public class Room : MonoBehaviour
-    {
-        // public GameObjects used for instantiating
-        public GameObject wallObj;
-        public GameObject floorObj;
-        public GameObject doorObj;
-        public GameObject roomGeneratorObj;
-        public GameObject combatManagerObj;
-
-        
+    public class AbstractRoom : MonoBehaviour
+    {        
         private char[,] baseRoomVisual;        // visual representation of the base room (doors are viewed as walls)
         private Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
 
         private Vector2 posOffset;             // specifies the relative position of this room from position [0, 0] in world coordinates
-        private RoomType type;                // type of this room (combat, event, shop)
 
         private List<Door> doors;        // list of doors in this room
 
-        private CombatManager combatManager;                  // combat related variables (only applies to combat rooms)
+
+        // prefab objects
+        public GameObject roomIO_Obj;
+        
         
 
         /*
@@ -41,17 +35,24 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                                 to right, top to bottom, and whenever a door is encountered, it is given the next teleport 
                                 distance from the list.
         */
-        public void Init(Vector2 posOffset, char[,] baseRoomVisual, RoomType type, List<Teleporter> teleporters) {
-            this.posOffset = posOffset;
+        public virtual void Init(Vector2 posOffset, char[,] baseRoomVisual, List<Teleporter> teleporters) {
+            this.posOffset = posOffset - new Vector2(0, 1);
+            // ^ Must subtract 1 from y offset to account for sometic walls taking up 2 vertical spaces
             this.baseRoomVisual = baseRoomVisual;
-            this.type = type;
-
-            if (type == RoomType.COMBAT) {
-                this.combatManager = Instantiate(combatManagerObj, Vector3.zero, Quaternion.identity).GetComponent<CombatManager>();
-                this.combatManager.Init(this);
-            }
             GenerateRoom();
             //SetTeleportersToDoors(teleporters);       // TEMPORARILY COMMENTED OUT
+
+            // testing
+            /*
+            print("Room visual:");
+            for (int y = 0; y < baseRoomVisual.GetLength(0); y++) {
+                string row = "";
+                for (int x = 0; x < baseRoomVisual.GetLength(1); x++) {
+                    row += baseRoomVisual[y, x];
+                }
+                print(row);
+            }
+            */
         }
 
         public void Update() {
@@ -83,33 +84,36 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
         
         private void GenerateRoom() {
-            /*
-            RoomIO roomIO = Instantiate(roomGeneratorObj, Vector3.zero, Quaternion.identity).GetComponent<RoomIO>();
-            roomIO.Generate(this, roomVisual);
-            this.doors = roomIO.GetDoors();
-
+            //this.doors = roomIO.GetDoors();       // TEMPORARILY COMMENTED OUT
             CreateRoomNodes();
             InitializeRoomNodes();
-            */
         }
         
 
         public char TileSymbolAtPosition(int x, int y) {
-            return baseRoomVisual[y, x];
+            return baseRoomVisual[RoomHeight() - y - 1, x];
         }
 
         private void CreateRoomNodes() {
-            this.roomNodes = new Node[RoomWidth(), RoomHeight()];
+            this.roomNodes = new Node[RoomHeight(), RoomWidth()];
             for (int y = 0; y < RoomHeight(); y++) {
                 for (int x = 0; x < RoomWidth(); x++) {
                     // first, set null to each element
-                    this.roomNodes[x, y] = null;
+                    SetRoomNode(x, y, null);
                     if (TileSymbolAtPosition(x, y) == '.') {
                         // second, change null to a node if needed
-                        this.roomNodes[x, y] = new Node(new Vector2Int(x, y));
+                        SetRoomNode(x, y, new Node(new Vector2Int(x, y)));
                     }
                 }
             }
+        }
+
+        private void SetRoomNode(int x, int y, Node node) {
+            this.roomNodes[RoomHeight() - y - 1, x] = node;
+        }
+
+        public Node GetRoomNode(int x, int y) {
+            return roomNodes[RoomHeight() - y - 1, x];
         }
 
         private void InitializeRoomNodes() {
@@ -120,35 +124,35 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     }
                     // bottom left
                     if (x - 1 >= 0 && y - 1 >= 0 && IsDiagonalUnobstructed(x - 1, y - 1)) {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y - 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x - 1, y - 1));
                     }
                     // bottom
                     if (y - 1 >= 0 && TileSymbolAtPosition(x, y - 1) == '.') {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y - 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x, y - 1));
                     }
                     // bottom right
                     if (x + 1 < RoomWidth() && y - 1 >= 0 && IsDiagonalUnobstructed(x, y - 1)) {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y - 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x + 1, y - 1));
                     }
                     // left
                     if (x - 1 >= 0 && TileSymbolAtPosition(x - 1, y) == '.') {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x - 1, y));
                     }
                     // right
                     if (x + 1 < RoomWidth() && TileSymbolAtPosition(x + 1, y) == '.') {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x + 1, y));
                     }
                     // top left
                     if (x - 1 >= 0 && y + 1 < RoomHeight() && IsDiagonalUnobstructed(x - 1, y)) {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x - 1, y + 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x - 1, y + 1));
                     }
                     // top
                     if (y + 1 < RoomHeight() && TileSymbolAtPosition(x, y + 1) == '.') {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x, y + 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x, y + 1));
                     }
                     // top right
                     if (x + 1 < RoomWidth() && y + 1 < RoomHeight() && IsDiagonalUnobstructed(x, y)) {
-                        this.roomNodes[x, y].AddNeighbour(this.roomNodes[x + 1, y + 1]);
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x + 1, y + 1));
                     }
                 }
             }
@@ -198,7 +202,13 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         public Node WorldPositionToNode(Vector2 position) {
             int x = (int) Mathf.Round(position.x - posOffset.x);
             int y = (int) Mathf.Round(position.y - posOffset.y);
-            return roomNodes[x, y];
+            /*
+            print($"x = {x}, y = {y}");
+            print($"roomNodes == null? {roomNodes == null}");
+            print($"roomNodes dimensions: {roomNodes.GetLength(0)}x{roomNodes.GetLength(1)}");
+            print($"roomNodes[x, y] == null? {roomNodes[x, y] == null}");
+            */
+            return GetRoomNode(x, y);
         }
         
 
@@ -217,14 +227,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
         public Vector2 GetPosOffset() {
             return posOffset;
-        }
-
-        public bool IsCombatRoom() {
-            return type == RoomType.COMBAT;
-        }
-
-        public CombatManager GetCombatManager() {
-            return combatManager;
         }
 
         public void OpenDoors() {

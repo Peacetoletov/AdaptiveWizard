@@ -13,17 +13,18 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         public GameObject enemy1Obj;
         public GameObject enemy2Obj;
         public GameObject enemyGatlingObj;
+        public GameObject walkingEyeballObj;
         public GameObject chestObj;
 
 
-        private Room room;                       // reference to the room manager of this combat
+        private AbstractRoom room;                       // reference to the room of this combat
         private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-        private const int totalEnemies = 0;     // was 5, temporarily changed to 0
+        private const int totalEnemies = 1;
         private int enemiesDead = 0;
 
 
-        public void Init(Room room) {
+        public void Init(AbstractRoom room) {
             this.room = room;
         }
 
@@ -48,7 +49,9 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             // TODO: make enemy spawning more complex, implement spawn waves etc.
             for (int i = 0; i < totalEnemies; i++) {
                 Vector2 spawnPos = RandomSpawnPos(1f);
-                AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
+                //Vector2 spawnPos = new Vector2(21, 5);
+                //AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
+                AbstractEnemy enemy = Instantiate(walkingEyeballObj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
                 enemy.SetCombatManager(this);
             }
         }
@@ -85,8 +88,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 // this loop finds a random position measured in room coordinates, meaning from 0 to room height/length, not in world coordinates
                 float xPosInRoomCoordinates = (float) (Random.Range(0f, room.RoomWidth() - 1));
                 float yPosInRoomCoordinates = (float) (Random.Range(0f, room.RoomHeight() - 1));
-                //float xPosInRoomCoordinates = 1.77902ff;
-                //float yPosInRoomCoordinates = 1.005072f;
+                //float xPosInRoomCoordinates = 5f;
+                //float yPosInRoomCoordinates = 16.5f;
 
                 spawnPosInRoomCoordinates = new Vector2(xPosInRoomCoordinates, yPosInRoomCoordinates);
                 spawnPosInWorldCoordinates = new Vector2((spawnPosInRoomCoordinates.x + room.GetPosOffset().x), (spawnPosInRoomCoordinates.y + room.GetPosOffset().y));
@@ -126,6 +129,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     }
                 }
             }
+
 
             //print("SpawnPos is valid.");
             return true;

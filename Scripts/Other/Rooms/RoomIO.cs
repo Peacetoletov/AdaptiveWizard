@@ -411,7 +411,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         public char[,] LoadRoom(int roomID, Vector3 origin, RoomDoorFlags doorFlags) {
-            print($"Loading room {roomID}");
+            //print($"Loading room {roomID}");
             string path = baseRoomsPath + @"/Room" + roomID + @"/objects.csv";
 
             try {
