@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other;
+using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
@@ -57,12 +57,15 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         public void OnEnemyDeath() {
+            // TEMPORARILY COMMENTED OUT
+            /*
             this.enemiesDead++;
             if (enemiesDead == totalEnemies) {
                 this.isCombatActive = false;
                 SpawnChest();
                 room.OpenDoors();
             }
+            */
         }
 
         private void SpawnChest() {

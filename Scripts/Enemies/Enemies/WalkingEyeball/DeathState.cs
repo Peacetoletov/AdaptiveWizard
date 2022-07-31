@@ -15,22 +15,22 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         private Timer timer;
 
 
-        public DeathState(Animator animator) {
-            this.animator = animator;
+        public DeathState(WalkingEyeball walkingEyeball) {
+            this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
-            //animator.SetTrigger("TrIdle");
-            //this.timer = new Timer(1.5f);
+            Debug.Log("Entered Death state");
+            animator.SetTrigger("TrDeath");
+            float deathAnimationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
+            this.timer = new Timer(deathAnimationLength);
             return 0;
         }
 
         public int Update() {
-            /*
             if (timer.UpdateAndCheck()) {
                 return 1;
             }
-            */
             return 0;
         }
 

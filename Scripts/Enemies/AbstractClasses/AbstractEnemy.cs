@@ -8,7 +8,8 @@ using AdaptiveWizard.Assets.Scripts.Items.Active.Classes.Concrete;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
+// TODO: update this class
+namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
 {
     public abstract class AbstractEnemy : MonoBehaviour
     {
@@ -16,6 +17,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
         private int ID;
         private float maxHealth;
         private float curHealth;
+        private bool dead = false;
         private CombatManager combatManager;
 
         // Extra distance is used when spawning enemies to ensure they don't spawn too close to a wall. 
@@ -33,25 +35,32 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
             this.curHealth = maxHealth;
         }
 
-        public void SetCombatManager(CombatManager combatManager) {
-            this.combatManager = combatManager;
+        public Vector2 VectorToPlayer() {
+            return MainGameManager.GetPlayer().transform.position - transform.position;
         }
 
-        protected Vector2 DirectionToPlayer() {
-            // Returns a vector directed from this enemy to the player 
-            return MainGameManager.GetPlayer().transform.position - transform.position;
+        public void SetCombatManager(CombatManager combatManager) {
+            this.combatManager = combatManager;
         }
 
         public void TakeDamage(float damage) {
             this.curHealth -= damage;
             //print("Took " + damage + " damage");
-            CheckDeath();
+            OnTakeDamage(damage);
+        }
+
+        protected virtual void OnTakeDamage(float damage) {
+            if (!dead) {
+                CheckDeath();
+            }
         }
 
         private void CheckDeath() {
             if (curHealth <= 0) {
-                Destroy(gameObject);
+                //Destroy(gameObject);
 
+                this.dead = true;
+                Debug.Log("Enemy is dead");
                 combatManager.OnEnemyDeath();
                 
                 // temporarily
@@ -61,6 +70,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
             // temporary - small chance to receive a potion after killing an enemy
             // even more temporary - always receive a potion after killing an enemy
             //  if (Random.Range(0f, 1f) < 0.04f) {
+            /*
             if (Random.Range(0f, 1f) < 1f) {
                 print("Killed an enemy, adding an active item");
                 if (Random.Range(0f, 1f) < 0.5f) {
@@ -69,10 +79,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other
                     InventoryManager.activeItemManager.AddItem(new ManaPotion());
                 }
             }
+            */
         }
 
         public int GetID() {
-            return this.ID;
+            return ID;
+        }
+
+        public bool IsDead() {
+            return dead;
         }
     }
 }

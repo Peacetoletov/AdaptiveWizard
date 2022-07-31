@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy;
+//using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies
 {
+    /*
     public class Enemy1 : MovingEnemy
     {
         protected void Start() {
@@ -16,4 +17,5 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies
             base.FixedUpdate();
         }
     }
+    */
 }

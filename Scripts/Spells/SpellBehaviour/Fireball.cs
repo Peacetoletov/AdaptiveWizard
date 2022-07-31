@@ -4,7 +4,7 @@ using UnityEngine;
 using AdaptiveWizard.Assets.Scripts.Player.Other;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other;
+using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Spells.SpellBehaviour

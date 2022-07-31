@@ -21,6 +21,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         }
 
         public int OnEnter() {
+            Debug.Log("Entered Idle state");
             animator.SetTrigger("TrIdle");
             this.timer = new Timer(2.5f);
             return 0;

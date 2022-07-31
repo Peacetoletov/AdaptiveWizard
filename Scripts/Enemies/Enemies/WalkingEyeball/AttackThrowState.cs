@@ -9,19 +9,20 @@ using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 {
-    public class AttackState : IState
+    public class AttackThrowState : IState
     {
         private Animator animator;
         private Timer timer;
 
 
-        public AttackState(Animator animator) {
-            this.animator = animator;
+        public AttackThrowState(WalkingEyeball walkingEyeball) {
+            this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
-            //animator.SetTrigger("TrIdle");
+            animator.SetTrigger("TrAttackThrow");
             //this.timer = new Timer(1.5f);
+            Debug.Log("Entered AttackThrow state");
             return 0;
         }
 

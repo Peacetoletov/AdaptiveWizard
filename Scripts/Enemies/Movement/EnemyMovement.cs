@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.Other;
+using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
@@ -29,20 +30,23 @@ This abstract class allows enemies to simply (in a straight line) move towards t
 so that they don't stack on top of each other. Additionally, if an enemy hits a wall, they will find a path to
 the player and start following it for a short while, before switching back to simple movement. 
 */
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 {
-    public abstract class MovingEnemy : AbstractEnemy
+    public class EnemyMovement
     {
-        // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
-        // of enemy shape. More precise colliders can be used for collision with player and player spells.
-        // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
-        public BoxCollider2D terrainCollider;
-
         // Current speed of the enemy. Possibly divide this into curSpeed and baseSpeed in future.
         private float speed;
 
+        // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
+        // of enemy shape. More precise colliders can be used for collision with player and player spells.
+        // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
+        private BoxCollider2D terrainCollider;
+
+        // The enemy in question
+        private AbstractEnemy enemy;
+
         // Class with variables related to general movement
-        private GeneralMovement generalMovement;
+        private MovementProperties movementProperties;
 
         // Struct with variables related following a path
         private Path path;
@@ -51,28 +55,37 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
         private int roomIndex;
 
 
-        protected virtual void Init(float maxHealth, float speed) {
+        public EnemyMovement(float speed, BoxCollider2D terrainCollider, AbstractEnemy enemy) {
             // Initialize variables
-            base.Init(maxHealth);
             this.speed = speed;
-            this.generalMovement = new GeneralMovement();
+            this.terrainCollider = terrainCollider;
+            this.enemy = enemy;
+            this.movementProperties = new MovementProperties();
             this.path = new Path();
             this.roomIndex = MainGameManager.GetRoomManager().GetCurActiveRoomIndex();
         }
-        
-        protected virtual void FixedUpdate() {
-            // Move each frame
-            if (MainGameManager.IsGameActive()) {
-                DetermineMovement();
 
-                // Update player's position; must be done as the last thing in the update method
-                UpdatePlayersPosition();
-            }
+        public (bool, bool) PublicTryToMove(Vector2 movementVector) {
+            // This method is used exclusively for movement caused by external sources, such as animations, crowd control etc.
+            // It cannot be reasonably used by the internal movement system without large refactoring.
+            // Some control information is unused provided/required by the method MoveOnOneAxis() is discarded. 
+            bool canMoveOnX;
+            bool canMoveOnY;
+            bool movedOnX = MoveOnOneAxis(movementVector.x, new Vector2(movementVector.x, 0), out canMoveOnX);
+            bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
+            return (movedOnX, movedOnY);
+        }
+        
+        public void UpdateMovement() {
+            DetermineMovement();
+
+            // Update player's position; must be done as the last thing in the update method
+            UpdatePlayersPosition();
         }
 
         private void StopFollowingPath() {
             // Sets control variables that signal to stop following a path
-            UnityEngine.Assertions.Assert.IsTrue(path.isFollowing);
+            Assert.IsTrue(path.isFollowing);
             //print(Time.time + ". Stopped following path");
             this.path.isFollowing = false;
             this.path.justFinishedFollowing = true;
@@ -83,8 +96,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             // Player's position is needed to prevent wiggling in place.
             // Note: computing this in each enemy is inefficient, could be optimized in future
             const float minPlayerPositionDelta = 0.1f;      // how much player's position must change to be considered different from the last stored position
-            if ((MainGameManager.GetPlayer().transform.position - generalMovement.lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
-                this.generalMovement.hasPlayerPositionChangedSinceLastMovement = true;
+            if ((MainGameManager.GetPlayer().transform.position - movementProperties.lastRecordedPlayerPosition).magnitude > minPlayerPositionDelta) {
+                this.movementProperties.hasPlayerPositionChangedSinceLastMovement = true;
             }
         }
 
@@ -121,7 +134,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 Vector2 movementVector = (RepulsionVector() + path.path.GetDirection()).normalized * speed * Time.deltaTime;
                 //print("Moving on path. movementVector: " + (RepulsionVector() + path.path.DirectionInWorldCoordinates()).normalized * speed);
                 bool moved = Move(movementVector);
-                if ((path.movementOrigin - (Vector2) transform.position).magnitude > path.path.DistanceInWorldCoordinates()) {
+                if ((path.movementOrigin - (Vector2) enemy.transform.position).magnitude > path.path.DistanceInWorldCoordinates()) {
                     // print("no longer following path");
                     StopFollowingPath();
                 }
@@ -134,7 +147,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                     // print("wall is blocking path. Starting to go towards first path node.");
                     // Move towards the starting node until the desired path can be followed.
                     this.path.firstNode.goingTowards = true;
-                    this.path.firstNode.movementOrigin = transform.position;
+                    this.path.firstNode.movementOrigin = enemy.transform.position;
                 }
             }
             if (path.firstNode.goingTowards) {
@@ -151,10 +164,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 */
                 
                 const float desiredDistance = 0.5f;
-                if ((path.movementOrigin - (Vector2) transform.position).magnitude > desiredDistance) {
+                if ((path.movementOrigin - (Vector2) enemy.transform.position).magnitude > desiredDistance) {
                     //print("reached first path node");
                     // First node was reached. Update the path origin, as the current position is where the actual path following starts.
-                    this.path.movementOrigin = transform.position;
+                    this.path.movementOrigin = enemy.transform.position;
                     this.path.firstNode.goingTowards = false;
                 }
             }
@@ -181,8 +194,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 path.justFinishedFollowing = false;
             }
             // Anti-wiggling condition
-            else if (Vector2.Angle(movementVector, generalMovement.lastMovementVector) < largeDirectionChange ||
-                    generalMovement.hasPlayerPositionChangedSinceLastMovement) {
+            else if (Vector2.Angle(movementVector, movementProperties.lastMovementVector) < largeDirectionChange ||
+                    movementProperties.hasPlayerPositionChangedSinceLastMovement) {
                 /* 
                 Move in the calculated direction if the direction is similar to the last frame's direction, or if the direction
                 is significantly different but player position has also changed (possibly teleported).
@@ -190,6 +203,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 */
                 Move(movementVector);
             }
+        }
+
+        private Vector2 DirectionToPlayer() {
+            // Returns a vector directed from this enemy to the player 
+            return MainGameManager.GetPlayer().transform.position - enemy.transform.position;
         }
 
         private bool Move(Vector2 movementVector) {
@@ -208,12 +226,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             //print(Time.time + ". movedOnX = " + movedOnX + ". movedOnY = " + movedOnY);
             if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
                 // Wall is blocking movement on at least one axis, need to perform A* to find a path.
-                Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(gameObject);
-                Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(MainGameManager.GetPlayer());
+                Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(enemy.transform.position);
+                Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(MainGameManager.GetPlayer().transform.position);
                 this.path.isFollowing = true;
                 this.path.followingTime = new Timer(1f);
                 this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos, roomIndex);
-                this.path.movementOrigin = transform.position;
+                this.path.movementOrigin = enemy.transform.position;
                 //print(Time.time + ". Wall is blocking movement on at least one axis, need to perform A* to find a path");
                 //print(Time.time + ". Path direction: " + path.path.GetDirection() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());
             }
@@ -227,9 +245,9 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
 
         private void UpdateAntiWigglingVariables(Vector2 movementVector) {
             // These variables are used in the anti-wiggling condition
-            this.generalMovement.lastMovementVector = movementVector;
-            this.generalMovement.lastRecordedPlayerPosition = MainGameManager.GetPlayer().transform.position;
-            this.generalMovement.hasPlayerPositionChangedSinceLastMovement = false;
+            this.movementProperties.lastMovementVector = movementVector;
+            this.movementProperties.lastRecordedPlayerPosition = MainGameManager.GetPlayer().transform.position;
+            this.movementProperties.hasPlayerPositionChangedSinceLastMovement = false;
         }
 
         
@@ -247,7 +265,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 return false;
             }
 
-            RaycastHit2D hit = Physics2D.BoxCast(transform.position, terrainCollider.size, 0, axisVector, Mathf.Abs(delta) + 
+            RaycastHit2D hit = Physics2D.BoxCast(enemy.transform.position, terrainCollider.size, 0, axisVector, Mathf.Abs(delta) + 
                                                 AbstractEnemy.extraDistanceFromWall, LayerMask.GetMask("Wall", "Lake"));
             if (hit.collider != null) {
                 // wall ahead; cannot move on this axis
@@ -255,10 +273,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
                 return false;
             }
             if (axisVector.x == 0) {
-                transform.Translate(0, delta, 0);
+                enemy.transform.Translate(0, delta, 0);
             }
             else {
-                transform.Translate(delta, 0, 0);
+                enemy.transform.Translate(delta, 0, 0);
             }
             canMove = true;
             return true;
@@ -284,16 +302,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             const float repulsionConstant = 0.75f;
 
             const float circleRadius = 3.5f;
-            Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, circleRadius, LayerMask.GetMask("Enemy"));
+            Collider2D[] hitColliders = Physics2D.OverlapCircleAll(enemy.transform.position, circleRadius, LayerMask.GetMask("Enemy"));
             foreach (Collider2D collider in hitColliders) {
                 // Each enemy within a short radius influences the final repulsion vector
-                AbstractEnemy enemy = collider.GetComponent<AbstractEnemy>();
-                if (enemy.GetID() == GetID()) {
+                AbstractEnemy anotherEnemy = collider.GetComponent<AbstractEnemy>();
+                if (anotherEnemy.GetID() == enemy.GetID()) {
                     // Ignore itself
                     continue;
                 }
-                Vector2 repulsionDirection = (transform.position - enemy.transform.position).normalized;
-                float distance = (transform.position - enemy.transform.position).magnitude;
+                Vector2 repulsionDirection = (enemy.transform.position - anotherEnemy.transform.position).normalized;
+                float distance = (enemy.transform.position - anotherEnemy.transform.position).magnitude;
                 float force = repulsionConstant / (distance * distance);
                 Vector2 repulsionVector = new Vector2(repulsionDirection.x * force, repulsionDirection.y * force);
                 if (distance == 0) {
@@ -305,8 +323,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
             return finalRepulsionVector;
         }
 
-        protected Vector2 GetLastMovementVector() {
-            return generalMovement.lastMovementVector;
+        public Vector2 GetLastMovementVector() {
+            return movementProperties.lastMovementVector;
         }
     }
 }

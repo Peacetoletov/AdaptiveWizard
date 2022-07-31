@@ -195,10 +195,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             MainGameManager.GetRoomManager().SetCurActiveRoomIndex(teleporter.GetAssocaitedRoomIndex());
         }
 
-        public Node WorldPositionToNode(GameObject obj) {
-            return WorldPositionToNode(obj.transform.position);
-        }
-
         public Node WorldPositionToNode(Vector2 position) {
             int x = (int) Mathf.Round(position.x - posOffset.x);
             int y = (int) Mathf.Round(position.y - posOffset.y);

@@ -5,9 +5,9 @@ using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
 /*
-Struct for keeping path related variables together.
+Class for keeping path related variables together.
 */
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 {
     public class Path
     {

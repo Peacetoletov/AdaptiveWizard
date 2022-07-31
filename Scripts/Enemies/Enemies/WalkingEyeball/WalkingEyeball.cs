@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy;
 using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
+using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
 
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
@@ -18,40 +18,45 @@ using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 // TODO: possibly remove MovingEnemy as the superclass and instead have it tied to the WalkState
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 {
-    public class WalkingEyeball : MovingEnemy
+    public class WalkingEyeball : AbstractEnemy
     {
-        private SpriteRenderer spriteRenderer;
+        // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
+        // of enemy shape. More precise colliders can be used for collision with player and player spells.
+        // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
+        public BoxCollider2D terrainCollider;
 
         private IState curState;
         private IdleState idleState;
         private WalkState walkState;
+        private AttackSlashState attackSlashState;
+        private AttackThrowState attackThrowState;
+        private DeathState deathState;
 
         protected void Start() {
-            base.Init(100f, 2f);
-            this.spriteRenderer = GetComponent<SpriteRenderer>();
-            CreateStates();
+            base.Init(100f);
+            CreateStates(terrainCollider);
             EnterState(idleState);
         }
 
-        protected override void FixedUpdate() {
+        public void FixedUpdate() {
             if (MainGameManager.IsGameActive()) {
-                /*
-                base.FixedUpdate();
-                UpdateSpriteOrientation();
-                */
-
-                // TODO: handle states
                 UpdateState();
             }
         }
 
-        public void OnTakeDamage() {
-            // TODO: probably make this protected override, and move some functionality into a higher class
+        protected override void OnTakeDamage(float damage) {
+            base.OnTakeDamage(damage);
+            if (IsDead() && !(curState is DeathState)) {
+                EnterState(deathState);
+            }
         }
 
-        private void CreateStates() {
+        private void CreateStates(BoxCollider2D terrainCollider) {
             this.idleState = new IdleState(this);
-            this.walkState = new WalkState(this);
+            this.walkState = new WalkState(this, terrainCollider);
+            this.deathState = new DeathState(this);
+            this.attackSlashState = new AttackSlashState(this);
+            this.attackThrowState = new AttackThrowState(this);
         }
 
         private void UpdateState() {
@@ -62,9 +67,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
                     EnterState(walkState);
                 }
                 else if (curState is WalkState) {
-                    if (returnCode == 1) {
-                        EnterState(idleState);
-                    }
+                    //EnterState(idleState);
+                    EnterState(attackSlashState);
+                }
+                else if (curState is DeathState) {
+                    Destroy(gameObject);
+                    //Debug.Log("Destroyed enemy");
+                } else if (curState is AttackSlashState) {
+                    EnterState(walkState);
                 }
             }
         }
@@ -74,14 +84,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             return state.OnEnter();
         }
 
-        private void UpdateSpriteOrientation() {
-            float xDir = base.GetLastMovementVector().x;
-            if (xDir > 0) {
-                spriteRenderer.flipX = true;
-            } else if (xDir < 0) {
-                spriteRenderer.flipX = false;
-            }
-            // Don't change orientation if xDir == 0
+        public WalkState GetWalkState() {
+            return walkState;
         }
     }
 }

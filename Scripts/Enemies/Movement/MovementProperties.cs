@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses.MovingEnemy
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 {
     /*
     Struct for keeping movement and anti-wiggling related variables together.
     */
-    public class GeneralMovement
+    public class MovementProperties
     {
         // Vector of the last performed movement
         public Vector2 lastMovementVector = Vector2.zero;
