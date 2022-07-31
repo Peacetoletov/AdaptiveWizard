@@ -226,11 +226,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             //print(Time.time + ". movedOnX = " + movedOnX + ". movedOnY = " + movedOnY);
             if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
                 // Wall is blocking movement on at least one axis, need to perform A* to find a path.
-                Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(enemy.transform.position);
-                Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().GetRoom(roomIndex).WorldPositionToNode(MainGameManager.GetPlayer().transform.position);
+                Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(enemy.transform.position);
+                Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(MainGameManager.GetPlayer().transform.position);
                 this.path.isFollowing = true;
                 this.path.followingTime = new Timer(1f);
-                this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos, roomIndex);
+                this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
                 this.path.movementOrigin = enemy.transform.position;
                 //print(Time.time + ". Wall is blocking movement on at least one axis, need to perform A* to find a path");
                 //print(Time.time + ". Path direction: " + path.path.GetDirection() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());

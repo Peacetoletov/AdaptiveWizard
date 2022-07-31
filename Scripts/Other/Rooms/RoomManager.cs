@@ -73,8 +73,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             
         }
 
-        public AbstractRoom GetRoom(int roomIndex) {
-            return rooms[roomIndex];
+        public AbstractRoom GetCurRoom() {
+            return rooms[curActiveRoomIndex];
         }
 
         public int GetCurActiveRoomIndex() {

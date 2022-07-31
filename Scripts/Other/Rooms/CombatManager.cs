@@ -31,9 +31,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         public void Update() {
             // TEMPORARY, INEFFICIENT SOLUTION
             if (MainGameManager.IsGameActive()) {
-                RoomManager rm = MainGameManager.GetRoomManager();
                 // if player is in the same room as this combat manager
-                if (rm.GetRoom(rm.GetCurActiveRoomIndex()) == room) {
+                if (MainGameManager.GetRoomManager().GetCurRoom() == room) {
                     if (!isCombatActive && totalEnemies != enemiesDead) {
                         BeginCombat();
                     }

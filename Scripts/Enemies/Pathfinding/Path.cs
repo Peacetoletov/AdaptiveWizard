@@ -22,14 +22,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         // room position of the start node
         private Vector2Int startNodePosition;
 
-        // index of the room that the enemy (that created this path) is in
-        private readonly int roomIndex;
 
-        public Path(Vector2 direction, float distance, Vector2Int startNodePosition, int roomIndex) {
+        public Path(Vector2 direction, float distance, Vector2Int startNodePosition) {
             this.direction = direction;
             this.distance = distance;
             this.startNodePosition = startNodePosition;
-            this.roomIndex = roomIndex;
         }
 
         public Vector2 GetDirection() {
@@ -57,7 +54,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         public Vector2 StartNodePositionInWorldCoordinates() {
             //return RoomManager.PositionInRoomToPositionInWorld(startNodePosition);
 
-            return MainGameManager.GetRoomManager().GetRoom(roomIndex).PositionInRoomToPositionInWorld(startNodePosition);
+            return MainGameManager.GetRoomManager().GetCurRoom().PositionInRoomToPositionInWorld(startNodePosition);
             
             //ManagerOfRoomManagers managerOfRoomManagers = MainGameManager.GetManagerOfRoomManagers();
             //RoomManager roomManager = managerOfRoomManagers.GetRoomManager(roomIndex);
