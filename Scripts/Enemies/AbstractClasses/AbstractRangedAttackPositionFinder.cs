@@ -61,7 +61,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
             return (MainGameManager.GetPlayer().transform.position - new Vector3(pos.x, pos.y, 0)).magnitude;
         }
 
-        protected bool CanHitFromDirection(Vector2 direction, Vector2Int position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance) {
+        protected bool CanHitFromDirection(Vector2 direction, Vector2 position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance) {
             RaycastHit2D[] hits = Physics2D.BoxCastAll(position, projectileBoundingBoxSize, 0, direction, projectileMaxTravelDistance,
                                                        LayerMask.GetMask("Wall", "Player"));
             //Debug.Log("NEW SECTION\n");
@@ -76,6 +76,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
             return false;
         }
 
-        protected abstract bool CanHit(Vector2Int position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance);
+        public abstract bool CanHit(Vector2 position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance);
     }
 }

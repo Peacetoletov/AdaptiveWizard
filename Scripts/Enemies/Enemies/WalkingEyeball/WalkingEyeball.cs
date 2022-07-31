@@ -34,26 +34,19 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 
         // JUST TESTING
         public GameObject test;
+        public BoxCollider2D colliderTest;
 
         protected void Start() {
             base.Init(100f);
-            /*
             CreateStates(terrainCollider);
             EnterState(idleState);
-            */
-            // ^ TEMPORARILY COMMENTED OUT
 
+            /*
             // just testing
             RangedAttackPositionFinder rapf = new RangedAttackPositionFinder();
-            /*
-            List<Vector2Int> testList = rapf.Find(transform.position, new Vector2(0.8f, 0.8f), 20);
-            foreach (Vector2Int pos in testList) {
-                print($"Spawning bones on position {pos}.");
-                Instantiate(test, new Vector3(pos.x, pos.y, 0), Quaternion.identity);
-            }
-            */
             Vector2Int pos = rapf.Find(transform.position, new Vector2(0.8f, 0.8f), 20);
             Instantiate(test, new Vector3(pos.x, pos.y, 0), Quaternion.identity);
+            */
         }
 
         public void FixedUpdate() {

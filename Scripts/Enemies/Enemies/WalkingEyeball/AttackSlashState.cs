@@ -38,7 +38,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             } else {
                 const float additionalMovementMagnitude = 4f;
                 Vector2 additionalMovementVector = initialDirToPlayer * additionalMovementMagnitude * Time.deltaTime;
-                walkingEyeball.GetWalkState().GetEnemyMovement().PublicTryToMove(additionalMovementVector);
+                //walkingEyeball.GetWalkState().GetEnemyMovement().PublicTryToMove(additionalMovementVector);
                 return 0;
             }
             

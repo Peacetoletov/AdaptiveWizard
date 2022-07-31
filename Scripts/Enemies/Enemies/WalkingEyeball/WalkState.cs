@@ -19,13 +19,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 
         private SpriteRenderer spriteRenderer;
 
-        private EnemyMovement movement;
+        //private EnemyMovement movement;
 
         public WalkState(WalkingEyeball walkingEyeball, BoxCollider2D terrainCollider) {
             this.walkingEyeball = walkingEyeball;
             this.animator = walkingEyeball.GetComponent<Animator>();
             this.spriteRenderer = walkingEyeball.GetComponent<SpriteRenderer>();
-            this.movement = new EnemyMovement(2f, terrainCollider, walkingEyeball);
+            //this.movement = new EnemyMovement(2f, terrainCollider, walkingEyeball);
         }
 
         public int OnEnter() {
@@ -38,13 +38,24 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         public int Update() {
 
             float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
-            if (distanceToPlayer > 2f) {
-                movement.UpdateMovement();
-                UpdateSpriteOrientation(movement.GetLastMovementVector().x);
-                return 0;
-            } else {
+            if (distanceToPlayer < 2f) {
+                // Change to slash attack state
                 return 1;
-            }            
+            } 
+            else if (distanceToPlayer < 4f) {
+                // Move closer to player, try to get into melee range
+                /*
+                movement.UpdateMovementTowardsPlayer();
+                UpdateSpriteOrientation(movement.GetLastMovementVector().x);
+                */
+                return 0;
+            }
+            else {
+                // Move into position for a ranged attack
+                // TODO: I need to do a lot of changes to enemy movement in order to implement this. Yikes.
+                return 0;
+            }
+            
         }
 
         public void UpdateSpriteOrientation(float xDir) {
@@ -56,9 +67,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             // Don't change orientation if xDir == 0
         }
 
+        /*
         public EnemyMovement GetEnemyMovement() {
             return movement;
         }
+        */
 
         public int OnLeave() {
             return 0;

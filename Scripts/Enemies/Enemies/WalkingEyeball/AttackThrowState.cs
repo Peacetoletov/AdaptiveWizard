@@ -13,6 +13,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
     {
         private Animator animator;
         private Timer timer;
+        private const float range = 20;
 
 
         public AttackThrowState(WalkingEyeball walkingEyeball) {
