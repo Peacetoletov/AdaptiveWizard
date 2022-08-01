@@ -24,7 +24,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
 
 
         public Path(Vector2 direction, float distance, Vector2Int startNodePosition) {
-            this.direction = direction;
+            this.direction = direction.normalized;
             this.distance = distance;
             this.startNodePosition = startNodePosition;
         }

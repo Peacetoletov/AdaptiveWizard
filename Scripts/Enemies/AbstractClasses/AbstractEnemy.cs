@@ -13,6 +13,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
 {
     public abstract class AbstractEnemy : MonoBehaviour
     {
+        // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
+        // of enemy shape. More precise colliders can be used for collision with player and player spells.
+        // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
+        public BoxCollider2D terrainCollider;
+        
         private static int ID_Counter = 0;
         private int ID;
         private float maxHealth;

@@ -81,7 +81,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
             Debug.Assert(playerObjects.Length <= 1);
             if (playerObjects.Length == 0) {
                 // Create a new player object and assign it to this manager
-                MainGameManager.player_spawn_pos = new Vector3(5, 5, 0);
+                MainGameManager.player_spawn_pos = new Vector3(18.1f, 1.5f, 0);
                 MainGameManager.player = Instantiate(playerObj, player_spawn_pos, Quaternion.identity) as GameObject;
             } else {
                 // Assign the existing player object to this manager

@@ -49,7 +49,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         private MovementProperties movementProperties;
 
         // Struct with variables related following a path
-        private Path path;
+        private PathManager pathManager;
 
         // Index of the room that this enemy spawned in
         private int roomIndex;
@@ -61,7 +61,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             this.terrainCollider = terrainCollider;
             this.enemy = enemy;
             this.movementProperties = new MovementProperties();
-            this.path = new Path();
+            this.pathManager = new PathManager();
             this.roomIndex = MainGameManager.GetRoomManager().GetCurActiveRoomIndex();
         }
 
@@ -85,11 +85,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 
         private void StopFollowingPath() {
             // Sets control variables that signal to stop following a path
-            Assert.IsTrue(path.isFollowing);
+            Assert.IsTrue(pathManager.isFollowing);
             //print(Time.time + ". Stopped following path");
-            this.path.isFollowing = false;
-            this.path.justFinishedFollowing = true;
-            this.path.firstNode.goingTowards = false;
+            this.pathManager.isFollowing = false;
+            this.pathManager.justFinishedFollowing = true;
+            this.pathManager.firstNode.goingTowards = false;
         }
 
         private void UpdatePlayersPosition() {
@@ -104,13 +104,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         
         private void DetermineMovement() {
             // Decide whether to move simply, or to follow a path
-            if (path.isFollowing && path.followingTime.UpdateAndCheck()) {
+            if (pathManager.isFollowing && pathManager.followingTime.UpdateAndCheck()) {
                 // If this enemy is following a path and has already been following it for a certain time, stop following it.
                 StopFollowingPath();
                 //print("1 second has passed, switching to simple movement");
             }
 
-            if (path.isFollowing) {
+            if (pathManager.isFollowing) {
                 //print(Time.time + ". following path");
                 MoveOnPath();
             } else {
@@ -128,13 +128,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             2) If movement in the path direction is not possible on either axis, this enemy is considered stuck due to rounding
             errors when estimating the node this enemy was standing on during the path creating process. To overcome this issue,
             enemy must first move towards the first node on the path, and only then can continue in the original path direction.
-            3) If this enemy is going towards the first path node, it moves in the required direction, adjusted by repulsion forces.
+            3) If this enemy is going towards the first path node, it moves in the required direction, adjusted for repulsion forces.
             */
-            if (!path.firstNode.goingTowards) {
-                Vector2 movementVector = (RepulsionVector() + path.path.GetDirection()).normalized * speed * Time.deltaTime;
+            if (!pathManager.firstNode.goingTowards) {
+                Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
                 //print("Moving on path. movementVector: " + (RepulsionVector() + path.path.DirectionInWorldCoordinates()).normalized * speed);
                 bool moved = Move(movementVector);
-                if ((path.movementOrigin - (Vector2) enemy.transform.position).magnitude > path.path.DistanceInWorldCoordinates()) {
+                if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.DistanceInWorldCoordinates()) {
                     // print("no longer following path");
                     StopFollowingPath();
                 }
@@ -146,12 +146,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                     */
                     // print("wall is blocking path. Starting to go towards first path node.");
                     // Move towards the starting node until the desired path can be followed.
-                    this.path.firstNode.goingTowards = true;
-                    this.path.firstNode.movementOrigin = enemy.transform.position;
+                    this.pathManager.firstNode.goingTowards = true;
+                    this.pathManager.firstNode.movementOrigin = enemy.transform.position;
                 }
             }
-            if (path.firstNode.goingTowards) {
-                Vector2 directionTowardsFirstPathNode = path.path.StartNodePositionInWorldCoordinates() - path.firstNode.movementOrigin;
+            if (pathManager.firstNode.goingTowards) {
+                Vector2 directionTowardsFirstPathNode = pathManager.path.StartNodePositionInWorldCoordinates() - pathManager.firstNode.movementOrigin;
                 Vector2 movementVector = (RepulsionVector() + directionTowardsFirstPathNode).normalized * speed * Time.deltaTime;
                 Move(movementVector);
 
@@ -164,11 +164,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 */
                 
                 const float desiredDistance = 0.5f;
-                if ((path.movementOrigin - (Vector2) enemy.transform.position).magnitude > desiredDistance) {
+                if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > desiredDistance) {
                     //print("reached first path node");
                     // First node was reached. Update the path origin, as the current position is where the actual path following starts.
-                    this.path.movementOrigin = enemy.transform.position;
-                    this.path.firstNode.goingTowards = false;
+                    this.pathManager.movementOrigin = enemy.transform.position;
+                    this.pathManager.firstNode.goingTowards = false;
                 }
             }
         }
@@ -187,11 +187,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
             const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
             // print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
-            if (path.justFinishedFollowing) {
+            if (pathManager.justFinishedFollowing) {
                 // Enemy can finish following a path and sharply change direction when they start moving simply. This is intended,
                 // anti-wiggling rules can be ignored in this case. 
                 Move(movementVector);
-                path.justFinishedFollowing = false;
+                pathManager.justFinishedFollowing = false;
             }
             // Anti-wiggling condition
             else if (Vector2.Angle(movementVector, movementProperties.lastMovementVector) < largeDirectionChange ||
@@ -224,14 +224,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             bool movedOnY = MoveOnOneAxis(movementVector.y, new Vector2(0, movementVector.y), out canMoveOnY);
             //print(Time.time + ". is following path = " + path.isFollowing);
             //print(Time.time + ". movedOnX = " + movedOnX + ". movedOnY = " + movedOnY);
-            if (!path.isFollowing && (!canMoveOnX || !canMoveOnY)) {
+            if (!pathManager.isFollowing && (!canMoveOnX || !canMoveOnY)) {
                 // Wall is blocking movement on at least one axis, need to perform A* to find a path.
                 Pathfinding.Node nodeOnThisPos = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(enemy.transform.position);
                 Pathfinding.Node nodeOnPlayerPos = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(MainGameManager.GetPlayer().transform.position);
-                this.path.isFollowing = true;
-                this.path.followingTime = new Timer(1f);
-                this.path.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
-                this.path.movementOrigin = enemy.transform.position;
+                this.pathManager.isFollowing = true;
+                this.pathManager.followingTime = new Timer(1f);
+                this.pathManager.path = Pathfinding.Pathfinder.DirectionAndDistanceUntilFirstTurn(nodeOnThisPos, nodeOnPlayerPos);
+                this.pathManager.movementOrigin = enemy.transform.position;
                 //print(Time.time + ". Wall is blocking movement on at least one axis, need to perform A* to find a path");
                 //print(Time.time + ". Path direction: " + path.path.GetDirection() + ". Distance of this direction: " + path.path.DistanceInWorldCoordinates());
             }

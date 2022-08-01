@@ -16,16 +16,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         private WalkingEyeball walkingEyeball;
         private Animator animator;
         //private Timer timer;
-
         private SpriteRenderer spriteRenderer;
-
-        //private EnemyMovement movement;
+        private EnemyMovement movement;
+        private const float speed = 2f;
 
         public WalkState(WalkingEyeball walkingEyeball, BoxCollider2D terrainCollider) {
             this.walkingEyeball = walkingEyeball;
             this.animator = walkingEyeball.GetComponent<Animator>();
             this.spriteRenderer = walkingEyeball.GetComponent<SpriteRenderer>();
-            //this.movement = new EnemyMovement(2f, terrainCollider, walkingEyeball);
+            this.movement = new EnemyMovement(walkingEyeball);
         }
 
         public int OnEnter() {
@@ -38,16 +37,22 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         public int Update() {
 
             float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
+
+            //testing
+            movement.MoveTowardsPlayer(speed);
+            return 0;
+
+
+            // TEMPORARIYL COMMENTED OUT
+            /*
             if (distanceToPlayer < 2f) {
                 // Change to slash attack state
                 return 1;
             } 
             else if (distanceToPlayer < 4f) {
                 // Move closer to player, try to get into melee range
-                /*
-                movement.UpdateMovementTowardsPlayer();
-                UpdateSpriteOrientation(movement.GetLastMovementVector().x);
-                */
+                //movement.UpdateMovementTowardsPlayer();
+                //UpdateSpriteOrientation(movement.GetLastMovementVector().x);
                 return 0;
             }
             else {
@@ -55,7 +60,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
                 // TODO: I need to do a lot of changes to enemy movement in order to implement this. Yikes.
                 return 0;
             }
-            
+            */
         }
 
         public void UpdateSpriteOrientation(float xDir) {

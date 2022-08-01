@@ -20,11 +20,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 {
     public class WalkingEyeball : AbstractEnemy
     {
-        // Box collider used for collision detecting with terrain. Every enemy's terrain collider will be a box, regardless
-        // of enemy shape. More precise colliders can be used for collision with player and player spells.
-        // For square-shaped enemies, one collider can be used for collision checking with both terrain and player/spells.
-        public BoxCollider2D terrainCollider;
-
         private IState curState;
         private IdleState idleState;
         private WalkState walkState;
@@ -32,26 +27,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
         private AttackThrowState attackThrowState;
         private DeathState deathState;
 
-        // JUST TESTING
-        public GameObject test;
-        public BoxCollider2D colliderTest;
 
         protected void Start() {
             base.Init(100f);
             CreateStates(terrainCollider);
             EnterState(idleState);
-
-            /*
-            // just testing
-            RangedAttackPositionFinder rapf = new RangedAttackPositionFinder();
-            Vector2Int pos = rapf.Find(transform.position, new Vector2(0.8f, 0.8f), 20);
-            Instantiate(test, new Vector3(pos.x, pos.y, 0), Quaternion.identity);
-            */
         }
 
         public void FixedUpdate() {
             if (MainGameManager.IsGameActive()) {
-                //UpdateState();
+                UpdateState();
             }
         }
 
@@ -74,6 +59,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             int returnCode = curState.Update();
             if (returnCode != 0) {
                 curState.OnLeave();
+                
+                //testing
+                EnterState(walkState);
+                
+                // TEMPORARILY COMMENTED OUT
+                /*
                 if (curState is IdleState) {
                     EnterState(walkState);
                 }
@@ -87,6 +78,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
                 } else if (curState is AttackSlashState) {
                     EnterState(walkState);
                 }
+                */
             }
         }
 
