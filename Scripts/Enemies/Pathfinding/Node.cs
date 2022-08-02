@@ -36,6 +36,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         // Predecessor of this node
         private Node parent;
 
+        /*
+        // Distance (as number of nodes) to the nearest wall/lake on the vertical axis
+        private int nearestVerticalWallDist;
+
+        // Distance (as number of nodes) to the nearest wall/lake on the horizontal axis
+        private int nearestHorizontalWallDist;
+        */
+
 
         public Node(Vector2Int position) {
             // Neighbours are set by another function, called from another class
@@ -118,5 +126,23 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         public void SetParent(Node parent) {
             this.parent = parent;
         }
+
+        /*
+        public int GetNearestVerticalWallDist() {
+            return nearestVerticalWallDist;
+        }
+
+        public void SetNearestVerticalWallDist(int dist) {
+            this.nearestVerticalWallDist = dist;
+        }
+
+        public int GetNearestHorizontalWallDist() {
+            return nearestHorizontalWallDist;
+        }
+
+        public void SetNearestHorizontalWallDist(int dist) {
+            this.nearestHorizontalWallDist = dist;
+        }
+        */
     }
 }

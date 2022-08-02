@@ -8,7 +8,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
  // TODO: refactor this class
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 {
-    public class AbstractRoom : MonoBehaviour
+    public abstract class AbstractRoom : MonoBehaviour
     {        
         private char[,] baseRoomVisual;        // visual representation of the base room (doors are viewed as walls)
         private Node[,] roomNodes;          // 2D array of floor nodes of the room, used for pathfinding. 2D array allows for easy heuristic calculation
@@ -37,7 +37,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         */
         public virtual void Init(Vector2 posOffset, char[,] baseRoomVisual, List<Teleporter> teleporters) {
             this.posOffset = posOffset - new Vector2(0, 1);
-            // ^ Must subtract 1 from y offset to account for sometic walls taking up 2 vertical spaces
+            // ^ Must subtract 1 from y offset to account for cosmetic walls taking up 2 vertical spaces
             this.baseRoomVisual = baseRoomVisual;
             GenerateRoom();
             //SetTeleportersToDoors(teleporters);       // TEMPORARILY COMMENTED OUT
@@ -117,6 +117,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         }
 
         private void InitializeRoomNodes() {
+            InitializeNeighbours();
+            //InitializeNearestWallDist();
+
+            // DEPRECATED
+            /*
             for (int y = 0; y < RoomHeight(); y++) {
                 for (int x = 0; x < RoomWidth(); x++) {
                     if (TileSymbolAtPosition(x, y) != '.') {
@@ -156,14 +161,107 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                     }
                 }
             }
+            */
         }
 
+        /*
+        private void InitializeNearestWallDist() {
+            InitializeNearestWallDistFirstIteration();
+            InitializeNearestWallDistSecondIteration();
+        }
+
+        private void InitializeNearestWallDistFirstIteration() {
+            for (int y = 0; y < RoomHeight(); y++) {
+                for (int x = 0; x < RoomWidth(); x++) {
+                    if (TileSymbolAtPosition(x, y) != '.') {
+                        continue;
+                    }
+                    Assert.IsTrue(y != 0);
+                    Assert.IsTrue(x != 0);
+                    // vertical
+                    if (TileSymbolAtPosition(x, y - 1) != '.') {
+                        GetRoomNode(x, y).SetNearestVerticalWallDist(1);
+                    } else {
+                        GetRoomNode(x, y).SetNearestVerticalWallDist(GetRoomNode(x, y - 1).GetNearestVerticalWallDist() + 1);
+                    }
+                    // horizontal
+                    if (TileSymbolAtPosition(x - 1, y) != '.') {
+                        GetRoomNode(x, y).SetNearestHorizontalWallDist(1);
+                    } else {
+                        GetRoomNode(x, y).SetNearestHorizontalWallDist(GetRoomNode(x - 1, y).GetNearestHorizontalWallDist() + 1);
+                    }
+                }
+            }
+        }
+
+        private void InitializeNearestWallDistSecondIteration() {
+            for (int y = RoomHeight() - 1; y >= 0; y--) {
+                for (int x = RoomWidth() - 1; x >= 0; x--) {
+                    if (TileSymbolAtPosition(x, y) != '.') {
+                        continue;
+                    }
+                    Assert.IsTrue(y != RoomHeight() - 1);
+                    Assert.IsTrue(x != RoomWidth() - 1);
+                    // vertical
+                    if (TileSymbolAtPosition(x, y + 1) != '.') {
+                        GetRoomNode(x, y).SetNearestVerticalWallDist(1);
+                    } else {
+                        int firstDist = GetRoomNode(x, y).GetNearestVerticalWallDist();
+                        int secondDist = GetRoomNode(x, y + 1).GetNearestVerticalWallDist() + 1;
+                        if (secondDist < firstDist) {
+                             GetRoomNode(x, y).SetNearestVerticalWallDist(secondDist);
+                        }
+                    }
+                    // horizontal
+                    if (TileSymbolAtPosition(x + 1, y) != '.') {
+                        GetRoomNode(x, y).SetNearestHorizontalWallDist(1);
+                    } else {
+                        int firstDist = GetRoomNode(x, y).GetNearestHorizontalWallDist();
+                        int secondDist = GetRoomNode(x + 1, y).GetNearestHorizontalWallDist() + 1;
+                        if (secondDist < firstDist) {
+                            GetRoomNode(x, y).SetNearestHorizontalWallDist(secondDist);
+                        }
+                    }
+                }
+            }
+        }
+        */
+
+        private void InitializeNeighbours() {
+            for (int y = 0; y < RoomHeight(); y++) {
+                for (int x = 0; x < RoomWidth(); x++) {
+                    if (TileSymbolAtPosition(x, y) != '.') {
+                        continue;
+                    }
+                    // top
+                    if (y + 1 < RoomHeight() && TileSymbolAtPosition(x, y + 1) == '.') {
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x, y + 1));
+                    }
+                    // left
+                    if (x - 1 >= 0 && TileSymbolAtPosition(x - 1, y) == '.') {
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x - 1, y));
+                    }
+                    // right
+                    if (x + 1 < RoomWidth() && TileSymbolAtPosition(x + 1, y) == '.') {
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x + 1, y));
+                    }
+                    // bottom
+                    if (y - 1 >= 0 && TileSymbolAtPosition(x, y - 1) == '.') {
+                        GetRoomNode(x, y).AddNeighbour(GetRoomNode(x, y - 1));
+                    }
+                }
+            }
+        }
+
+        // DEPRECATED
+        /*
         private bool IsDiagonalUnobstructed(int lowerX, int lowerY) {
             int upperX = lowerX + 1;
             int upperY = lowerY + 1;
             return (TileSymbolAtPosition(lowerX, lowerY) == '.' && TileSymbolAtPosition(lowerX, upperY) == '.' &&
                     TileSymbolAtPosition(upperX, lowerY) == '.' && TileSymbolAtPosition(upperX, upperY) == '.');
         }
+        */
 
         private void SetTeleportersToDoors(List<Teleporter> teleporters) {
             Assert.IsTrue(doors.Count == teleporters.Count);
