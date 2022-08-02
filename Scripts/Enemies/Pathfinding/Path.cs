@@ -17,50 +17,19 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         enemy will follow the given direction until the distance traveled in such direction
         is greater than this distance 
         */
-        private float distance;
+        private int distance;
 
-        // room position of the start node
-        private Vector2Int startNodePosition;
-
-
-        public Path(Vector2 direction, float distance, Vector2Int startNodePosition) {
+        public Path(Vector2 direction, int distance) {
             this.direction = direction.normalized;
             this.distance = distance;
-            this.startNodePosition = startNodePosition;
         }
 
         public Vector2 GetDirection() {
-            /*
-            In the pathfinding algorithm, I use room coordinates, where top left corner has 
-            coordinates  (0, 0), as opposed to world coordinates, where the bottom left corner
-            has coornidates (0, 0). This function performs the transformation from room 
-            coordinates into world coordinates.
-            */
-            //return new Vector2(direction.x, -direction.y);
-            //return new Vector2(direction.x, direction.y);
             return direction;
         }
 
-        public float DistanceInWorldCoordinates() {
-            /*
-            In the pathfinding algorithm, I use room coordinates, where 10 is the distance between 
-            two straight neighbours.
-            In world coordinates, this distance is 1. This function performs the transformation
-            from room coordinates into world coordinates.
-            */
-            return distance / 10f;
-        }
-
-        public Vector2 StartNodePositionInWorldCoordinates() {
-            //return RoomManager.PositionInRoomToPositionInWorld(startNodePosition);
-
-            return MainGameManager.GetRoomManager().GetCurRoom().PositionInRoomToPositionInWorld(startNodePosition);
-            
-            //ManagerOfRoomManagers managerOfRoomManagers = MainGameManager.GetManagerOfRoomManagers();
-            //RoomManager roomManager = managerOfRoomManagers.GetRoomManager(roomIndex);
-            //Vector2 worldPos = roomManager.PositionInRoomToPositionInWorld(startNodePosition);
-            //return worldPos;
-            //return Vector2.zero;
+        public float GetDistance() {
+            return distance;
         }
     }
 }

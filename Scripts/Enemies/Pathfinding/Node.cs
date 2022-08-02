@@ -21,7 +21,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         // List of up to 8 neighbour nodes
         private List<Node> neighbours;
 
-        // Distance from the start node; straight neighbours have a distance of 10, diagonal neighbours have a distance of 14
+        // Distance from the start node
         private int distance;
 
         // A* heuristic, estimating the distance between this node and target node
@@ -35,14 +35,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
 
         // Predecessor of this node
         private Node parent;
-
-        /*
-        // Distance (as number of nodes) to the nearest wall/lake on the vertical axis
-        private int nearestVerticalWallDist;
-
-        // Distance (as number of nodes) to the nearest wall/lake on the horizontal axis
-        private int nearestHorizontalWallDist;
-        */
 
 
         public Node(Vector2Int position) {
@@ -80,13 +72,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         }
 
         private void SetHeuristic(Vector2Int targetPosition) {
-            // Modification of Manhattan heuristic to include diagonals
-            // I'm using 10 as the distance between two straight neighbours, and 14 as the distance between two diagonal ones
+            // Manhattan distance
             int xDelta = (int) Math.Abs(targetPosition.x - position.x);
             int yDelta = (int) Math.Abs(targetPosition.y - position.y);
-            int max = Math.Max(xDelta, yDelta);
-            int min = Math.Min(xDelta, yDelta);
-            this.heuristic = 10 * (max - min) + 14 * min;
+            this.heuristic = xDelta + yDelta;
         }
 
         public void Close() {
@@ -126,23 +115,5 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
         public void SetParent(Node parent) {
             this.parent = parent;
         }
-
-        /*
-        public int GetNearestVerticalWallDist() {
-            return nearestVerticalWallDist;
-        }
-
-        public void SetNearestVerticalWallDist(int dist) {
-            this.nearestVerticalWallDist = dist;
-        }
-
-        public int GetNearestHorizontalWallDist() {
-            return nearestHorizontalWallDist;
-        }
-
-        public void SetNearestHorizontalWallDist(int dist) {
-            this.nearestHorizontalWallDist = dist;
-        }
-        */
     }
 }
