@@ -12,33 +12,11 @@ using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
 
 /*
 KNOWN ISSUES:
-- Near corners, enemy can start going back and forth a few times for some reason. This isn't easy to replicate but happens
-  often enough to urgently demand a fix. I have no idea what it could be caused by or how to replicate it. I only noticed
-  that when it happens, a lot of messages appear informing about desiredDistance being reached.
-  - I found a way to replicate this. Position needs to look like this:
-      P . # # . .
-      . . # # . . 
-      . . # # . .
-      . . # # . .
-      . . . . . .
-      . . . . . E
-  
-    Exact positions: player (4, 11), enemy (11, 4)
-
-    Such that the enemy walks straight into the edge of the corner. Then it starts walking up instead of left.
-    Something is wrong with the mechanism dealing with walking towards path's first node. Investigate more.
-
-    UPDATE: I think I know what this is caused by. The problem is that the enemy collider is slightly bigger than 1x1, and
-    also slightly more tall than wide. When I change the collider to a standard 1x1 size and 0 offset, this issue disappears.
-    SOLUTION: Given that I don't want all enemies to have a 1x1 terrain collider, this problem won't be easy to fix. I need
-    to rewrite Pathfinder's A* logic to only consider nodes which can be reached by a given enemy. Nodes immediately next
-    to walls won't be reachable by large enemies.
-        - I should also probably remove diagonal connections of nodes, and replace Dijkstra with BFS. The end result should
-          be pretty much the same because I don't need to follow diagonal paths, and I don't need the shortest paths in all
-          cases. Removing diagonal connections will also make it much easier to implement pathfinding with colliders of
-          different sizes.  
- 
-- I thought that pathfinding can never return a diagonal path. I was wrong. I should have been right. Look into this.
+- Enemies with large colliders tend to get stuck near wall corners. This is because the current implementation
+  generally assumes 1x1 collider (or at least similar size). To fix this, I need to take mechanisms which make
+  the enemy stop following a path and turn these mechanisms into functions of collider size, such that enemies
+  with bigger colliders keep following the path for longer.
+  Currently, this is a low priority issue, but it will need to get fixed when I add large enemies.
 */
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
@@ -47,7 +25,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
     {
         /*
         ##################################################
-        #################  Variables  ####################
+        ###############  Classes, enums  #################
         ##################################################
         */
 
@@ -57,6 +35,26 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             POSITION, 
             DIRECTION 
         };
+
+        public struct StuckInfo {
+            public bool StuckOnX { get; }
+            public bool StuckOnY { get; }
+            public Vector2 MovementVector { get; }
+
+            public StuckInfo(bool stuckOnX, bool stuckOnY, Vector2 movementVector) {
+                StuckOnX = stuckOnX;
+                StuckOnY = stuckOnY;
+                MovementVector = movementVector;
+            }
+        }
+
+        /*
+        ##################################################
+        #################  Variables  ####################
+        ##################################################
+        */
+
+        
 
         private MovementType lastMovementType;
 
@@ -171,10 +169,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 MoveOnPath(speed);
             } else {
                 //Debug.Log("Moving simply");
-                (bool stuckOnX, bool stuckOnY) = MoveSimply(speed);
-                if (stuckOnX || stuckOnY) {
+                StuckInfo stuckInfo = MoveSimply(speed);
+                if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
                     //Debug.Log("Stuck. Creating a path");
-                    CreatePath(targetPosition);
+                    CreatePath(targetPosition, stuckInfo);
                 }
             }
         }
@@ -184,14 +182,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             this.pathManager.firstNode.goingTowards = false;
         }
 
-        private (bool, bool) MoveSimply(float speed) {
+        private StuckInfo MoveSimply(float speed) {
             Vector2 movementVector = (RepulsionVector() + enemy.VectorToPlayer().normalized).normalized * speed * Time.deltaTime;
             //Debug.Log("Warning: repulsion vectors are commented out");
             //Vector2 movementVector = enemy.VectorToPlayer().normalized * speed * Time.deltaTime;
             return Move(movementVector);
         }
 
-        private (bool, bool) Move(Vector2 movementVector) {
+        private StuckInfo Move(Vector2 movementVector) {
             
             bool stuckOnX = false;
             bool stuckOnY = false;
@@ -203,7 +201,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             }
 
             //return stuckOnX || stuckOnY;
-            return (stuckOnX, stuckOnY);
+            //return (stuckOnX, stuckOnY);
+            return new StuckInfo(stuckOnX, stuckOnY, movementVector);
         }
 
         private bool MoveOnAxis(float signedDistance, char axis) {
@@ -218,12 +217,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             return false;       // not stuck on this axis
         }
 
-        private void CreatePath(Vector2 targetPosition) {
+        private void CreatePath(Vector2 targetPosition, StuckInfo stuckInfo) {
             Node enemyPosNode = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(enemy.transform.position);
             Node targetPosNode = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(targetPosition);
             this.pathManager.isFollowing = true;
             this.pathManager.followingTime = new Timer(1f);
-            this.pathManager.path = Pathfinder.DirectionAndDistanceUntilFirstTurn(enemyPosNode, targetPosNode);
+            this.pathManager.path = Pathfinder.PathUntilFirstTurn(enemyPosNode, targetPosNode, stuckInfo);
             this.pathManager.movementOrigin = enemy.transform.position;
         }
 
@@ -238,23 +237,33 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             enemy must first move towards the first node on the path, and only then can continue in the original path direction.
             3) If this enemy is going towards the first path node, it moves in the required direction, adjusted for repulsion forces.
             */
+
+            Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
+            Move(movementVector);
+            if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.DistanceInWorldCoordinates()) {
+                //Debug.Log("Stopped following path because specified distance was reached");
+                StopFollowingPath();
+            }
+
+            /*
             if (!pathManager.firstNode.goingTowards) {
                 // 1) Base case - move in path direction
                 Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
-                (bool stuckOnX, bool stuckOnY) = Move(movementVector);
+                //(bool stuckOnX, bool stuckOnY) = Move(movementVector);
                 if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.DistanceInWorldCoordinates()) {
                     StopFollowingPath();
                 }
+                
                 if (stuckOnX || stuckOnY) {
                     // 2) Resolve being stuck when attempting to follow a path
-                    /*
-                    Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
-                    Note: this is not an issue with the pathfinder, rather with rounding errors when mapping enemy's
-                    position to a node.
-
-                    Note 2: 'stuck' is true even if the enemy is stuck only on one axis. However, when following a path,
-                    the enemy only ever moves on one axis, so if it is stuck on one axis, it is fully stuck and cannot move.
-                    */
+                    //
+                    //Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
+                    //Note: this is not an issue with the pathfinder, rather with rounding errors when mapping enemy's
+                    //position to a node.
+                    //
+                    //Note 2: 'stuck' is true even if the enemy is stuck only on one axis. However, when following a path,
+                    //the enemy only ever moves on one axis, so if it is stuck on one axis, it is fully stuck and cannot move.
+                    //
                     // print("wall is blocking path. Starting to go towards first path node.");
                     // Move towards the starting node until the desired path can be followed.
                     this.pathManager.firstNode.goingTowards = true;
@@ -283,15 +292,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 Vector2 movementVector = (RepulsionVector() + vectorTowardsFirstPathNode.normalized).normalized * speed * Time.deltaTime;
                 Move(movementVector);
                 
-                /*
-                If an enemy needs to go towards the first path node, it means a rounding error had occured. This means that the enemy
-                is at most 0.5 nodes away from the first path node (assuming only straight movement, but diagonal movement should be
-                impossible in this scenario). Therefore, I can check the distance traveled towards the first path node with a hard coded
-                constant distnace of 0.5 nodes.
-                Note that this stops working when very narrow corridors (1 node wide) are introduced.
-
-                IDEA: maybe this cannot be a constant 0.5 distance, but needs to be tied to the collider's size?
-                */
+                //
+                //If an enemy needs to go towards the first path node, it means a rounding error had occured. This means that the enemy
+                //is at most 0.5 nodes away from the first path node (assuming only straight movement, but diagonal movement should be
+                //impossible in this scenario). Therefore, I can check the distance traveled towards the first path node with a hard coded
+                //constant distnace of 0.5 nodes.
+                //Note that this stops working when very narrow corridors (1 node wide) are introduced.
+                //
+                //IDEA: maybe this cannot be a constant 0.5 distance, but needs to be tied to the collider's size?
+                //
                 
                 
                 const float desiredDistance = 0.5f;
@@ -303,6 +312,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 }
                 
             }
+            */
         }
 
         private void ResetVariablesIfLastMovementTypeDoesntMatch(MovementType currentType) {

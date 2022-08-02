@@ -34,6 +34,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 {
     public class EnemyMovementOld
     {
+        /*
         // Current speed of the enemy. Possibly divide this into curSpeed and baseSpeed in future.
         private float speed;
 
@@ -120,16 +121,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         }
 
         private void MoveOnPath() {
-            /*
-            This function is called each frame when this enemy is following a path.
-            1) In the base case, enemy will just move in the direction specified in path.path, adjusted by repulsion forces.
-            Then, if the distance traveled is large enough (again specified in path.path), enemy will stop following the path
-            and switch to simple movement.
-            2) If movement in the path direction is not possible on either axis, this enemy is considered stuck due to rounding
-            errors when estimating the node this enemy was standing on during the path creating process. To overcome this issue,
-            enemy must first move towards the first node on the path, and only then can continue in the original path direction.
-            3) If this enemy is going towards the first path node, it moves in the required direction, adjusted for repulsion forces.
-            */
+            //
+            //This function is called each frame when this enemy is following a path.
+            //1) In the base case, enemy will just move in the direction specified in path.path, adjusted by repulsion forces.
+            //Then, if the distance traveled is large enough (again specified in path.path), enemy will stop following the path
+            //and switch to simple movement.
+            //2) If movement in the path direction is not possible on either axis, this enemy is considered stuck due to rounding
+            //errors when estimating the node this enemy was standing on during the path creating process. To overcome this issue,
+            //enemy must first move towards the first node on the path, and only then can continue in the original path direction.
+            //3) If this enemy is going towards the first path node, it moves in the required direction, adjusted for repulsion forces.
+            //
             if (!pathManager.firstNode.goingTowards) {
                 Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
                 //print("Moving on path. movementVector: " + (RepulsionVector() + path.path.DirectionInWorldCoordinates()).normalized * speed);
@@ -139,11 +140,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                     StopFollowingPath();
                 }
                 if (!moved) {
-                    /*
-                    Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
-                    Note: this is not an issue with the pathfinder, rather with rounding errors when mapping enemy's
-                    position to a node.
-                    */
+                    //
+                    //Enemy is trying to follow a path but isn't able to do so because a wall is blocking movement
+                    //Note: this is not an issue with the pathfinder, rather with rounding errors when mapping enemy's
+                    //position to a node.
+                    //
                     // print("wall is blocking path. Starting to go towards first path node.");
                     // Move towards the starting node until the desired path can be followed.
                     this.pathManager.firstNode.goingTowards = true;
@@ -155,13 +156,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 Vector2 movementVector = (RepulsionVector() + directionTowardsFirstPathNode).normalized * speed * Time.deltaTime;
                 Move(movementVector);
 
-                /*
-                If an enemy needs to go towards the first path node, it means a rounding error had occured. This means that the enemy
-                is at most 0.5 nodes away from the first path node (assuming only straight movement, but diagonal movement should be
-                impossible in this scenario). Therefore, I can check the distance traveled towards the first path node with a hard coded
-                constant distnace of 0.5 nodes.
-                Note that this stops working when very narrow corridors (1 node wide) are introduced.
-                */
+                //
+                //If an enemy needs to go towards the first path node, it means a rounding error had occured. This means that the enemy
+                //is at most 0.5 nodes away from the first path node (assuming only straight movement, but diagonal movement should be
+                //impossible in this scenario). Therefore, I can check the distance traveled towards the first path node with a hard coded
+                //constant distnace of 0.5 nodes.
+                //Note that this stops working when very narrow corridors (1 node wide) are introduced.
+                //
                 
                 const float desiredDistance = 0.5f;
                 if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > desiredDistance) {
@@ -174,16 +175,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         }
         
         private void TryToMoveSimply() {
-            /*
-            Simple movement is composed of two vectors: straight line between this enemy and the player (ignoring terrain), and repulsion
-            forces from other enemies (currently all enemies, planning to change it to only enemies within a short radius).
-            Simple movement can fail in two scenarios:
-            1) A wall is in the way
-            2) Enemy would wiggle in place due to repulsion forces, which usually happens when the player is stationary and multiple
-            enemies are around the player. These small back and forth wiggling movements look weird and are generally unwanted.
-            Multiple variables are checked for possible signs of wiggling, and if a wiggling condition is met, enemy doesn't move.
-
-            */
+            //
+            //Simple movement is composed of two vectors: straight line between this enemy and the player (ignoring terrain), and repulsion
+            //forces from other enemies (currently all enemies, planning to change it to only enemies within a short radius).
+            //Simple movement can fail in two scenarios:
+            //1) A wall is in the way
+            //2) Enemy would wiggle in place due to repulsion forces, which usually happens when the player is stationary and multiple
+            //enemies are around the player. These small back and forth wiggling movements look weird and are generally unwanted.
+            //Multiple variables are checked for possible signs of wiggling, and if a wiggling condition is met, enemy doesn't move.
+            //
+            
             Vector2 movementVector = (RepulsionVector() + DirectionToPlayer()).normalized * speed * Time.deltaTime;
             const float largeDirectionChange = 30f;        // what is considered a large change in direction (in degrees)
             // print("angle = " + Vector2.Angle(movementVector, lastMovementVector));
@@ -196,11 +197,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             // Anti-wiggling condition
             else if (Vector2.Angle(movementVector, movementProperties.lastMovementVector) < largeDirectionChange ||
                     movementProperties.hasPlayerPositionChangedSinceLastMovement) {
-                /* 
-                Move in the calculated direction if the direction is similar to the last frame's direction, or if the direction
-                is significantly different but player position has also changed (possibly teleported).
-                Do NOT move if the direction is significantly different and player has not moved, as this is a clear sign of wiggling. 
-                */
+                //
+                //Move in the calculated direction if the direction is similar to the last frame's direction, or if the direction
+                //is significantly different but player position has also changed (possibly teleported).
+                //Do NOT move if the direction is significantly different and player has not moved, as this is a clear sign of wiggling. 
+                //
                 Move(movementVector);
             }
         }
@@ -211,10 +212,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         }
 
         private bool Move(Vector2 movementVector) {
-            /*
-            Update anti-wiggling variables and try to move in the direction and magnitude of movementVector.
-            If simple movement is not possible, find a path and start following it.
-            */
+            //
+            //Update anti-wiggling variables and try to move in the direction and magnitude of movementVector.
+            //If simple movement is not possible, find a path and start following it.
+            //
             UpdateAntiWigglingVariables(movementVector);
 
             // Try to move on each axis
@@ -252,12 +253,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 
         
         private bool MoveOnOneAxis(float delta, Vector2 axisVector, out bool canMove) {
-            /*
-            Move on axis axisVector by amount delta, if no wall is in the way.
-            Returns true if movement on the given axis was perfmormed, false otherwise. 
-            Additionally, out parameter canMove signals whether movement on the given axis was possible
-            (regardless of whether it was actually performed or not). 
-            */
+            //
+            //Move on axis axisVector by amount delta, if no wall is in the way.
+            //Returns true if movement on the given axis was perfmormed, false otherwise. 
+            //Additionally, out parameter canMove signals whether movement on the given axis was possible
+            //(regardless of whether it was actually performed or not). 
+            //
             if (Mathf.Abs(delta) < 0.0000001) {
                 //print("delta = " + delta);
                 // No need to attempt movement if delta is 0
@@ -284,17 +285,17 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
 
         private Vector2 RepulsionVector() {
             
-            /*
-            TODO: I don't need to calculate repulsion from all other enemies, as the forces from enemies far away are negligable anyway.
-            I could use Physics.OverlapSphere function to get only enemies within a certain (very small) radius and perform repulsion calculations
-            with just those. Movement could be simple for the most part, only when enemies get close to player will they start to base their movement
-            on their mutual positions.
-            */
+            //
+            //TODO: I don't need to calculate repulsion from all other enemies, as the forces from enemies far away are negligable anyway.
+            //I could use Physics.OverlapSphere function to get only enemies within a certain (very small) radius and perform repulsion calculations
+            //with just those. Movement could be simple for the most part, only when enemies get close to player will they start to base their movement
+            //on their mutual positions.
+            //
 
-            /*
-            Inspired by magnetic forces, an enemy is repulsed from each other enemy based on the inversion of their distance squared.
-            This method computes and returns the sum of all repulsion vectors, one from each other enemy.
-            */
+            //
+            //Inspired by magnetic forces, an enemy is repulsed from each other enemy based on the inversion of their distance squared.
+            //This method computes and returns the sum of all repulsion vectors, one from each other enemy.
+            //
             //return Vector2.zero;
 
             
@@ -326,5 +327,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         public Vector2 GetLastMovementVector() {
             return movementProperties.lastMovementVector;
         }
+        */
     }
 }
