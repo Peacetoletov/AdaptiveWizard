@@ -101,13 +101,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             */
 
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.PLAYER);
-            DecideAndExecuteMovementMode(speed, MainGameManager.GetPlayer().transform.position);                
+            DecideAndExecuteMovement(speed, MainGameManager.GetPlayer().transform.position, true);                
         }
 
-        public int MoveTowardsPosition(Vector2 targetPos, float speed) {
+        public int MoveTowardsPosition(float speed, Vector2 targetPos) {
             /*
             Moves towards an arbitrary position in a room. Similar behaviour to moving towards the player -
-            prefers simple movement if possibly, finds and shortly follows a path if necessary.
+            prefers simple movement if possible, finds and shortly follows a path if necessary.
 
             This movement is affected by repulsion vectors.
 
@@ -122,14 +122,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             Returns 0 if nothing exceptional happens and the enemy successfully moves towards target position.
             */
 
+            // TODO: finish this and test this
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.POSITION);
-
-            // TODO
-
-            return 0;
+            int returnCode = DecideAndExecuteMovement(speed, targetPos, false);
+            if (returnCode != 0) {
+                ResetVariables();
+            }
+            return returnCode;
         }
 
-        public void MoveInDirection(Vector2 direction, float speed) {
+        public void MoveInDirection(float speed, Vector2 direction) {
             /*
             Moves in an arbitrary direction, if possible. Considers x and y axes separately (such that if movement is impossible
             in one but possible in the other, movement in the other axis happens regardless of the first axis).
@@ -149,32 +151,47 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
         ##################################################
         */
 
-        private void DecideAndExecuteMovementMode(float speed, Vector2 targetPosition) {
-            // Decide whether to move simply, or to follow a path
+        private int DecideAndExecuteMovement(float speed, Vector2 targetPosition, bool rigidMovement) {
+            // Decide movement mode - whether to move simply, or to follow a path
+            
+            /* Variable rigidMovement determines whether this movement is rigid or soft.
+            Rigid movement - movement will always be performed, regardless of situation.
+            Soft movement - 
+            */
 
             if (pathManager.isFollowing && pathManager.followingTime.UpdateAndCheck()) {
                 // If this enemy is following a path and has already been following it for a certain time, stop following it.
-                StopFollowingPath();
+                this.pathManager.isFollowing = false;
             }
 
+            if (rigidMovement) {
+                DecideAndExecuteRigidMovement(speed, targetPosition);
+                return 0;
+            } 
+            return DecideAndExecuteSoftMovement(speed, targetPosition);
+        }
+
+        private void DecideAndExecuteRigidMovement(float speed, Vector2 targetPosition) {
             if (pathManager.isFollowing) {
-                MoveOnPath(speed);
+                MoveOnPathRigid(speed);
             } else {
-                StuckInfo stuckInfo = MoveSimply(speed);
-                if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
-                    CreatePath(targetPosition, stuckInfo);
-                }
+                MoveSimplyRigid(speed, targetPosition);
             }
         }
 
-        private void StopFollowingPath() {
-            this.pathManager.isFollowing = false;
-            this.pathManager.firstNode.goingTowards = false;
+        private int DecideAndExecuteSoftMovement(float speed, Vector2 targetPosition) {
+            if (pathManager.isFollowing) {
+                return MoveOnPathSoft(speed, targetPosition);
+            }
+            return MoveSimplySoft(speed, targetPosition);
         }
 
-        private StuckInfo MoveSimply(float speed) {
+        private void MoveSimplyRigid(float speed, Vector2 targetPosition) {
             Vector2 movementVector = (RepulsionVector() + enemy.VectorToPlayer().normalized).normalized * speed * Time.deltaTime;
-            return Move(movementVector);
+            StuckInfo stuckInfo = Move(movementVector);
+            if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
+                CreatePath(targetPosition, stuckInfo);
+            }
         }
 
         private StuckInfo Move(Vector2 movementVector) {
@@ -211,11 +228,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             this.pathManager.movementOrigin = enemy.transform.position;
         }
 
-        private void MoveOnPath(float speed) {
+        private void MoveOnPathRigid(float speed) {
             Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
             Move(movementVector);
             if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.GetDistance()) {
-                StopFollowingPath();
+                this.pathManager.isFollowing = false;
             }
         }
 
@@ -224,6 +241,71 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
                 ResetVariables();
                 lastMovementType = currentType;
             }
+        }
+
+        private int MoveSimplySoft(float speed, Vector2 targetPosition) {
+            // Get movement vectors
+            Vector2 dirToTarget = (targetPosition - (Vector2) enemy.transform.position).normalized;
+            Vector2 baseMovementVector = dirToTarget * speed * Time.deltaTime;
+            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + dirToTarget).normalized * speed * Time.deltaTime;
+
+            // Soft movement fails if the angle between base movement vector and movement vector after repulsion is too large
+            if (IsAngleTooBig(baseMovementVector, movementVectorAfterRepulsion)) {
+                return 2;
+            }
+
+            // Move
+            StuckInfo stuckInfo = Move(movementVectorAfterRepulsion);
+
+            // Successfully end movement if close to the target position
+            if (IsTargetClose(targetPosition)) {
+                return 1;
+            }
+
+            // Create a path if necessary
+            if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
+                CreatePath(targetPosition, stuckInfo);
+            }
+
+            // Return 0 if nothing extraordinary happens
+            return 0;
+        }
+
+        private bool IsAngleTooBig(Vector2 baseMovementVector, Vector2 movementVectorAfterRepulsion) {
+            const float angleTooBig = 90f;
+            return Vector2.Angle(baseMovementVector, movementVectorAfterRepulsion) > angleTooBig;
+        }
+
+        private bool IsTargetClose(Vector2 targetPosition) {
+            const float targetClose = 0.25f;
+            return ((Vector2) enemy.transform.position - targetPosition).magnitude < targetClose;
+        }
+
+        private int MoveOnPathSoft(float speed, Vector2 targetPosition) {
+            // Get movement vectors
+            Vector2 baseMovementVector = pathManager.path.GetDirection() * speed * Time.deltaTime;
+            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
+
+            // Soft movement fails if the angle between base movement vector and movement vector after repulsion is too large
+            if (IsAngleTooBig(baseMovementVector, movementVectorAfterRepulsion)) {
+                return 2;
+            }
+
+            // Move
+            Move(movementVectorAfterRepulsion);
+
+            // Successfully end movement if close to the target position
+            if (IsTargetClose(targetPosition)) {
+                return 1;
+            }
+
+            // Stop following path if reasonably possible
+            if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.GetDistance()) {
+                this.pathManager.isFollowing = false;
+            }
+
+            // Return 0 if nothing extraordinary happens
+            return 0;
         }
 
         private void ResetVariables() {

@@ -57,11 +57,18 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 
         private void UpdateState() {
             int returnCode = curState.Update();
+
+            // testing
+            //if (GetID() == 0 && Input.GetKeyDown(KeyCode.V)) {
+            if (Input.GetKeyDown(KeyCode.V)) {
+                EnterState(walkState);
+            }
+
             if (returnCode != 0) {
                 curState.OnLeave();
                 
                 //testing
-                EnterState(walkState);
+                EnterState(idleState);
                 
                 // TEMPORARILY COMMENTED OUT
                 /*

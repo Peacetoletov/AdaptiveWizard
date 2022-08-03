@@ -36,11 +36,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 
         public int Update() {
 
-            float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
+            //float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
 
             //testing
-            movement.MoveTowardsPlayer(speed);
-            return 0;
+            Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            int returnCode = movement.MoveTowardsPosition(speed, cursorPos);
+            return returnCode;
 
 
             // TEMPORARIYL COMMENTED OUT
