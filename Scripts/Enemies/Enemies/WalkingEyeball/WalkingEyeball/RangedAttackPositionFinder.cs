@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class RangedAttackPositionFinder : AbstractRangedAttackPositionFinder
     {

@@ -4,7 +4,7 @@ using UnityEngine;
 using System;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding
 {
     /*
     A node represents a floor block. Floor is the only block that can be freely walked on.

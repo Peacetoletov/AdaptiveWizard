@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Spells.SpellBehaviour

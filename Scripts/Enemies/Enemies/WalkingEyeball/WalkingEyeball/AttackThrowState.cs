@@ -4,33 +4,35 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
-    public class DeathState : IState
+    public class AttackThrowState : IState
     {
         private Animator animator;
         private Timer timer;
+        private const float range = 20;
 
 
-        public DeathState(WalkingEyeball walkingEyeball) {
+        public AttackThrowState(WalkingEyeball walkingEyeball) {
             this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Death state");
-            animator.SetTrigger("TrDeath");
-            float deathAnimationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
-            this.timer = new Timer(deathAnimationLength);
+            animator.SetTrigger("TrAttackThrow");
+            //this.timer = new Timer(1.5f);
+            Debug.Log("Entered AttackThrow state");
             return 0;
         }
 
         public int Update() {
+            /*
             if (timer.UpdateAndCheck()) {
                 return 1;
             }
+            */
             return 0;
         }
 

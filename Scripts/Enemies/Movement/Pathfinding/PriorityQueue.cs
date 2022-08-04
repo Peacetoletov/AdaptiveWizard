@@ -6,7 +6,7 @@ using System.Text;
 
 // http://www.java2s.com/Code/CSharp/Collections-Data-Structure/PriorityQueue2.htm
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding
 {
     
     /// <summary>

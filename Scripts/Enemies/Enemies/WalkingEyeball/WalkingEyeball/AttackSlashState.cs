@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class AttackSlashState : IState
     {

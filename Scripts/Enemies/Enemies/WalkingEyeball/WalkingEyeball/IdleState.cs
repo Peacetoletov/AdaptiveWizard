@@ -4,26 +4,26 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
-    public class AttackThrowState : IState
+    public class IdleState : IState
     {
         private Animator animator;
         private Timer timer;
-        private const float range = 20;
 
 
-        public AttackThrowState(WalkingEyeball walkingEyeball) {
+        public IdleState(WalkingEyeball walkingEyeball) {
             this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
-            animator.SetTrigger("TrAttackThrow");
-            //this.timer = new Timer(1.5f);
-            Debug.Log("Entered AttackThrow state");
+            Debug.Log("Entered Idle state");
+            animator.SetTrigger("TrIdle");
+            //this.timer = new Timer(2.5f);
             return 0;
         }
 

@@ -2,13 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
-using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
 
 
 /*
 Class for keeping path related variables together.
 */
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
 {
     public class PathManager
     {

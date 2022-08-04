@@ -9,7 +9,7 @@ using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
 
 // TODO: update this class
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
+namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 {
     public abstract class AbstractEnemy : MonoBehaviour
     {

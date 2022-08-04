@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses
+namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 {
     public abstract class AbstractRangedAttackPositionFinder
     {

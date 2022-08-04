@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
@@ -16,7 +16,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
 */
 // TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
 // TODO: possibly remove MovingEnemy as the superclass and instead have it tied to the WalkState
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkingEyeball : AbstractEnemy
     {
@@ -59,8 +59,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
             int returnCode = curState.Update();
 
             // testing
-            //if (GetID() == 0 && Input.GetKeyDown(KeyCode.V)) {
-            if (Input.GetKeyDown(KeyCode.V)) {
+            if (GetID() == 0 && Input.GetKeyDown(KeyCode.V)) {
+            //if (Input.GetKeyDown(KeyCode.V)) {
                 EnterState(walkState);
             }
 

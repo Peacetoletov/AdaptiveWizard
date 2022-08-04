@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using AdaptiveWizard.Assets.Scripts.Enemies.Movement;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding
 {
     public static class Pathfinder
     {

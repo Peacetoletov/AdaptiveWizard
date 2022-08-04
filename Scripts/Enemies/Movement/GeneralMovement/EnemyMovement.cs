@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.AbstractClasses;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
-using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
 
 
 /*
@@ -19,7 +19,7 @@ KNOWN ISSUES:
   Currently, this is a low priority issue, but it will need to get fixed when I add large enemies.
 */
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
 {
     public class EnemyMovement
     {
@@ -122,7 +122,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             Returns 0 if nothing exceptional happens and the enemy successfully moves towards target position.
             */
 
-            // TODO: finish this and test this
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.POSITION);
             int returnCode = DecideAndExecuteMovement(speed, targetPos, false);
             if (returnCode != 0) {
@@ -131,7 +130,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             return returnCode;
         }
 
-        public void MoveInDirection(float speed, Vector2 direction) {
+        public StuckInfo MoveInDirection(float speed, Vector2 direction) {
             /*
             Moves in an arbitrary direction, if possible. Considers x and y axes separately (such that if movement is impossible
             in one but possible in the other, movement in the other axis happens regardless of the first axis).
@@ -140,8 +139,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement
             */
 
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.DIRECTION);
-
-            // TODO
+            Vector2 movementVector = direction.normalized * speed * Time.deltaTime;
+            return Move(movementVector);
         } 
 
 

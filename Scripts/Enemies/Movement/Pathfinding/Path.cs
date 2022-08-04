@@ -4,7 +4,7 @@ using UnityEngine;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding
 {
     // The Path class defines how an enemy should move after performing an A* search
     public class Path

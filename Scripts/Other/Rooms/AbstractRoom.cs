@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.Pathfinding;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
  
  // TODO: refactor this class
 namespace AdaptiveWizard.Assets.Scripts.Other.Rooms

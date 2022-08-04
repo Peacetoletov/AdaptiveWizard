@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
-using AdaptiveWizard.Assets.Scripts.Enemies.Interfaces;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
-using AdaptiveWizard.Assets.Scripts.Enemies.Movement;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement;
 
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkState : IState
     {
@@ -40,9 +40,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball
 
             //testing
             Vector2 cursorPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            /*
             int returnCode = movement.MoveTowardsPosition(speed, cursorPos);
             return returnCode;
-
+            */
+            EnemyMovement.StuckInfo stuckInfo = movement.MoveInDirection(speed, cursorPos - (Vector2) walkingEyeball.transform.position);
+            if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
+                return 1;
+            }
+            return 0;
 
             // TEMPORARIYL COMMENTED OUT
             /*

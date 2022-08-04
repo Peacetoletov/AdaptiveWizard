@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Interfaces
+namespace AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces
 {
     public interface IState
     {
