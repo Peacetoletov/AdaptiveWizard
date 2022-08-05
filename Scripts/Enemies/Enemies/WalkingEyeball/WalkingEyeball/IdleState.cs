@@ -21,22 +21,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Idle state");
+            //Debug.Log("Entered Idle state");
             animator.SetTrigger("TrIdle");
-            //this.timer = new Timer(2.5f);
+            this.timer = new Timer(2.5f);
             return 0;
         }
 
         public int Update() {
-            /*
             if (timer.UpdateAndCheck()) {
                 return 1;
             }
-            */
-            return 0;
-        }
-
-        public int OnLeave() {
             return 0;
         }
     }

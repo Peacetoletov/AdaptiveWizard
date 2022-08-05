@@ -19,7 +19,7 @@ KNOWN ISSUES:
   Currently, this is a low priority issue, but it will need to get fixed when I add large enemies.
 */
 
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
 {
     public class EnemyMovement
     {
@@ -54,13 +54,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
         ##################################################
         */
 
-        
-
-        private MovementType lastMovementType;
-
         private AbstractEnemy enemy;
 
         private PathManager pathManager;
+        
+        private MovementType lastMovementType;
+
+        private Vector2 lastMovementVector;
 
 
         /*
@@ -115,18 +115,20 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
             Returns 1 after successfully reaching target position.
 
             In rare situations, due to the forces of repulsion vectors, it might not be realistically possible to reach
-            the target position. This might happen if the final movement vector (= intended movement vector + repulsion vector)
-            is pointing in a significantly different direction from the intended movement vector, or if the magnitude of the 
-            final movement vector is very small. This method returns 2 if either case is detected.
+            the target position. This happens if the final movement vector (= intended movement vector + repulsion vector)
+            is pointing in a significantly different direction from the intended movement vector. This method returns 2 
+            if such behaviour is detected.
 
             Returns 0 if nothing exceptional happens and the enemy successfully moves towards target position.
             */
 
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.POSITION);
             int returnCode = DecideAndExecuteMovement(speed, targetPos, false);
+            /*
             if (returnCode != 0) {
                 ResetVariables();
             }
+            */
             return returnCode;
         }
 
@@ -142,6 +144,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
             Vector2 movementVector = direction.normalized * speed * Time.deltaTime;
             return Move(movementVector);
         } 
+
+        public Vector2 GetLastMovementVector() {
+            return lastMovementVector;
+        }
 
 
         /*
@@ -203,6 +209,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
                 stuckOnY = MoveOnAxis(movementVector.y, 'y');
             }
 
+            this.lastMovementVector = movementVector;
+
             return new StuckInfo(stuckOnX, stuckOnY, movementVector);
         }
 
@@ -219,6 +227,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
         }
 
         private void CreatePath(Vector2 targetPosition, StuckInfo stuckInfo) {
+            //Debug.Log("Creating path.");
             Node enemyPosNode = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(enemy.transform.position);
             Node targetPosNode = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(targetPosition);
             this.pathManager.isFollowing = true;
@@ -263,6 +272,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
 
             // Create a path if necessary
             if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
+                Debug.Log("Creating path.");
                 CreatePath(targetPosition, stuckInfo);
             }
 
@@ -300,6 +310,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
 
             // Stop following path if reasonably possible
             if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.GetDistance()) {
+                /*
+                Debug.Log("Stopped following path because required path distance was reached.");
+                Debug.Log($"Movement origin: {pathManager.movementOrigin}");
+                Debug.Log($"Enemy position: {(Vector2) enemy.transform.position}");
+                Debug.Log($"Required distance: {pathManager.path.GetDistance()}");
+                */
                 this.pathManager.isFollowing = false;
             }
 
@@ -308,6 +324,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
         }
 
         private void ResetVariables() {
+            Debug.Log("Resetting movement variables");
             this.lastMovementType = MovementType.UNINITIALIZED;
             this.pathManager = new PathManager();
         }

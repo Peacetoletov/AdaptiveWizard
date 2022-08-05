@@ -8,7 +8,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
 /*
 Class for keeping path related variables together.
 */
-namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement
+namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
 {
     public class PathManager
     {

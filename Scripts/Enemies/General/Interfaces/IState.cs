@@ -9,6 +9,5 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces
     {
         int OnEnter();
         int Update();
-        int OnLeave();
     }
 }

@@ -43,9 +43,5 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             }
             
         }
-
-        public int OnLeave() {
-            return 0;
-        }
     }
 }

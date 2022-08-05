@@ -50,6 +50,9 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
         private static MinigameManager minigameManager;
         private static RoomManager roomManager;
 
+        // testing
+        public GameObject webTest;
+
         
         private void Start() {
             InitializePlayer();
@@ -126,21 +129,11 @@ namespace AdaptiveWizard.Assets.Scripts.Other.GameManagers
                 }
                 */
                 
-                // test
-                /*
+                // testing
                 if (Input.GetKeyDown(KeyCode.N)) {
-                    InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.HealthCrystal());
+                    Vector2 cursorPos = UnityEngine.Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    Instantiate(webTest, cursorPos, Quaternion.identity);
                 }
-                if (Input.GetKeyDown(KeyCode.M)) {
-                    InventoryNS.Inventory.passiveItemsManager.AddItem(new Items.ManaCrystal());
-                }
-                if (Input.GetKeyDown(KeyCode.V)) {
-                    InventoryNS.Inventory.activeItemsManager.AddItem(new Items.HealthPotion());
-                }
-                if (Input.GetKeyDown(KeyCode.B)) {
-                    InventoryNS.Inventory.activeItemsManager.AddItem(new Items.ManaPotion());
-                }
-                */
             } 
 
             if (Input.GetKeyDown(KeyCode.P)) {

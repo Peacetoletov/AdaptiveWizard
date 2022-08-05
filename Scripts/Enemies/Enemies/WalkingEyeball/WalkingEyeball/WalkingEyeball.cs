@@ -16,6 +16,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 */
 // TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
 // TODO: possibly remove MovingEnemy as the superclass and instead have it tied to the WalkState
+// TODO: rename AttackSlashState to MeleeAttackState, rename AttackThrowState to RangedAttackState
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkingEyeball : AbstractEnemy
@@ -27,10 +28,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private AttackThrowState attackThrowState;
         private DeathState deathState;
 
+        public BoxCollider2D projectileCollider;
+        public GameObject webObj;
+
 
         protected void Start() {
             base.Init(100f);
-            CreateStates(terrainCollider);
+            CreateStates(projectileCollider);
             EnterState(idleState);
         }
 
@@ -47,9 +51,9 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             }
         }
 
-        private void CreateStates(BoxCollider2D terrainCollider) {
+        private void CreateStates(BoxCollider2D projectileCollider) {
             this.idleState = new IdleState(this);
-            this.walkState = new WalkState(this, terrainCollider);
+            this.walkState = new WalkState(this, projectileCollider);
             this.deathState = new DeathState(this);
             this.attackSlashState = new AttackSlashState(this);
             this.attackThrowState = new AttackThrowState(this);
@@ -58,26 +62,20 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private void UpdateState() {
             int returnCode = curState.Update();
 
+            /*
             // testing
             if (GetID() == 0 && Input.GetKeyDown(KeyCode.V)) {
             //if (Input.GetKeyDown(KeyCode.V)) {
                 EnterState(walkState);
             }
+            */
 
             if (returnCode != 0) {
-                curState.OnLeave();
-                
-                //testing
-                EnterState(idleState);
-                
-                // TEMPORARILY COMMENTED OUT
-                /*
                 if (curState is IdleState) {
                     EnterState(walkState);
                 }
                 else if (curState is WalkState) {
-                    //EnterState(idleState);
-                    EnterState(attackSlashState);
+                    ProcessWalkStateReturnCode(returnCode);
                 }
                 else if (curState is DeathState) {
                     Destroy(gameObject);
@@ -85,7 +83,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 } else if (curState is AttackSlashState) {
                     EnterState(walkState);
                 }
-                */
             }
         }
 
@@ -94,8 +91,21 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             return state.OnEnter();
         }
 
+        private void ProcessWalkStateReturnCode(int code) {
+            Assert.IsTrue(code != 0);
+            if (code == 1) {
+                EnterState(attackSlashState);
+            } else {
+                EnterState(attackThrowState);
+            }
+        }
+
         public WalkState GetWalkState() {
             return walkState;
+        }
+
+        public void InstantiateWeb(Vector2 position) {
+            Instantiate(webObj, position, Quaternion.identity);
         }
     }
 }

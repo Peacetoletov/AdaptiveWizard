@@ -29,12 +29,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
         public int Update() {
             if (timer.UpdateAndCheck()) {
+                // Stop playing animation
+                animator.enabled = false;
                 return 1;
             }
-            return 0;
-        }
-
-        public int OnLeave() {
             return 0;
         }
     }

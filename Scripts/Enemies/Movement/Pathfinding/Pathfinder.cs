@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using AdaptiveWizard.Assets.Scripts.Enemies.Movement.GeneralMovement;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.General;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding

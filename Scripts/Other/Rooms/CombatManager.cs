@@ -20,7 +20,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private AbstractRoom room;                       // reference to the room of this combat
         private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-        private const int totalEnemies = 2;
+        private const int totalEnemies = 1;
         private int enemiesDead = 0;
 
 
@@ -48,8 +48,6 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
             // TODO: make enemy spawning more complex, implement spawn waves etc.
             for (int i = 0; i < totalEnemies; i++) {
                 Vector2 spawnPos = RandomSpawnPos(1f);
-                //Vector2 spawnPos = new Vector2(21, 5);
-                //AbstractEnemy enemy = Instantiate(enemy1Obj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
                 AbstractEnemy enemy = Instantiate(walkingEyeballObj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
                 enemy.SetCombatManager(this);
             }

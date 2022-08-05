@@ -18,13 +18,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
             // Finds a position from which the enemy can shoot the player. If there are multiple such positions, 
             // try to select one of the better ones.
 
+            //Debug.Log("Finding a new ranged position.");
+
             Vector2Int pos = Vector2Int.zero;
             bool found = false;
             float posScore = float.NegativeInfinity;
 
+            List<Node> modifiedNodes = new List<Node>();
             Queue<Node> q = new Queue<Node>();
             Node root = MainGameManager.GetRoomManager().GetCurRoom().WorldPositionToNode(enemyPosition);
-            EnqueueAndClose(root, q);
+            EnqueueAndClose(root, q, modifiedNodes);
             while (q.Count != 0) {
                 Node curNode = q.Dequeue();
                 Vector2Int curNodePos = curNode.GetPosition();
@@ -39,22 +42,32 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
                 if (!found) {
                     foreach (Node neighbour in curNode.GetNeighbours()) {
                         if (!neighbour.IsClosed()) {
-                            EnqueueAndClose(neighbour, q);
+                            EnqueueAndClose(neighbour, q, modifiedNodes);
                         }
                     }
                 }
             }
 
+            ResetModifiedNodes(modifiedNodes);
+
             if (found) {
+                //Debug.Log($"Found a new ranged position: {pos}");
                 return pos;
             }
 
             throw new Exception("Error: Unable to find a ranged attack position!");
         }
 
-        private void EnqueueAndClose(Node node, Queue<Node> q) {
+        private void EnqueueAndClose(Node node, Queue<Node> q, List<Node> modifiedNodes) {
             q.Enqueue(node);
             node.Close();
+            modifiedNodes.Add(node);
+        }
+
+        private static void ResetModifiedNodes(List<Node> modifiedNodes) {
+            foreach (Node node in modifiedNodes) {
+                node.Reset();
+            }
         }
 
         protected virtual float EvaluatePosition(Vector2Int pos) {
