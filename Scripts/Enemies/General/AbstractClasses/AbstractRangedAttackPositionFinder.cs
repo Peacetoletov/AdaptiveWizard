@@ -5,16 +5,22 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;
+using AdaptiveWizard.Assets.Scripts.Enemies.Movement.Pathfinding;  
+using AdaptiveWizard.Assets.Scripts.Player.Other;           
 
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 {
     public abstract class AbstractRangedAttackPositionFinder
     {
+        AbstractPlayer player;
+
+        public AbstractRangedAttackPositionFinder() {
+            this.player = MainGameManager.GetPlayer().GetComponent<AbstractPlayer>();
+        }
 
         // TODO: document this more
-        public Vector2Int Find(Vector2 enemyPosition, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance) {
+        public Vector2Int Find(Vector2 enemyPosition, BoxCollider2D projectileCollider, float projectileMaxTravelDistance) {
             // Finds a position from which the enemy can shoot the player. If there are multiple such positions, 
             // try to select one of the better ones.
 
@@ -31,7 +37,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
             while (q.Count != 0) {
                 Node curNode = q.Dequeue();
                 Vector2Int curNodePos = curNode.GetPosition();
-                if (CanHit(curNodePos, projectileBoundingBoxSize, projectileMaxTravelDistance)) {
+                if (CanHit(curNodePos, projectileCollider, projectileMaxTravelDistance)) {
                     found = true;
                     float curScore = EvaluatePosition(curNodePos);
                     if (curScore > posScore) {
@@ -74,30 +80,44 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
             return (MainGameManager.GetPlayer().transform.position - new Vector3(pos.x, pos.y, 0)).magnitude;
         }
 
-        protected bool CanHitFromDirection(Vector2 direction, Vector2 position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance) {
+        private float SignedAngleFromEnemyToPlayer(Vector2 enemyPosition) {
             /*
-            RaycastHit2D[] hits = Physics2D.BoxCastAll(position, projectileBoundingBoxSize, 0, direction, projectileMaxTravelDistance,
-                                                       LayerMask.GetMask("Wall", "Player"));
-            //Debug.Log("NEW SECTION\n");
-            //Debug.Log($"Position: {position}. Raycast hits:");
-            foreach (RaycastHit2D hit in hits) {
-                //Debug.Log($"Hit has layer mask: {1 << hit.transform.gameObject.layer}. Player has layer mask: {LayerMask.GetMask("Player")}");
-                if (1 << hit.transform.gameObject.layer == LayerMask.GetMask("Player")) {
-                    return true;
-                }
-                return false;
-            }
-            return false;
+            Angles from different enemy positions (P is player):
+            ..........90.........
+            .179.................
+            ..........P.........0
+            -179.................
+            .........-90.........
             */
+            return Vector2.SignedAngle(Vector2.right, (Vector2) player.transform.position - enemyPosition);
+        }
 
-            RaycastHit2D hit = Physics2D.BoxCast(position, projectileBoundingBoxSize, 0, direction, projectileMaxTravelDistance,
+        private bool CanHitFromDirection(Vector2 position, BoxCollider2D projectileCollider, float projectileMaxTravelDistance) {
+            float angle = SignedAngleFromEnemyToPlayer(position);
+            Vector2 direction = (Vector2) player.transform.position - position;
+            RaycastHit2D hit = Physics2D.BoxCast(position, projectileCollider.size, angle, direction, projectileMaxTravelDistance, 
                                                  LayerMask.GetMask("Wall", "Player"));
             if (hit.collider != null && 1 << hit.transform.gameObject.layer == LayerMask.GetMask("Player")) {
                 return true;
             }
             return false;
+
+            /*
+            RaycastHit2D hit = Physics2D.Raycast(position, direction, projectileMaxTravelDistance, LayerMask.GetMask("Wall", "Player"));
+            if (hit.collider != null && 1 << hit.transform.gameObject.layer == LayerMask.GetMask("Player")) {
+                return true;
+            }
+            return false;
+            */
         }
 
-        public abstract bool CanHit(Vector2 position, Vector2 projectileBoundingBoxSize, float projectileMaxTravelDistance);
+        public bool CanHit(Vector2 position, BoxCollider2D projectileCollider, float projectileMaxTravelDistance) {
+            if (IsAngleValid(SignedAngleFromEnemyToPlayer(position))) {
+                return CanHitFromDirection(position, projectileCollider, projectileMaxTravelDistance);
+            }
+            return false;
+        }
+
+        protected abstract bool IsAngleValid(float signedAngle);
     }
 }

@@ -8,6 +8,14 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
+/*
+KNOWN ISSUES:
+- Enemy is oriented in the wrong direction
+- Web cannot spawn on the right
+- Web always flies in the bottom left
+- Enemy can get stuck on one animation frame when it should have a moving animation. This happens when the enemy shoots a web and then
+  tries to find another ranged spot. This needs more testing.
+*/
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
    the distance, the higher chance of entering the Idle state).
@@ -15,8 +23,6 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
    becomes short, it enters Walk state.
 */
 // TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
-// TODO: possibly remove MovingEnemy as the superclass and instead have it tied to the WalkState
-// TODO: rename AttackSlashState to MeleeAttackState, rename AttackThrowState to RangedAttackState
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkingEyeball : AbstractEnemy
@@ -24,17 +30,17 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private IState curState;
         private IdleState idleState;
         private WalkState walkState;
-        private AttackSlashState attackSlashState;
-        private AttackThrowState attackThrowState;
+        private MeleeAttackState meleeAttackState;
+        private RangedAttackState rangedAttackState;
         private DeathState deathState;
 
-        public BoxCollider2D projectileCollider;
         public GameObject webObj;
+        public BoxCollider2D projectileCollider;
 
 
         protected void Start() {
             base.Init(100f);
-            CreateStates(projectileCollider);
+            CreateStates();
             EnterState(idleState);
         }
 
@@ -51,12 +57,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             }
         }
 
-        private void CreateStates(BoxCollider2D projectileCollider) {
+        private void CreateStates() {
             this.idleState = new IdleState(this);
             this.walkState = new WalkState(this, projectileCollider);
             this.deathState = new DeathState(this);
-            this.attackSlashState = new AttackSlashState(this);
-            this.attackThrowState = new AttackThrowState(this);
+            this.meleeAttackState = new MeleeAttackState(this);
+            this.rangedAttackState = new RangedAttackState(this);
         }
 
         private void UpdateState() {
@@ -73,15 +79,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             if (returnCode != 0) {
                 if (curState is IdleState) {
                     EnterState(walkState);
-                }
-                else if (curState is WalkState) {
+                } else if (curState is WalkState) {
                     ProcessWalkStateReturnCode(returnCode);
-                }
-                else if (curState is DeathState) {
+                } else if (curState is DeathState) {
                     Destroy(gameObject);
                     //Debug.Log("Destroyed enemy");
-                } else if (curState is AttackSlashState) {
+                } else if (curState is MeleeAttackState) {
                     EnterState(walkState);
+                } else if (curState is RangedAttackState) {
+                    EnterState(idleState);
                 }
             }
         }
@@ -94,9 +100,9 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private void ProcessWalkStateReturnCode(int code) {
             Assert.IsTrue(code != 0);
             if (code == 1) {
-                EnterState(attackSlashState);
+                EnterState(meleeAttackState);
             } else {
-                EnterState(attackThrowState);
+                EnterState(rangedAttackState);
             }
         }
 

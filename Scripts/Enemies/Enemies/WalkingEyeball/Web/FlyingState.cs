@@ -28,7 +28,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         public int Update() {
-            int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, finalCollider);
+            //int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, finalCollider);
+            int movementReturnCode = Utility.MoveAndCheckCollision(web, new Vector2(-1, -0.5f), speed, finalCollider);
             if (movementReturnCode == 1) {
                 // Player was hit
                 return 1;
