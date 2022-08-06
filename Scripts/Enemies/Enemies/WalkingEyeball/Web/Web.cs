@@ -21,6 +21,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         private FlyingState flyingState;
         private FadingAwayState fadingAwayState;
 
+        private Vector2 direction;
         private const float damage = 15f;
         private const float speed = 5f;
 
@@ -37,8 +38,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         private void CreateStates(BoxCollider2D initialCollider, BoxCollider2D finalCollider) {
-            this.expandingState = new ExpandingState(this, initialCollider, speed);
-            this.flyingState = new FlyingState(this, finalCollider, speed);
+            this.expandingState = new ExpandingState(this, initialCollider, direction, speed);
+            this.flyingState = new FlyingState(this, finalCollider, direction, speed);
             this.fadingAwayState = new FadingAwayState(this);
         }
 
@@ -88,6 +89,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
             }
             // Wall or player was hit
             EnterState(fadingAwayState);
+        }
+
+        public void SetDirection(Vector2 direction) {
+            this.direction = direction;
         }
     }
 }

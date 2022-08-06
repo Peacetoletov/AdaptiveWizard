@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
+using AdaptiveWizard.Assets.Scripts.Player.Other;
+using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
+using AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web;
 
 /*
 TODO: Currently, given that I'm using Raycast, it's possible that although a raycast can hit the player,
@@ -19,25 +22,35 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
     public class RangedAttackState : IState
     {
         WalkingEyeball walkingEyeball;
+        private SpriteRenderer spriteRenderer;
         private Animator animator;
         private Timer timer;
         private const float range = 20;
-        private bool spawned = false;
+        private bool spawned;
+        //private AbstractPlayer player;
+        private Vector2 spawnPos;
+        private Vector2 direction;
 
 
         public RangedAttackState(WalkingEyeball walkingEyeball) {
             this.walkingEyeball = walkingEyeball;
+            this.spriteRenderer = walkingEyeball.GetComponent<SpriteRenderer>();
             this.animator = walkingEyeball.GetComponent<Animator>();
+            //this.player = MainGameManager.GetPlayer().GetComponent<AbstractPlayer>();
         }
 
         public int OnEnter() {
             animator.SetTrigger("TrRangedAttack");
-            //Debug.Log($"Time on enter: {animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).normalizedTime}");
-            animator.Play("Ranged Attack", 0, 0f);
-            //Debug.Log($"Time after custom play method: {animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).normalizedTime}");
-            //this.timer = new Timer(1.5f);
+            animator.Play("Ranged Attack", 0, 0f);      // Setting animation time to 0
             Debug.Log("Entered Ranged Attack state");
+            this.spawned = false;
+            spriteRenderer.flipX = direction.x > 0;
             return 0;
+        }
+
+        public void SetAttackProperties(Vector2 spawnPos, Vector2 direction) {
+            this.spawnPos = spawnPos;
+            this.direction = direction;
         }
 
         public int Update() {
@@ -50,12 +63,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
             if (!spawned && animationTime >= spawnFrame / fps) {
                 // TODO - make both spawn directions work
-                Vector2 pos = walkingEyeball.transform.position - new Vector3(1, 0, 0);
-                walkingEyeball.InstantiateWeb(pos);
-                //Debug.Log("Spawned!");
+                GameObject web = walkingEyeball.InstantiateWeb(spawnPos);
+                web.GetComponent<Web.Web>().SetDirection(direction);
                 this.spawned = true;
 
-                // TODO - possibly change state to Idle for a couple seconds after spawning a web?
+                //Debug.Log("Spawned!");
             }
 
             if (animationTime >= totalFrames / fps) {

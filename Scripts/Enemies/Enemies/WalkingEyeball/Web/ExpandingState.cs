@@ -16,13 +16,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         private Animator animator;
         private BoxCollider2D initialCollider;
         private float speed;
+        Vector2 direction;
 
 
-        public ExpandingState(Web web, BoxCollider2D initialCollider, float speed) {
+        public ExpandingState(Web web, BoxCollider2D initialCollider, Vector2 direction, float speed) {
             this.web = web;
             this.animator = web.GetComponent<Animator>();
             this.initialCollider = initialCollider;
             this.speed = speed;
+            this.direction = direction;
         }
 
         public int OnEnter() {
@@ -34,7 +36,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         public int Update() {
             
             // int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, initialCollider);
-            int movementReturnCode = Utility.MoveAndCheckCollision(web, new Vector2(-1, -0.5f), speed, initialCollider);
+            int movementReturnCode = Utility.MoveAndCheckCollision(web, direction, speed, initialCollider);
             if (movementReturnCode == 1) {
                 // Player was hit
                 return 2;

@@ -10,11 +10,18 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-- Enemy is oriented in the wrong direction
-- Web cannot spawn on the right
-- Web always flies in the bottom left
+
 - Enemy can get stuck on one animation frame when it should have a moving animation. This happens when the enemy shoots a web and then
   tries to find another ranged spot. This needs more testing.
+*/
+
+/*
+FIXED ISSUES (just for my motivation):
+- With enemy starting position (5, 11) and player starting position (13, 3), enemy starts rapidly wiggling instead of shooting a web.
+    - fixed by correcting web spawn positions when checking viable ranged attack positions
+- With enemy starting position (5, 11) and player starting position (13, 3), enemy shoots a web which then gets blocked by a wall. This should
+  never happen.
+    - fixed by adding a buffer to collider's size when checking if a ranged attack position is viable
 */
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
@@ -110,8 +117,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             return walkState;
         }
 
-        public void InstantiateWeb(Vector2 position) {
-            Instantiate(webObj, position, Quaternion.identity);
+        public RangedAttackState GetRangedAttackState() {
+            return rangedAttackState;
+        }
+
+        public GameObject InstantiateWeb(Vector2 position) {
+            return Instantiate(webObj, position, Quaternion.identity);
         }
     }
 }

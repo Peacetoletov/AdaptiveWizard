@@ -15,12 +15,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         private Web web;
         private BoxCollider2D finalCollider;
         private float speed;
+        private Vector2 direction;
 
 
-        public FlyingState(Web web, BoxCollider2D finalCollider, float speed) {
+        public FlyingState(Web web, BoxCollider2D finalCollider, Vector2 direction, float speed) {
             this.web = web;
             this.finalCollider = finalCollider;
             this.speed = speed;
+            this.direction = direction;
         }
 
         public int OnEnter() {
@@ -29,7 +31,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 
         public int Update() {
             //int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, finalCollider);
-            int movementReturnCode = Utility.MoveAndCheckCollision(web, new Vector2(-1, -0.5f), speed, finalCollider);
+            int movementReturnCode = Utility.MoveAndCheckCollision(web, direction, speed, finalCollider);
             if (movementReturnCode == 1) {
                 // Player was hit
                 return 1;

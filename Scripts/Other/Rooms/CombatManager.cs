@@ -47,7 +47,8 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
 
             // TODO: make enemy spawning more complex, implement spawn waves etc.
             for (int i = 0; i < totalEnemies; i++) {
-                Vector2 spawnPos = RandomSpawnPos(1f);
+                //Vector2 spawnPos = RandomSpawnPos(1f);
+                Vector2 spawnPos = new Vector2(5, 11);
                 AbstractEnemy enemy = Instantiate(walkingEyeballObj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
                 enemy.SetCombatManager(this);
             }

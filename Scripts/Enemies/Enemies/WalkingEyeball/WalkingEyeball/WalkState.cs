@@ -53,13 +53,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
             if (distanceToPlayer < meleeRange) {
                 // Change to slash attack state
-                //Debug.Log("In melee range.");
+                Debug.Log("In melee range.");
                 return 1;
             } 
             else if (distanceToPlayer < almostMeleeRange || !rangedAttacksAllowed) {
                 // If the enemy is close to the player or is not allowed to perform ranged attacks, move closer
                 // to the player and try to get into melee range
-                //Debug.Log("Almost in melee range. Moving closer to player.");
+                Debug.Log("Almost in melee range. Moving closer to player.");
                 movement.MoveTowardsPlayer(speed);
                 UpdateSpriteOrientation(movement.GetLastMovementVector().x);
                 return 0;
@@ -68,24 +68,29 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 // Move into position for a ranged attack
                 //Debug.Log($"Moving towards position: {rangedAttackPosition}");
                 int movementReturnCode = movement.MoveTowardsPosition(speed, rangedAttackPosition);
+                UpdateSpriteOrientation(movement.GetLastMovementVector().x);
                 //Debug.Log($"Movement vector (x100): {movement.GetLastMovementVector() * 100}");
                 
+                // must be called *after* calling UpdateSpriteOrientation()
+                Vector2 webSpawnPos = WebSpawnPos();
 
                 // If player can be hit with a ranged attack from the current position, change to ranged attack state
-                if (rapf.CanHit(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance)) {
-                    //Debug.Log("Player can be hit with a ranged attack from the current position. Returning 2.");
+                if (rapf.CanHit(webSpawnPos, projectileCollider, projectileMaxTravelDistance)) {
+                    Debug.Log("Player can be hit with a ranged attack from the current position. Returning 2.");
+                    walkingEyeball.GetRangedAttackState().SetAttackProperties(webSpawnPos, rapf.DirectionToPlayer(webSpawnPos));
                     return 2;
                 }
 
                 // If position cannot be reached, permanently switch to melee mode
                 if (movementReturnCode == 2) {
-                    //Debug.Log("Permanently switching to melee mode!");
+                    Debug.Log("Permanently switching to melee mode!");
                     this.rangedAttacksAllowed = false;
                 }
 
                 // If target position is reached but cannot hit player from the position, find a new position
                 if (movementReturnCode == 1) {
-                    //Debug.Log("Position reached can player cannot be hit. Trying to find a new position.");
+                    Debug.Log("Position reached but player cannot be hit. Trying to find a new position.");
+                    // TODO: change this such that the new position is at least 2 nodes away from the current position
                     this.rangedAttackPosition = rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
                 }
 
@@ -116,10 +121,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             }
         }
 
-        /*
-        public EnemyMovement GetEnemyMovement() {
-            return movement;
+        private Vector2 WebSpawnPos() {
+            Vector2 dirToPlayer = rapf.DirectionToPlayer(walkingEyeball.transform.position);
+            Vector2 webSpawnOffset = dirToPlayer.x > 0 ? Vector2.right : Vector2.left;
+            return (Vector2) walkingEyeball.transform.position + webSpawnOffset;
         }
-        */
     }
 }
