@@ -19,10 +19,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private EnemyMovement movement;
         private const float speed = 2f;
         private const float projectileMaxTravelDistance = 20f;
+        private const float meleeRange = 2f;
+        private const float almostMeleeRange = 3.5f;
 
         // Variables related to ranged attacks
-        private BoxCollider2D projectileCollider;
-        private RangedAttackPositionFinder rapf;
+        private readonly BoxCollider2D projectileCollider;
+        private readonly RangedAttackPositionFinder rapf;
         private bool seekingRangedAttack = false;
         private Vector2 rangedAttackPosition;
         private bool rangedAttacksAllowed = true;
@@ -47,9 +49,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         public int Update() {
             
             float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
-            const float meleeRange = 2f;
-            const float almostMeleeRange = 3.5f;
-            UpdateRangedAttackPositionIfNecessary(distanceToPlayer, almostMeleeRange);
+            
+            UpdateRangedAttackPositionIfNecessary(distanceToPlayer);
 
             if (distanceToPlayer < meleeRange) {
                 // Change to slash attack state
@@ -70,6 +71,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 int movementReturnCode = movement.MoveTowardsPosition(speed, rangedAttackPosition);
                 UpdateSpriteOrientation(movement.GetLastMovementVector().x);
                 //Debug.Log($"Movement vector (x100): {movement.GetLastMovementVector() * 100}");
+
                 
                 // must be called *after* calling UpdateSpriteOrientation()
                 Vector2 webSpawnPos = WebSpawnPos();
@@ -78,6 +80,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 if (rapf.CanHit(webSpawnPos, projectileCollider, projectileMaxTravelDistance)) {
                     Debug.Log("Player can be hit with a ranged attack from the current position. Returning 2.");
                     walkingEyeball.GetRangedAttackState().SetAttackProperties(webSpawnPos, rapf.DirectionToPlayer(webSpawnPos));
+                    ResetState();
                     return 2;
                 }
 
@@ -109,7 +112,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             // Don't change orientation if xDir == 0
         }
 
-        private void UpdateRangedAttackPositionIfNecessary(float distanceToPlayer, float almostMeleeRange) {
+        private void UpdateRangedAttackPositionIfNecessary(float distanceToPlayer) {
             if (distanceToPlayer < almostMeleeRange) {
                 seekingRangedAttack = false;
             } else {
@@ -125,6 +128,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             Vector2 dirToPlayer = rapf.DirectionToPlayer(walkingEyeball.transform.position);
             Vector2 webSpawnOffset = dirToPlayer.x > 0 ? Vector2.right : Vector2.left;
             return (Vector2) walkingEyeball.transform.position + webSpawnOffset;
+        }
+
+        private void ResetState() {
+            seekingRangedAttack = false;
         }
     }
 }

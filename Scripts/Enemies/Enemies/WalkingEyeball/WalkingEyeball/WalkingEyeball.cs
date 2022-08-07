@@ -10,9 +10,8 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-
-- Enemy can get stuck on one animation frame when it should have a moving animation. This happens when the enemy shoots a web and then
-  tries to find another ranged spot. This needs more testing.
+- When an enemy shoots and then wants to and can shoot again, it currently goes through a short walking animation between the shots. 
+  Remove entering WalkState in this scenario.
 */
 
 /*
@@ -22,6 +21,12 @@ FIXED ISSUES (just for my motivation):
 - With enemy starting position (5, 11) and player starting position (13, 3), enemy shoots a web which then gets blocked by a wall. This should
   never happen.
     - fixed by adding a buffer to collider's size when checking if a ranged attack position is viable
+- Enemy behaviour gets broken in the following scenario:
+  1) Enemy starts at (5, 11), player starts at (13, 3).
+  2) Enemy finds a position to shoot from, then walks towards it and starts to shoot.
+  3) During the shooting animation, player goes up. It doesn't matter how far, it just needs to be enough to get out of enemy's attack range.
+  4) Now the enemy starts doing weird stuff.
+    - fixed by changing how time is animation time counted in RangedAttackState 
 */
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
