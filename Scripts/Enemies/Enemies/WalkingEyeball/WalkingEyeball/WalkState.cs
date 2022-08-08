@@ -24,7 +24,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
         // Variables related to ranged attacks
         private readonly BoxCollider2D projectileCollider;
-        private readonly RangedAttackPositionFinder rapf;
+        //private readonly RangedAttackPositionFinder rapf;
         private bool seekingRangedAttack = false;
         private Vector2 rangedAttackPosition;
         private bool rangedAttacksAllowed = true;
@@ -35,7 +35,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             this.spriteRenderer = walkingEyeball.GetComponent<SpriteRenderer>();
             this.movement = new EnemyMovement(walkingEyeball);
 
-            this.rapf = new RangedAttackPositionFinder();
+            //this.rapf = new RangedAttackPositionFinder();
             this.projectileCollider = projectileCollider;
         }
 
@@ -47,17 +47,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int Update() {
-            
-            float distanceToPlayer = walkingEyeball.VectorToPlayer().magnitude;
-            
-            UpdateRangedAttackPositionIfNecessary(distanceToPlayer);
-
-            if (distanceToPlayer < meleeRange) {
+            UpdateRangedAttackPositionIfNecessary();
+            if (IsInMeleeRange()) {
                 // Change to slash attack state
                 Debug.Log("In melee range.");
                 return 1;
             } 
-            else if (distanceToPlayer < almostMeleeRange || !rangedAttacksAllowed) {
+            else if (!ShouldAttemptRangedAttack()) {
                 // If the enemy is close to the player or is not allowed to perform ranged attacks, move closer
                 // to the player and try to get into melee range
                 Debug.Log("Almost in melee range. Moving closer to player.");
@@ -71,15 +67,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 int movementReturnCode = movement.MoveTowardsPosition(speed, rangedAttackPosition);
                 UpdateSpriteOrientation(movement.GetLastMovementVector().x);
                 //Debug.Log($"Movement vector (x100): {movement.GetLastMovementVector() * 100}");
-
-                
-                // must be called *after* calling UpdateSpriteOrientation()
-                Vector2 webSpawnPos = WebSpawnPos();
+        
 
                 // If player can be hit with a ranged attack from the current position, change to ranged attack state
-                if (rapf.CanHit(webSpawnPos, projectileCollider, projectileMaxTravelDistance)) {
+                if (CanHitPlayerWithRangedAttackFromCurrentPosition()) {
                     Debug.Log("Player can be hit with a ranged attack from the current position. Returning 2.");
-                    walkingEyeball.GetRangedAttackState().SetAttackProperties(webSpawnPos, rapf.DirectionToPlayer(webSpawnPos));
                     ResetState();
                     return 2;
                 }
@@ -93,8 +85,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                 // If target position is reached but cannot hit player from the position, find a new position
                 if (movementReturnCode == 1) {
                     Debug.Log("Position reached but player cannot be hit. Trying to find a new position.");
-                    // TODO: change this such that the new position is at least 2 nodes away from the current position
-                    this.rangedAttackPosition = rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
                 }
 
                 //Debug.Log("Returning 0");
@@ -112,23 +103,42 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             // Don't change orientation if xDir == 0
         }
 
-        private void UpdateRangedAttackPositionIfNecessary(float distanceToPlayer) {
-            if (distanceToPlayer < almostMeleeRange) {
+        private void UpdateRangedAttackPositionIfNecessary() {
+            if (DistanceToPlayer() < almostMeleeRange) {
                 seekingRangedAttack = false;
             } else {
                 if (!seekingRangedAttack) {
                     // Just got far enough from the player to seek a ranged attack. Needs to find a good position.
-                    this.rangedAttackPosition = rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
                 }
                 seekingRangedAttack = true;
             }
         }
 
+        private bool IsInMeleeRange() {
+            return DistanceToPlayer() < meleeRange;
+        }
+
+        private float DistanceToPlayer() {
+            return walkingEyeball.VectorToPlayer().magnitude;
+        }
+
+        public bool ShouldAttemptRangedAttack() {
+            return rangedAttacksAllowed && DistanceToPlayer() > almostMeleeRange;
+        }
+
+        public bool CanHitPlayerWithRangedAttackFromCurrentPosition() {
+            Vector2 webSpawnPos = RangedAttackState.WebSpawnPos(walkingEyeball.transform.position);
+            return RangedAttackState.rapf.CanHit(webSpawnPos, projectileCollider, projectileMaxTravelDistance);
+        }
+
+        /*
         private Vector2 WebSpawnPos() {
-            Vector2 dirToPlayer = rapf.DirectionToPlayer(walkingEyeball.transform.position);
+            Vector2 dirToPlayer = RangedAttackState.rapf.DirectionToPlayer(walkingEyeball.transform.position);
             Vector2 webSpawnOffset = dirToPlayer.x > 0 ? Vector2.right : Vector2.left;
             return (Vector2) walkingEyeball.transform.position + webSpawnOffset;
         }
+        */
 
         private void ResetState() {
             seekingRangedAttack = false;

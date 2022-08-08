@@ -16,9 +16,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
     {
         private Animator animator;
         private Timer timer;
+        private WalkingEyeball walkingEyeball;
 
-        // just testing
-        WalkingEyeball walkingEyeball;
 
         public IdleState(WalkingEyeball walkingEyeball) {
             this.animator = walkingEyeball.GetComponent<Animator>();
@@ -34,6 +33,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
         public int Update() {
             if (timer.UpdateAndCheck()) {
+                WalkState ws = walkingEyeball.GetWalkState();
+                if (ws.ShouldAttemptRangedAttack() && ws.CanHitPlayerWithRangedAttackFromCurrentPosition()) {
+                    // Change to ranged attack state
+                    Debug.Log("Returning 2 from IdleState");
+                    return 2;
+                }
+                // Change to walk state
+                Debug.Log("Returning 1 from IdleState");
                 return 1;
             }
             /*

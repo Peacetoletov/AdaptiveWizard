@@ -10,8 +10,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-- When an enemy shoots and then wants to and can shoot again, it currently goes through a short walking animation between the shots. 
-  Remove entering WalkState in this scenario.
+- Behaviour in melee attack is not working.
 */
 
 /*
@@ -27,6 +26,9 @@ FIXED ISSUES (just for my motivation):
   3) During the shooting animation, player goes up. It doesn't matter how far, it just needs to be enough to get out of enemy's attack range.
   4) Now the enemy starts doing weird stuff.
     - fixed by changing how time is animation time counted in RangedAttackState 
+- When an enemy shoots and then wants to and can shoot again, it currently goes through a short walking animation between the shots. 
+  Remove entering WalkState in this scenario.
+    - fixed by writing more code
 */
 
 /* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
@@ -90,7 +92,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
             if (returnCode != 0) {
                 if (curState is IdleState) {
-                    EnterState(walkState);
+                    ProcessIdleStateReturnCode(returnCode);
                 } else if (curState is WalkState) {
                     ProcessWalkStateReturnCode(returnCode);
                 } else if (curState is DeathState) {
@@ -107,6 +109,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private int EnterState(IState state) {
             this.curState = state;
             return state.OnEnter();
+        }
+
+        private void ProcessIdleStateReturnCode(int code) {
+            Assert.IsTrue(code != 0);
+            if (code == 1) {
+                EnterState(walkState);
+            } else {
+                EnterState(rangedAttackState);
+            }
         }
 
         private void ProcessWalkStateReturnCode(int code) {

@@ -21,8 +21,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private const float range = 20;
         private bool spawned;
         //private AbstractPlayer player;
-        private Vector2 spawnPos;
         private Vector2 direction;
+        public static RangedAttackPositionFinder rapf = new RangedAttackPositionFinder();
 
         private const float spawnFrame = 5;
         private const float totalFrames = 10;
@@ -38,20 +38,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            animator.SetTrigger("TrRangedAttack");
-
-            //animator.Play("Ranged Attack", 0, 0f);      // Setting animation time to 0
-            this.timeSinceEnter = 0;
-
             Debug.Log("Entered Ranged Attack state");
+            this.animator.SetTrigger("TrRangedAttack");
+            this.timeSinceEnter = 0;
             this.spawned = false;
-            spriteRenderer.flipX = direction.x > 0;
+            this.direction = rapf.DirectionToPlayer(WebSpawnPos(walkingEyeball.transform.position));
+            this.spriteRenderer.flipX = direction.x > 0;
             return 0;
-        }
-
-        public void SetAttackProperties(Vector2 spawnPos, Vector2 direction) {
-            this.spawnPos = spawnPos;
-            this.direction = direction;
         }
 
         public int Update() {
@@ -63,11 +56,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
             //if (!spawned && animationTime >= spawnFrame / fps) {
             if (!spawned && timeSinceEnter >= spawnFrame / fps) {
-                GameObject web = walkingEyeball.InstantiateWeb(spawnPos);
-                web.GetComponent<Web.Web>().SetDirection(direction);
-                this.spawned = true;
-
-                //Debug.Log("Spawned!");
+                Spawn();
             }
 
             //if (animationTime >= totalFrames / fps) {
@@ -81,6 +70,25 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             }
             */
             return 0;
+        }
+
+        public static Vector2 WebSpawnPos(Vector2 walkingEyeballPos) {
+            Vector2 dirToPlayer = rapf.DirectionToPlayer(walkingEyeballPos);
+            Vector2 webSpawnOffset = dirToPlayer.x > 0 ? Vector2.right : Vector2.left;
+            return (Vector2) walkingEyeballPos + webSpawnOffset;
+        }
+
+        private void Spawn() {
+            Vector2 spawnPos = WebSpawnPos(walkingEyeball.transform.position);
+            GameObject web = walkingEyeball.InstantiateWeb(spawnPos);
+            web.GetComponent<Web.Web>().SetDirection(direction);
+            this.spawned = true;
+            //Debug.Log("Spawned!");
+        }
+
+        private void SetAttackProperties() {
+            //this.spawnPos = spawnPos;
+            //this.direction = direction;
         }
     }
 }
