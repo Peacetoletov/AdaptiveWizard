@@ -8,6 +8,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces
     public interface IState
     {
         int OnEnter();
-        int Update();
+        int StateUpdate();
     }
 }

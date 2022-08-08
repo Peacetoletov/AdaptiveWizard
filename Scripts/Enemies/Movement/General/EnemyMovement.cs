@@ -141,7 +141,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
             */
 
             ResetVariablesIfLastMovementTypeDoesntMatch(MovementType.DIRECTION);
-            Vector2 movementVector = direction.normalized * speed * Time.deltaTime;
+            Vector2 movementVector = direction.normalized * speed * Time.fixedDeltaTime;
             return Move(movementVector);
         } 
 
@@ -192,7 +192,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
         }
 
         private void MoveSimplyRigid(float speed, Vector2 targetPosition) {
-            Vector2 movementVector = (RepulsionVector() + enemy.VectorToPlayer().normalized).normalized * speed * Time.deltaTime;
+            Vector2 movementVector = (RepulsionVector() + enemy.VectorToPlayer().normalized).normalized * speed * Time.fixedDeltaTime;
             StuckInfo stuckInfo = Move(movementVector);
             if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
                 CreatePath(targetPosition, stuckInfo);
@@ -237,7 +237,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
         }
 
         private void MoveOnPathRigid(float speed) {
-            Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
+            Vector2 movementVector = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.fixedDeltaTime;
             Move(movementVector);
             if ((pathManager.movementOrigin - (Vector2) enemy.transform.position).magnitude > pathManager.path.GetDistance()) {
                 this.pathManager.isFollowing = false;
@@ -254,8 +254,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
         private int MoveSimplySoft(float speed, Vector2 targetPosition) {
             // Get movement vectors
             Vector2 dirToTarget = (targetPosition - (Vector2) enemy.transform.position).normalized;
-            Vector2 baseMovementVector = dirToTarget * speed * Time.deltaTime;
-            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + dirToTarget).normalized * speed * Time.deltaTime;
+            Vector2 baseMovementVector = dirToTarget * speed * Time.fixedDeltaTime;
+            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + dirToTarget).normalized * speed * Time.fixedDeltaTime;
 
             // Soft movement fails if the angle between base movement vector and movement vector after repulsion is too large
             if (IsAngleTooBig(baseMovementVector, movementVectorAfterRepulsion)) {
@@ -292,8 +292,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
 
         private int MoveOnPathSoft(float speed, Vector2 targetPosition) {
             // Get movement vectors
-            Vector2 baseMovementVector = pathManager.path.GetDirection() * speed * Time.deltaTime;
-            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.deltaTime;
+            Vector2 baseMovementVector = pathManager.path.GetDirection() * speed * Time.fixedDeltaTime;
+            Vector2 movementVectorAfterRepulsion = (RepulsionVector() + pathManager.path.GetDirection()).normalized * speed * Time.fixedDeltaTime;
 
             // Soft movement fails if the angle between base movement vector and movement vector after repulsion is too large
             if (IsAngleTooBig(baseMovementVector, movementVectorAfterRepulsion)) {

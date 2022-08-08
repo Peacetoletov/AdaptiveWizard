@@ -20,14 +20,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Death state");
+            //Debug.Log("Entered Death state");
             animator.SetTrigger("TrDeath");
             float deathAnimationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
             this.timer = new Timer(deathAnimationLength);
             return 0;
         }
 
-        public int Update() {
+        public int StateUpdate() {
             if (timer.UpdateAndCheck()) {
                 // Stop playing animation
                 animator.enabled = false;

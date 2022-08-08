@@ -5,10 +5,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
-//using AdaptiveWizard.Assets.Scripts.Other.Other;
-using AdaptiveWizard.Assets.Scripts.Player.Other;
-using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
-using AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web;
 
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
@@ -18,9 +14,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         WalkingEyeball walkingEyeball;
         private SpriteRenderer spriteRenderer;
         private Animator animator;
-        private const float range = 20;
+        //private const float range = 20;
         private bool spawned;
-        //private AbstractPlayer player;
         private Vector2 direction;
         public static RangedAttackPositionFinder rapf = new RangedAttackPositionFinder();
 
@@ -34,7 +29,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             this.walkingEyeball = walkingEyeball;
             this.spriteRenderer = walkingEyeball.GetComponent<SpriteRenderer>();
             this.animator = walkingEyeball.GetComponent<Animator>();
-            //this.player = MainGameManager.GetPlayer().GetComponent<AbstractPlayer>();
         }
 
         public int OnEnter() {
@@ -47,28 +41,18 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             return 0;
         }
 
-        public int Update() {
-            //Debug.Log($"Animation time: {animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).normalizedTime}");
-            
+        public int StateUpdate() {
             this.timeSinceEnter += Time.fixedDeltaTime;
-
             float animationTime = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).normalizedTime;
 
-            //if (!spawned && animationTime >= spawnFrame / fps) {
             if (!spawned && timeSinceEnter >= spawnFrame / fps) {
                 Spawn();
             }
 
-            //if (animationTime >= totalFrames / fps) {
             if (timeSinceEnter >= totalFrames / fps) {
                 return 1;
             }
-            
-            /*
-            if (timer.UpdateAndCheck()) {
-                return 1;
-            }
-            */
+
             return 0;
         }
 
@@ -83,12 +67,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             GameObject web = walkingEyeball.InstantiateWeb(spawnPos);
             web.GetComponent<Web.Web>().SetDirection(direction);
             this.spawned = true;
-            //Debug.Log("Spawned!");
-        }
-
-        private void SetAttackProperties() {
-            //this.spawnPos = spawnPos;
-            //this.direction = direction;
         }
     }
 }

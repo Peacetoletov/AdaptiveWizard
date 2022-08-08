@@ -44,7 +44,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         private void UpdateState() {
-            int returnCode = curState.Update();
+            int returnCode = curState.StateUpdate();
             if (returnCode != 0) {
                 if (curState is ExpandingState) {
                     GetComponent<Animator>().enabled = false;       // Stop playing animation

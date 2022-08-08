@@ -33,7 +33,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
             return 0;
         }
 
-        public int Update() {
+        public int StateUpdate() {
             
             // int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, initialCollider);
             int movementReturnCode = Utility.MoveAndCheckCollision(web, direction, speed, initialCollider);

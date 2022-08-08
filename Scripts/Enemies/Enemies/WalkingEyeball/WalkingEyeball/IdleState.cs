@@ -6,8 +6,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
-//using AdaptiveWizard.Assets.Scripts.Other.GameManagers;     // just testing
-//using AdaptiveWizard.Assets.Scripts.Player.Other;           // just testing
 
 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
@@ -25,31 +23,24 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Idle state");
-            animator.SetTrigger("TrIdle");
-            this.timer = new Timer(2.5f);
+            //Debug.Log("Entered Idle state");
+            this.animator.SetTrigger("TrIdle");
+            this.timer = new Timer(2.0f);
             return 0;
         }
 
-        public int Update() {
+        public int StateUpdate() {
             if (timer.UpdateAndCheck()) {
                 WalkState ws = walkingEyeball.GetWalkState();
                 if (ws.ShouldAttemptRangedAttack() && ws.CanHitPlayerWithRangedAttackFromCurrentPosition()) {
                     // Change to ranged attack state
-                    Debug.Log("Returning 2 from IdleState");
                     return 2;
                 }
                 // Change to walk state
-                Debug.Log("Returning 1 from IdleState");
                 return 1;
             }
-            /*
-            Vector2 eyeballPos = walkingEyeball.transform.position;
-            Vector2 playerPos = MainGameManager.GetPlayer().GetComponent<AbstractPlayer>().transform.position;
-            Debug.Log($"Eyeball position: {eyeballPos}. Player position: {playerPos}");
-            float signedAngle = Vector2.SignedAngle(Vector2.right, playerPos - eyeballPos);
-            Debug.Log($"Signed angle from enemy to player: {signedAngle}");
-            */
+
+            // Stay in idle state
             return 0;
         }
     }

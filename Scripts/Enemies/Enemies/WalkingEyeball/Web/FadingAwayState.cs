@@ -26,7 +26,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
             return 0;
         }
 
-        public int Update() {
+        public int StateUpdate() {
             // Calculate new alpha
             float time = Time.time - timeInit;
             float alpha = 1 - (time / totalFadeTime);

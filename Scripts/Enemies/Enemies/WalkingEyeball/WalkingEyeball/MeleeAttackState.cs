@@ -23,8 +23,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Melee Attack state");
-            animator.SetTrigger("TrMeleeAttack");
+            //Debug.Log("Entered Melee Attack state");
+            this.animator.SetTrigger("TrMeleeAttack");
             float animationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
             this.timer = new Timer(animationLength);
             this.initialDirToPlayer = walkingEyeball.VectorToPlayer().normalized;
@@ -32,16 +32,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             return 0;
         }
 
-        public int Update() {
+        public int StateUpdate() {
             if (timer.UpdateAndCheck()) {
                 return 1;
-            } else {
-                const float additionalMovementMagnitude = 4f;
-                Vector2 additionalMovementVector = initialDirToPlayer * additionalMovementMagnitude * Time.deltaTime;
-                //walkingEyeball.GetWalkState().GetEnemyMovement().PublicTryToMove(additionalMovementVector);
-                return 0;
-            }
-            
+            } 
+            const float movementSpeedDuringAttack = 3f;
+            walkingEyeball.GetWalkState().GetMovement().MoveInDirection(movementSpeedDuringAttack, initialDirToPlayer);
+            return 0;            
         }
     }
 }

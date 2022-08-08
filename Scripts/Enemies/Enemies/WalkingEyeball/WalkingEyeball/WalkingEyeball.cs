@@ -10,7 +10,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-- Behaviour in melee attack is not working.
+
 */
 
 /*
@@ -29,14 +29,11 @@ FIXED ISSUES (just for my motivation):
 - When an enemy shoots and then wants to and can shoot again, it currently goes through a short walking animation between the shots. 
   Remove entering WalkState in this scenario.
     - fixed by writing more code
+- Behaviour in melee attack is not working.
+    - fixed
 */
 
-/* TODO: redesing when Idle state occurs. It should be a function of the distance between the enemy and the player (the longer
-   the distance, the higher chance of entering the Idle state).
-   Additionally, if the distance is short, enemy should never enter Idle state. If enemy is in Idle state and the distance
-   becomes short, it enters Walk state.
-*/
-// TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
+// MAYBE TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkingEyeball : AbstractEnemy
@@ -80,16 +77,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         private void UpdateState() {
-            int returnCode = curState.Update();
-
-            /*
-            // testing
-            if (GetID() == 0 && Input.GetKeyDown(KeyCode.V)) {
-            //if (Input.GetKeyDown(KeyCode.V)) {
-                EnterState(walkState);
-            }
-            */
-
+            int returnCode = curState.StateUpdate();
             if (returnCode != 0) {
                 if (curState is IdleState) {
                     ProcessIdleStateReturnCode(returnCode);
@@ -97,7 +85,6 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
                     ProcessWalkStateReturnCode(returnCode);
                 } else if (curState is DeathState) {
                     Destroy(gameObject);
-                    //Debug.Log("Destroyed enemy");
                 } else if (curState is MeleeAttackState) {
                     EnterState(walkState);
                 } else if (curState is RangedAttackState) {
