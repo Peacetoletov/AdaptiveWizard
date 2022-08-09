@@ -11,7 +11,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
     public static class Utility
     {
         public static int MoveAndCheckCollision(Web web, Vector2 direction, float speed, BoxCollider2D collider) {
-            float distance = speed * Time.deltaTime;
+            float distance = speed * Time.fixedDeltaTime;
             RaycastHit2D hit = Physics2D.BoxCast(web.transform.position, collider.size, 0, direction, distance, LayerMask.GetMask("Wall", "Player"));
             
             Vector2 movement = direction.normalized * distance;
@@ -27,8 +27,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
             return 2;
         }
 
+        public static void Rotate(Web web, float rotateSpeed) {
+            //web.transform.rotation = Quaternion.Euler(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
+            web.transform.Rotate(Vector3.forward * rotateSpeed * Time.fixedDeltaTime);
+        }
+
         private static void Move(Web web, Vector3 movement) {
             web.transform.position += movement;
-        }
+        }        
     }
 }

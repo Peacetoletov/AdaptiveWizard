@@ -9,6 +9,13 @@ using AdaptiveWizard.Assets.Scripts.Other.GameManagers;
 using AdaptiveWizard.Assets.Scripts.Player.Other;
 
 
+/*
+Web spawns after a certain frame of WalkingEyeball's ranged attack animation plays out. It is spawned next to the Eyeball,
+based on whichever way it is oriented.
+Web starts expanding after is is spawned. When it is fully expanded, it starts rotating in one direction. The rotation speed
+linearly decreases until it hits 0.
+Web stops and starts fading away after it hits the player or a wall. If it hits the player, it also deals damage.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 {
     public class Web : MonoBehaviour
@@ -23,10 +30,14 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 
         private Vector2 direction;
         private const float damage = 15f;
-        private const float speed = 5f;
+        private const float speed = 6.5f;
+        private float rotateSpeed;
 
         
         void Start() {
+            int rand = UnityEngine.Random.Range(150, 200);
+            this.rotateSpeed = rand % 2 == 0 ? rand : -rand;
+            Debug.Log($"Rotate speed: {rotateSpeed}");
             CreateStates(initialCollider, finalCollider);
             EnterState(expandingState);
         }
@@ -38,8 +49,8 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         private void CreateStates(BoxCollider2D initialCollider, BoxCollider2D finalCollider) {
-            this.expandingState = new ExpandingState(this, initialCollider, direction, speed);
-            this.flyingState = new FlyingState(this, finalCollider, direction, speed);
+            this.expandingState = new ExpandingState(this, initialCollider, direction, speed, rotateSpeed);
+            this.flyingState = new FlyingState(this, finalCollider, direction, speed, rotateSpeed);
             this.fadingAwayState = new FadingAwayState(this);
         }
 
@@ -50,7 +61,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
                     GetComponent<Animator>().enabled = false;       // Stop playing animation
                     ProcessExpandingStateReturnCode(returnCode);
                 } else if (curState is FlyingState) {
-                    EnterState(fadingAwayState);
+                    ProcessFlyingStateReturnCode(returnCode);
                 } else if (curState is FadingAwayState) {
                     Destroy(gameObject);
                 }

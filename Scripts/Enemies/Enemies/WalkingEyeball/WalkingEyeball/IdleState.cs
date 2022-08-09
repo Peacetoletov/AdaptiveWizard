@@ -8,6 +8,10 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
+/*
+Idle state occurs when the enemy spawns (this might be needed to change in the future), or after 
+the enemy shoots a ranged attack.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class IdleState : IState

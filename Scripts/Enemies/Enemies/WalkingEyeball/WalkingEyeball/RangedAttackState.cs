@@ -11,10 +11,9 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 {
     public class RangedAttackState : IState
     {
-        WalkingEyeball walkingEyeball;
+        private WalkingEyeball walkingEyeball;
         private SpriteRenderer spriteRenderer;
         private Animator animator;
-        //private const float range = 20;
         private bool spawned;
         private Vector2 direction;
         public static RangedAttackPositionFinder rapf = new RangedAttackPositionFinder();
@@ -32,7 +31,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Ranged Attack state");
+            //Debug.Log("Entered Ranged Attack state");
             this.animator.SetTrigger("TrRangedAttack");
             this.timeSinceEnter = 0;
             this.spawned = false;

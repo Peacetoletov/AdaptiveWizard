@@ -5,10 +5,20 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
-using AdaptiveWizard.Assets.Scripts.Other.Other;
 using AdaptiveWizard.Assets.Scripts.Enemies.Movement.General;
+using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 
+/*
+Walk state occurs whenever the enemy isn't idle or attacking.
+Walk state ends if:
+    a) Enemy is very close to the player, enters melee attack state.
+    b) Enemy is far from the player and can shoot the player from the current position, enters 
+       ranged attack state.
+In some situations, it might not be reasonably possible to find a suitable ranged attack position.
+In such situations, the enemy permanently switches into melee mode and will never attempt ranged
+attacks again.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkState : IState
@@ -37,7 +47,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         }
 
         public int OnEnter() {
-            Debug.Log("Entered Walk state");
+            //Debug.Log("Entered Walk state");
             animator.SetTrigger("TrWalk");
             return 0;
         }
@@ -73,7 +83,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
                 // If target position is reached but cannot hit player from the position, find a new position
                 if (movementReturnCode == 1) {
-                    this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    try {
+                        this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    } catch (NoSuitablePositionException) {
+                        this.rangedAttacksAllowed = false;
+                    }
                 }
 
                 return 0;
@@ -96,7 +110,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
             } else {
                 if (!seekingRangedAttack) {
                     // Just got far enough from the player to seek a ranged attack. Needs to find a good position.
-                    this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    try {
+                        this.rangedAttackPosition = RangedAttackState.rapf.Find(walkingEyeball.transform.position, projectileCollider, projectileMaxTravelDistance);
+                    } catch (NoSuitablePositionException) {
+                        this.rangedAttacksAllowed = false;
+                    }
                 }
                 seekingRangedAttack = true;
             }

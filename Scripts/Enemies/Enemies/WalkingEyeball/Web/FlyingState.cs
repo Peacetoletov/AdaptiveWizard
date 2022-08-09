@@ -5,24 +5,31 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
-using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
+/*
+Flying state occurs after expanding state animation finishes.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 {
     public class FlyingState : IState
     {
-        private Web web;
-        private BoxCollider2D finalCollider;
-        private float speed;
+        private readonly Web web;
+        private readonly BoxCollider2D finalCollider;
+        private readonly float speed;
+        private readonly float rotateSpeed;
         private Vector2 direction;
 
+        // variables related to rotation
+        private float timeSinceEnter = 0;
 
-        public FlyingState(Web web, BoxCollider2D finalCollider, Vector2 direction, float speed) {
+
+        public FlyingState(Web web, BoxCollider2D finalCollider, Vector2 direction, float speed, float rotateSpeed) {
             this.web = web;
             this.finalCollider = finalCollider;
             this.speed = speed;
             this.direction = direction;
+            this.rotateSpeed = rotateSpeed;
         }
 
         public int OnEnter() {
@@ -30,12 +37,21 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         public int StateUpdate() {
-            //int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, finalCollider);
+            this.timeSinceEnter += Time.fixedDeltaTime;
+            float rotateBy;
+            if (rotateSpeed > 0) {
+                rotateBy = Math.Max(rotateSpeed - timeSinceEnter * 125, 0);
+            } else {
+                rotateBy = Math.Min(rotateSpeed + timeSinceEnter * 125, 0);
+            }
+            Utility.Rotate(web, rotateBy);
+
             int movementReturnCode = Utility.MoveAndCheckCollision(web, direction, speed, finalCollider);
             if (movementReturnCode == 1) {
                 // Player was hit
                 return 1;
-            } else if (movementReturnCode == 2) {
+            } 
+            if (movementReturnCode == 2) {
                 // Wall was hit
                 return 2;
             }

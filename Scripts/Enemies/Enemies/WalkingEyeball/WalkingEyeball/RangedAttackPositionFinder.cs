@@ -7,6 +7,9 @@ using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 
+/*
+This class is used to find a good position from which to shoot a ranged attack.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class RangedAttackPositionFinder : AbstractRangedAttackPositionFinder

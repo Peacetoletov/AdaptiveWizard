@@ -10,7 +10,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-
+- unhandled exception if there is no ranged attack position.
 */
 
 /*
@@ -31,6 +31,8 @@ FIXED ISSUES (just for my motivation):
     - fixed by writing more code
 - Behaviour in melee attack is not working.
     - fixed
+- Death animation doesn't play if the enemy gets killed just after changing to ranged attack state.
+    - fixed by adding a transition to animator
 */
 
 // MAYBE TODO: possibly add more properties to abstract classes / add more interfaces, to have unified implementations of enemies

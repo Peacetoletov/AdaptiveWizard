@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
-using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
+/*
+Fading away occurs after the web hits something.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 {
     public class FadingAwayState : IState
     {
-        private SpriteRenderer spriteRenderer;
+        private readonly SpriteRenderer spriteRenderer;
         private const float totalFadeTime = 0.25f;
         private float timeInit;
 

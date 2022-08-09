@@ -65,6 +65,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
                 //Destroy(gameObject);
 
                 this.dead = true;
+                gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
                 Debug.Log("Enemy is dead");
                 combatManager.OnEnemyDeath();
                 

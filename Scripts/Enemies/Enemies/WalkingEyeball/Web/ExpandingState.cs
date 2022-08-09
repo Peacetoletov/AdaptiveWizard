@@ -5,26 +5,31 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
-using AdaptiveWizard.Assets.Scripts.Other.Other;
 
 
+/*
+Expanding state occurs after the web spawns and lasts until the animation finishes. Changes to Flying state afterwards.
+Additionally, the web doesn't rotate in expanding state, as it wouldn't be noticable anyway.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
 {
     public class ExpandingState : IState
     {
-        private Web web;
-        private Animator animator;
-        private BoxCollider2D initialCollider;
-        private float speed;
+        private readonly Web web;
+        private readonly Animator animator;
+        private readonly BoxCollider2D initialCollider;
+        private readonly float speed;
+        private readonly float rotateSpeed;
         Vector2 direction;
 
 
-        public ExpandingState(Web web, BoxCollider2D initialCollider, Vector2 direction, float speed) {
+        public ExpandingState(Web web, BoxCollider2D initialCollider, Vector2 direction, float speed, float rotateSpeed) {
             this.web = web;
             this.animator = web.GetComponent<Animator>();
             this.initialCollider = initialCollider;
             this.speed = speed;
             this.direction = direction;
+            this.rotateSpeed = rotateSpeed;
         }
 
         public int OnEnter() {
@@ -34,8 +39,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         }
 
         public int StateUpdate() {
-            
-            // int movementReturnCode = Utility.MoveAndCheckCollision(web, Vector2.left, speed, initialCollider);
+            Utility.Rotate(web, rotateSpeed);
             int movementReturnCode = Utility.MoveAndCheckCollision(web, direction, speed, initialCollider);
             if (movementReturnCode == 1) {
                 // Player was hit

@@ -77,7 +77,7 @@ namespace AdaptiveWizard.Assets.Scripts.Player.Other
             Color tmp = spriteRenderer.color;
             tmp.a = 0.1f;
             spriteRenderer.color = tmp;
-
+            
             CheckDeath();
         }
 

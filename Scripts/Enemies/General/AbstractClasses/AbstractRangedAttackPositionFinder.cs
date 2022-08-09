@@ -64,7 +64,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
                 return pos;
             }
 
-            throw new Exception("Error: Unable to find a ranged attack position!");
+            throw new NoSuitablePositionException("Error: Unable to find a ranged attack position!");
         }
 
         private void EnqueueAndClose(Node node, Queue<Node> q, int distance, List<Node> modifiedNodes) {

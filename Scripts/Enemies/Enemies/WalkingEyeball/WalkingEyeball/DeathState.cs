@@ -7,6 +7,7 @@ using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
+
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class DeathState : IState

@@ -7,6 +7,11 @@ using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Enemies.General.Interfaces;
 using AdaptiveWizard.Assets.Scripts.Other.Other;
 
+
+/*
+Melee attack occurs when the enemy is very close to the player, unless the enemy recently shot
+a ranged attack.
+*/
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class MeleeAttackState : IState
