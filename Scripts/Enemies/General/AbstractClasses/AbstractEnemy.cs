@@ -25,6 +25,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
         private bool dead = false;
         private CombatManager combatManager;
 
+        // Variables related to flashing white when taking taking
+        private Material material;
+        private const float flashDuration = 0.025f;
+        private float flashTime = 0f;
+        private bool isFlashing = false;
+
         // Extra distance is used when spawning enemies to ensure they don't spawn too close to a wall. 
         // This distance is also added to delta when checking collisions (casting a box). Without this 
         // buffer, enemies could possibly get stuck in a wall on rare occasions (presumably due to
@@ -38,6 +44,23 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
             // set health
             this.maxHealth = maxHealth;
             this.curHealth = maxHealth;
+
+            // get material
+            this.material = GetComponent<SpriteRenderer>().material;
+        }
+
+        protected virtual void Update() {
+            if (MainGameManager.IsGameActive()) {
+                // Flashing white
+                if (flashTime > flashDuration) {
+                    this.flashTime = 0;
+                    this.isFlashing = false;
+                    material.SetFloat("_AddedColorValue", 0);
+                }
+                if (isFlashing) {
+                    this.flashTime += Time.deltaTime;
+                }
+            }
         }
 
         public Vector2 VectorToPlayer() {
@@ -55,6 +78,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
         }
 
         protected virtual void OnTakeDamage(float damage) {
+            // flashing white
+            this.isFlashing = true;
+            material.SetFloat("_AddedColorValue", 1);
+
+            // death?
             if (!dead) {
                 CheckDeath();
             }
@@ -66,7 +94,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 
                 this.dead = true;
                 gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
-                Debug.Log("Enemy is dead");
+                //Debug.Log("Enemy is dead");
                 combatManager.OnEnemyDeath();
                 
                 // temporarily

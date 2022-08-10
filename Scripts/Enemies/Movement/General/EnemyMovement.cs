@@ -272,7 +272,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
 
             // Create a path if necessary
             if (stuckInfo.StuckOnX || stuckInfo.StuckOnY) {
-                Debug.Log("Creating path.");
+                //Debug.Log("Creating path.");
                 CreatePath(targetPosition, stuckInfo);
             }
 
@@ -324,7 +324,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Movement.General
         }
 
         private void ResetVariables() {
-            Debug.Log("Resetting movement variables");
+            //Debug.Log("Resetting movement variables");
             this.lastMovementType = MovementType.UNINITIALIZED;
             this.pathManager = new PathManager();
         }

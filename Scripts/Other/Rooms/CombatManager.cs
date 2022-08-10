@@ -20,7 +20,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
         private AbstractRoom room;                       // reference to the room of this combat
         private bool isCombatActive = false;          // are there any enemies alive or will more enemies spawn?
 
-        private const int totalEnemies = 1;
+        private const int totalEnemies = 6;
         private int enemiesDead = 0;
 
 

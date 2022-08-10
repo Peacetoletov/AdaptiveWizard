@@ -37,7 +37,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.Web
         void Start() {
             int rand = UnityEngine.Random.Range(150, 200);
             this.rotateSpeed = rand % 2 == 0 ? rand : -rand;
-            Debug.Log($"Rotate speed: {rotateSpeed}");
+            //Debug.Log($"Rotate speed: {rotateSpeed}");
             CreateStates(initialCollider, finalCollider);
             EnterState(expandingState);
         }
