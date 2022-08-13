@@ -10,7 +10,7 @@ using AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses;
 
 /*
 KNOWN ISSUES:
-- unhandled exception if there is no ranged attack position.
+
 */
 
 /*
@@ -47,11 +47,15 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private RangedAttackState rangedAttackState;
         private DeathState deathState;
 
-        public GameObject webObj;
-        public BoxCollider2D projectileCollider;
+        [SerializeField]
+        private GameObject webObj;
+        [SerializeField]
+        private BoxCollider2D projectileCollider;
+        [SerializeField]
+        private GameObject walkingEyeballSmallObj;
 
 
-        protected void Start() {
+        public override void Init() {
             base.Init(100f);
             CreateStates();
             EnterState(idleState);
@@ -128,6 +132,13 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 
         public GameObject InstantiateWeb(Vector2 position) {
             return Instantiate(webObj, position, Quaternion.identity);
+        }
+
+        public GameObject InstantiateWalkingEyeballSmall(Vector2 position) {
+            GameObject walkingEyeballSmall = Instantiate(walkingEyeballSmallObj, position, Quaternion.identity);
+            walkingEyeballSmall.GetComponent<AbstractEnemy>().Init();
+            walkingEyeballSmall.GetComponent<AbstractEnemy>().SetCombatManager(base.GetCombatManager());
+            return walkingEyeballSmall;
         }
     }
 }

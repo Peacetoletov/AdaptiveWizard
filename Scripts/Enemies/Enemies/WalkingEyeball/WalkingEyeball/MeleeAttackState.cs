@@ -18,7 +18,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
     {
         private WalkingEyeball walkingEyeball;
         private Animator animator;
-        private Timer timer;
+        private FixedTimer timer;
         private Vector2 initialDirToPlayer;
 
 
@@ -30,8 +30,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         public int OnEnter() {
             //Debug.Log("Entered Melee Attack state");
             this.animator.SetTrigger("TrMeleeAttack");
-            float animationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
-            this.timer = new Timer(animationLength);
+            const float totalFrames = 9;
+            const float fps = 12;
+            float animationLength = totalFrames / fps;
+            this.timer = new FixedTimer(animationLength);
             this.initialDirToPlayer = walkingEyeball.VectorToPlayer().normalized;
             walkingEyeball.GetWalkState().UpdateSpriteOrientation(initialDirToPlayer.x);
             return 0;

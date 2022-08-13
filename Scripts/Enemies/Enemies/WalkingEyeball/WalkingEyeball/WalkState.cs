@@ -18,7 +18,7 @@ Walk state ends if:
 In some situations, it might not be reasonably possible to find a suitable ranged attack position.
 In such situations, the enemy permanently switches into melee mode and will never attempt ranged
 attacks again.
-*/
+*/ 
 namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEyeball
 {
     public class WalkState : IState
@@ -28,11 +28,11 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         private SpriteRenderer spriteRenderer;
         private EnemyMovement movement;
         private const float speed = 2.25f;
-        private const float projectileMaxTravelDistance = 20f;
         private const float meleeRange = 2f;
         private const float almostMeleeRange = 4.5f;
 
         // Variables related to ranged attacks
+        private const float projectileMaxTravelDistance = 20f;
         private readonly BoxCollider2D projectileCollider;
         private bool seekingRangedAttack = false;
         private Vector2 rangedAttackPosition;

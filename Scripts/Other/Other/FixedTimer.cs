@@ -7,14 +7,14 @@ using UnityEngine;
 
 namespace AdaptiveWizard.Assets.Scripts.Other.Other
 {
-    public class Timer : AbstractTimer
+    public class FixedTimer : AbstractTimer
     {
-        public Timer(float basePeriod, float periodVariance=0f, float initialDelay=0f) : 
+        public FixedTimer(float basePeriod, float periodVariance=0f, float initialDelay=0f) : 
                 base(basePeriod, periodVariance, initialDelay) {}
 
 
         protected override float GetDeltaTime() {
-            return Time.deltaTime;
+            return Time.fixedDeltaTime;
         }
     }
 }

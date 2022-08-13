@@ -50,6 +50,7 @@ namespace AdaptiveWizard.Assets.Scripts.Other.Rooms
                 Vector2 spawnPos = RandomSpawnPos(1f);
                 //Vector2 spawnPos = new Vector2(6, 4);
                 AbstractEnemy enemy = Instantiate(walkingEyeballObj, spawnPos, Quaternion.identity).GetComponent<AbstractEnemy>();
+                enemy.Init();
                 enemy.SetCombatManager(this);
             }
         }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Assertions;
 using AdaptiveWizard.Assets.Scripts.Other.Rooms;
 using AdaptiveWizard.Assets.Scripts.UI;
 using AdaptiveWizard.Assets.Scripts.Player.Inventory;
@@ -27,9 +28,12 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 
         // Variables related to flashing white when taking taking
         private Material material;
-        private const float flashDuration = 0.025f;
+        private const float flashDuration = 0.015f;
         private float flashTime = 0f;
         private bool isFlashing = false;
+
+        // Variables related to (pausing) animations
+        private Animator animator;
 
         // Extra distance is used when spawning enemies to ensure they don't spawn too close to a wall. 
         // This distance is also added to delta when checking collisions (casting a box). Without this 
@@ -37,7 +41,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
         // floating point errors).
         public const float extraDistanceFromWall = 0.01f;
 
-        protected virtual void Init(float maxHealth) {
+
+        public abstract void Init();
+
+        protected void Init(float maxHealth) {
             // set ID and increment ID counter
             this.ID = AbstractEnemy.ID_Counter++;
 
@@ -45,12 +52,16 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
             this.maxHealth = maxHealth;
             this.curHealth = maxHealth;
 
-            // get material
+            // get components
             this.material = GetComponent<SpriteRenderer>().material;
+            this.animator = GetComponent<Animator>();
         }
 
         protected virtual void Update() {
             if (MainGameManager.IsGameActive()) {
+                // unpausing animation
+                this.animator.enabled = true;
+
                 // Flashing white
                 if (flashTime > flashDuration) {
                     this.flashTime = 0;
@@ -60,6 +71,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
                 if (isFlashing) {
                     this.flashTime += Time.deltaTime;
                 }
+            }
+            else {
+                // pausing animation
+                this.animator.enabled = false;
             }
         }
 
@@ -122,6 +137,10 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.General.AbstractClasses
 
         public bool IsDead() {
             return dead;
+        }
+
+        protected CombatManager GetCombatManager() {
+            return combatManager;
         }
     }
 }

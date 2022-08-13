@@ -17,7 +17,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
     public class IdleState : IState
     {
         private Animator animator;
-        private Timer timer;
+        private FixedTimer timer;
         private WalkingEyeball walkingEyeball;
 
 
@@ -29,7 +29,7 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
         public int OnEnter() {
             //Debug.Log("Entered Idle state");
             this.animator.SetTrigger("TrIdle");
-            this.timer = new Timer(2.0f);
+            this.timer = new FixedTimer(2.0f);
             return 0;
         }
 

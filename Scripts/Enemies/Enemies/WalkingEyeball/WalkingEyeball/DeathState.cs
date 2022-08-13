@@ -12,26 +12,44 @@ namespace AdaptiveWizard.Assets.Scripts.Enemies.Enemies.WalkingEyeball.WalkingEy
 {
     public class DeathState : IState
     {
+        private WalkingEyeball walkingEyeball;
         private Animator animator;
-        private Timer timer;
+        private FixedTimer animationTimer;
+        private FixedTimer[] walkingEyeballSmallSpawnTimers = new FixedTimer[3];
+        private bool[] walkingEyeballSmallSpawned = new bool[3];
 
 
         public DeathState(WalkingEyeball walkingEyeball) {
+            this.walkingEyeball = walkingEyeball;
             this.animator = walkingEyeball.GetComponent<Animator>();
         }
 
         public int OnEnter() {
             //Debug.Log("Entered Death state");
             animator.SetTrigger("TrDeath");
-            float deathAnimationLength = animator.GetCurrentAnimatorStateInfo(animator.GetLayerIndex("Base Layer")).length;
-            this.timer = new Timer(deathAnimationLength);
+            const float totalFrames = 14;
+            const float fps = 12;
+            float deathAnimationLength = totalFrames / fps;
+
+            this.animationTimer = new FixedTimer(deathAnimationLength);
+            
+            for (int i = 0; i < 3; i++) {
+                this.walkingEyeballSmallSpawnTimers[i] = new FixedTimer(deathAnimationLength * (0.4f + i * 0.1f));
+            }
             return 0;
         }
 
         public int StateUpdate() {
-            if (timer.UpdateAndCheck()) {
-                // Stop playing animation
-                animator.enabled = false;
+            for (int i = 0; i < 3; i++) {
+                // Spawn 3 small eyeballs
+                if (!walkingEyeballSmallSpawned[i] && walkingEyeballSmallSpawnTimers[i].UpdateAndCheck()) {
+                    Vector2 pos = (Vector2) walkingEyeball.transform.position + new Vector2(0.5f * (i - 1), -0.25f);
+                    walkingEyeball.InstantiateWalkingEyeballSmall(pos);
+                    this.walkingEyeballSmallSpawned[i] = true;
+                }
+            }
+            
+            if (animationTimer.UpdateAndCheck()) {
                 return 1;
             }
             return 0;
